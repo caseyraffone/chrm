@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 18.0.6",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "REVENUECAT_API_KEY_IOS": "${REVENUECAT_API_KEY_IOS}"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "REVENUECAT_API_KEY_IOS": "${REVENUECAT_API_KEY_IOS}"
+      }
+    }
+  },
+  "submit": {
+    "preview": {
+      "ios": {}
+    },
+    "production": {
+      "ios": {}
+    }
+  }
+}

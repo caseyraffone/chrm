@@ -1,20 +1,110 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
+
+import HomeScreen from './src/screens/HomeScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import RoleSelectionScreen from './src/screens/RoleSelectionScreen';
+import PracticeScreen from './src/screens/PracticeScreen';
+import QuickFireScreen from './src/screens/QuickFireScreen';
+import PrepKitInputScreen from './src/screens/PrepKitInputScreen';
+import PrepKitScreen from './src/screens/PrepKitScreen';
+import PrepKitHubScreen from './src/screens/PrepKitHubScreen';
+import FeedbackScreen from './src/screens/FeedbackScreen';
+import HistoryScreen from './src/screens/HistoryScreen';
+import MockInterviewSetupScreen from './src/screens/MockInterviewSetupScreen';
+import MockInterviewScreen from './src/screens/MockInterviewScreen';
+import MockInterviewDebriefScreen from './src/screens/MockInterviewDebriefScreen';
+import MockInterviewTranscriptScreen from './src/screens/MockInterviewTranscriptScreen';
+import PaywallScreen from './src/screens/PaywallScreen';
+import DevSettingsScreen from './src/screens/DevSettingsScreen';
+import { colors } from './src/constants/theme';
+import { getOnboardingCompleted } from './src/utils/storage';
+import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } from './src/utils/purchases';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    BebasNeue_400Regular,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
+  });
+
+  const [initialRoute, setInitialRoute] = useState(null);
+
+  useEffect(() => {
+    // Initialize RevenueCat before anything else, then sync entitlement status
+    // into AsyncStorage so gating logic has an up-to-date value on first load.
+    initializePurchases();
+    syncSubscriptionStatus();
+
+    // Keep AsyncStorage in sync whenever RevenueCat detects a status change
+    // (renewal, cancellation, billing retry, etc.) during the app session.
+    const removeListener = addSubscriptionListener();
+
+    getOnboardingCompleted().then((completed) => {
+      setInitialRoute(completed ? 'Home' : 'Onboarding');
+    });
+
+    return () => removeListener();
+  }, []);
+
+  if (!fontsLoaded || !initialRoute) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={initialRoute}
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ animation: 'none' }} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+        <Stack.Screen name="Practice" component={PracticeScreen} />
+        <Stack.Screen name="QuickFire" component={QuickFireScreen} />
+        <Stack.Screen name="PrepKitInput" component={PrepKitInputScreen} />
+        <Stack.Screen name="PrepKit" component={PrepKitScreen} />
+        <Stack.Screen name="PrepKitHub" component={PrepKitHubScreen} />
+        <Stack.Screen
+          name="Feedback"
+          component={FeedbackScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen name="History" component={HistoryScreen} />
+        <Stack.Screen name="MockInterviewSetup" component={MockInterviewSetupScreen} />
+        <Stack.Screen
+          name="MockInterview"
+          component={MockInterviewScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="MockInterviewDebrief"
+          component={MockInterviewDebriefScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen name="MockInterviewTranscript" component={MockInterviewTranscriptScreen} />
+        <Stack.Screen name="Paywall" component={PaywallScreen} options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
+        <Stack.Screen name="DevSettings" component={DevSettingsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

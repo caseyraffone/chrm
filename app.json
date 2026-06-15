@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "pitchiq",
+    "name": "CHRM",
     "slug": "pitchiq",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,7 +12,14 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.caseyraffone.pitchiq",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "Microphone access is required for the mock interview.",
+        "NSCameraUsageDescription": "Camera access is required by the audio subsystem.",
+        "UIBackgroundModes": []
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,10 +27,21 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "RECORD_AUDIO",
+        "CAMERA",
+        "MODIFY_AUDIO_SETTINGS",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f8d00677-24ab-4ec8-a51b-cc6fa71d7ec1"
+      }
     }
   }
 }

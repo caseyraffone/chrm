@@ -176,18 +176,16 @@ export default function QuickFireScreen({ navigation }) {
 
   async function startRecording() {
     try {
-      const { status, canAskAgain } = await Audio.requestPermissionsAsync();
+      const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
-        if (!canAskAgain) {
-          Alert.alert(
-            'Microphone Access Required',
-            'Please enable microphone access for CHRM in Settings.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Open Settings', onPress: () => Linking.openSettings() },
-            ]
-          );
-        }
+        Alert.alert(
+          'Microphone Access Required',
+          'CHRM needs microphone access to record your answers. Please enable it in Settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
         return;
       }
 

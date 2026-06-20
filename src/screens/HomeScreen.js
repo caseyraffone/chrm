@@ -106,7 +106,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Rep Counter */}
       <View style={styles.repBadge}>
@@ -122,6 +122,9 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.tagline}>Clear. Confident. Under Pressure.</Text>
       </View>
 
+      {/* Divider */}
+      <View style={styles.divider} />
+
       {/* Drill Cards */}
       <ScrollView
         style={styles.cardsScroll}
@@ -131,14 +134,16 @@ export default function HomeScreen({ navigation }) {
         {DRILL_CATEGORIES.map((cat) => (
           <Pressable
             key={cat.name}
-            style={({ pressed }) => [
-              styles.card,
-              pressed && styles.cardPressed,
-            ]}
+            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             onPress={() => handleCategoryPress(cat)}
           >
-            <Text style={styles.cardTitle}>{cat.name}</Text>
-            <Text style={styles.cardSubtitle}>{cat.subtitle}</Text>
+            <View style={styles.cardRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{cat.name}</Text>
+                <Text style={styles.cardSubtitle}>{cat.subtitle}</Text>
+              </View>
+              <Text style={styles.cardArrow}>›</Text>
+            </View>
           </Pressable>
         ))}
 
@@ -147,9 +152,12 @@ export default function HomeScreen({ navigation }) {
           style={({ pressed }) => [styles.prepKitCard, pressed && styles.prepKitCardPressed]}
           onPress={handlePrepKitPress}
         >
-          <View style={styles.prepKitInner}>
-            <Text style={styles.prepKitTitle}>COMPANY PREP KIT</Text>
-            <Text style={styles.prepKitSubtitle}>Deep intelligence on any firm. Custom training plan.</Text>
+          <View style={styles.cardRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.prepKitTitle}>Company Prep Kit</Text>
+              <Text style={styles.prepKitSubtitle}>Deep intel + custom training plan</Text>
+            </View>
+            <Text style={styles.prepKitArrow}>›</Text>
           </View>
         </Pressable>
 
@@ -181,35 +189,41 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   repNumber: {
-    fontFamily: fonts.header,
-    fontSize: 36,
+    fontFamily: fonts.display,
+    fontSize: 30,
     color: colors.accent,
-    lineHeight: 36,
+    lineHeight: 30,
   },
   repLabel: {
     fontFamily: fonts.body,
-    fontSize: 10,
-    color: colors.textSecondary,
+    fontSize: 9,
+    color: colors.textMuted,
     letterSpacing: 2,
+    marginTop: 2,
   },
   hero: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: 22,
+    paddingBottom: 20,
   },
   logo: {
     fontFamily: fonts.header,
-    fontSize: 88,
-    color: colors.text,
-    lineHeight: 96,
-    letterSpacing: 4,
-    overflow: 'visible',
+    fontSize: 84,
+    color: colors.accent,
+    lineHeight: 74,
+    letterSpacing: 3,
   },
   tagline: {
     fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    letterSpacing: 0.5,
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 8,
+    letterSpacing: 0.4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.lg,
+    marginBottom: 18,
   },
   cardsScroll: {
     flex: 1,
@@ -217,85 +231,86 @@ const styles = StyleSheet.create({
   cardsContainer: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
+    gap: 8,
   },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: spacing.lg,
-    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    borderLeftWidth: 1,
-    borderLeftColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   cardPressed: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent,
+    opacity: 0.85,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   cardTitle: {
-    fontFamily: fonts.header,
-    fontSize: 28,
+    fontFamily: fonts.display,
+    fontSize: 15,
     color: colors.text,
-    lineHeight: 30,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   cardSubtitle: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 18,
+    fontSize: 11,
+    color: colors.textMuted,
+    lineHeight: 16,
+  },
+  cardArrow: {
+    fontSize: 20,
+    color: '#ddd',
+    marginLeft: 8,
   },
   prepKitCard: {
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
+    marginTop: 4,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.surface,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  prepKitCardPressed: {
-    shadowOpacity: 0.35,
-    borderLeftWidth: 3,
-  },
-  prepKitInner: {
+    backgroundColor: colors.text,
     padding: spacing.lg,
   },
+  prepKitCardPressed: {
+    opacity: 0.85,
+  },
   prepKitTitle: {
-    fontFamily: fonts.header,
-    fontSize: 28,
-    color: colors.accent,
-    lineHeight: 30,
-    marginBottom: 4,
+    fontFamily: fonts.display,
+    fontSize: 15,
+    color: '#F2F1EE',
+    marginBottom: 2,
   },
   prepKitSubtitle: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 18,
+    fontSize: 11,
+    color: '#555555',
+    lineHeight: 16,
+  },
+  prepKitArrow: {
+    fontSize: 20,
+    color: '#444444',
+    marginLeft: 8,
   },
   historyButton: {
     marginTop: spacing.lg,
     paddingVertical: spacing.md,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
   },
   historyButtonText: {
     fontFamily: fonts.body,
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: 11,
+    color: colors.textMuted,
     letterSpacing: 2,
   },
   debugText: {
     fontFamily: fonts.body,
     fontSize: 11,
-    color: '#444444',
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: spacing.lg,
     paddingBottom: spacing.sm,

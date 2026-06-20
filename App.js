@@ -2,12 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import { useFonts as useBebasNeue, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import {
+  useFonts as useDMSans,
   DMSans_400Regular,
   DMSans_500Medium,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
+import {
+  useFonts as useSpaceGrotesk,
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
 
 import HomeScreen from './src/screens/HomeScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -32,12 +40,15 @@ import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    BebasNeue_400Regular,
-    DMSans_400Regular,
-    DMSans_500Medium,
-    DMSans_700Bold,
+  const [bebasLoaded] = useBebasNeue({ BebasNeue_400Regular });
+  const [dmLoaded] = useDMSans({ DMSans_400Regular, DMSans_500Medium, DMSans_700Bold });
+  const [sgLoaded] = useSpaceGrotesk({
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
   });
+  const fontsLoaded = bebasLoaded && dmLoaded && sgLoaded;
 
   const [initialRoute, setInitialRoute] = useState(null);
 

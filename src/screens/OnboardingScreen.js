@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Dimensions,
   Alert,
+  StatusBar,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
@@ -124,6 +125,8 @@ export default function OnboardingScreen({ navigation }) {
 
   return (
     <Animated.View style={[styles.container, { opacity: containerOpacity }]}>
+      <StatusBar barStyle="dark-content" />
+
       {/* Skip button */}
       <TouchableOpacity style={styles.skipBtn} onPress={handleSkip} activeOpacity={0.7}>
         <Text style={styles.skipText}>Skip</Text>
@@ -167,8 +170,12 @@ function WelcomeStep({ onGetStarted }) {
         <Text style={styles.tagline}>Train how you communicate.</Text>
         <Text style={styles.subTagline}>Reps. Pressure. Feedback.</Text>
       </View>
-      <TouchableOpacity style={styles.primaryBtn} onPress={onGetStarted} activeOpacity={0.85}>
-        <Text style={styles.primaryBtnText}>GET STARTED</Text>
+      <TouchableOpacity
+        style={[styles.primaryBtn, { backgroundColor: colors.text }]}
+        onPress={onGetStarted}
+        activeOpacity={0.85}
+      >
+        <Text style={[styles.primaryBtnText, { color: '#F2F1EE' }]}>GET STARTED</Text>
       </TouchableOpacity>
     </View>
   );
@@ -262,7 +269,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingTop: Platform.OS === 'ios' ? 56 : 36,
   },
-
   skipBtn: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 60 : 40,
@@ -274,17 +280,15 @@ const styles = StyleSheet.create({
   skipText: {
     fontFamily: fonts.body,
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
-
   stepContent: {
     flex: 1,
   },
-
   stepInner: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingBottom: 80, // room for dots
+    paddingBottom: 80,
   },
 
   // Welcome
@@ -297,41 +301,41 @@ const styles = StyleSheet.create({
   logo: {
     fontFamily: fonts.header,
     fontSize: 96,
-    color: colors.text,
+    color: colors.accent,
     letterSpacing: 4,
-    lineHeight: 100,
+    lineHeight: 84,
   },
   tagline: {
     fontFamily: fonts.body,
-    fontSize: 18,
+    fontSize: 16,
     color: colors.text,
     textAlign: 'center',
     marginTop: spacing.md,
   },
   subTagline: {
     fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.textSecondary,
+    fontSize: 13,
+    color: colors.textMuted,
     textAlign: 'center',
     letterSpacing: 1,
   },
 
   // Intent & Role titles
   stepTitle: {
-    fontFamily: fonts.header,
-    fontSize: 44,
+    fontFamily: fonts.display,
+    fontSize: 36,
     color: colors.text,
-    letterSpacing: 1,
-    lineHeight: 48,
-    marginTop: spacing.xxl,
+    letterSpacing: -0.5,
+    lineHeight: 40,
+    marginTop: spacing.xl,
     marginBottom: spacing.xl,
   },
   stepSubtitle: {
     fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.textSecondary,
+    fontSize: 13,
+    color: colors.textMuted,
     marginBottom: spacing.xl,
-    lineHeight: 22,
+    lineHeight: 20,
   },
 
   // Intent cards
@@ -346,17 +350,22 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderWidth: 1,
     borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   cardLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 16,
+    fontFamily: fonts.displayMedium,
+    fontSize: 15,
     color: colors.text,
     marginBottom: spacing.xs,
   },
   cardSubtitle: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
+    fontSize: 12,
+    color: colors.textMuted,
   },
 
   // Role scroll
@@ -370,7 +379,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -378,6 +387,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     marginBottom: spacing.md,
+  },
+  inputFocused: {
+    borderColor: colors.accent,
   },
 
   // Chips
@@ -401,7 +413,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: fonts.body,
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
   },
   chipTextSelected: {
@@ -410,18 +422,18 @@ const styles = StyleSheet.create({
 
   // Primary button
   primaryBtn: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.text,
     paddingVertical: spacing.md + 4,
     borderRadius: radius.md,
     alignItems: 'center',
   },
   primaryBtnDisabled: {
-    opacity: 0.35,
+    opacity: 0.25,
   },
   primaryBtnText: {
-    fontFamily: fonts.header,
-    fontSize: 22,
-    color: colors.text,
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: '#F2F1EE',
     letterSpacing: 2,
   },
 
@@ -442,7 +454,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   dotActive: {
-    width: 18,
-    backgroundColor: colors.accent,
+    width: 20,
+    backgroundColor: colors.text,
   },
 });

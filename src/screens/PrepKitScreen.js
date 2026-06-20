@@ -48,29 +48,10 @@ function Section({ title, children }) {
 }
 
 const sectionStyles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: spacing.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontFamily: fonts.header,
-    fontSize: 20,
-    color: colors.accent,
-    letterSpacing: 1.5,
-  },
-  chevron: {
-    fontFamily: fonts.body,
-    fontSize: 16,
-    color: colors.textMuted,
-  },
+  wrapper: { marginBottom: spacing.xl, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.lg },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md },
+  title: { fontFamily: fonts.displayMedium, fontSize: 13, color: colors.accent, letterSpacing: 1.5 },
+  chevron: { fontFamily: fonts.body, fontSize: 16, color: colors.textMuted },
   body: {},
 });
 
@@ -90,7 +71,7 @@ function BulletList({ items, color = colors.textSecondary }) {
 const bulletStyles = StyleSheet.create({
   row: { flexDirection: 'row', marginBottom: spacing.xs + 2, gap: spacing.sm },
   dot: { fontSize: 14, lineHeight: 22, width: 14 },
-  text: { fontFamily: fonts.body, fontSize: 14, color: colors.text, flex: 1, lineHeight: 22 },
+  text: { fontFamily: fonts.body, fontSize: 13, color: colors.text, flex: 1, lineHeight: 22 },
 });
 
 function CultureChip({ label }) {
@@ -102,14 +83,7 @@ function CultureChip({ label }) {
 }
 
 const chipStyles = StyleSheet.create({
-  chip: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  chip: { backgroundColor: colors.surface, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 5, borderWidth: 1, borderColor: colors.border },
   text: { fontFamily: fonts.body, fontSize: 12, color: colors.textSecondary },
 });
 
@@ -131,55 +105,13 @@ function QuestionCard({ item, accentColor, onPress }) {
 }
 
 const questionCardStyles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderLeftWidth: 3,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  question: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: colors.text,
-    lineHeight: 21,
-    marginBottom: spacing.sm,
-  },
-  whyLabel: {
-    fontFamily: fonts.body,
-    fontSize: 9,
-    color: colors.textMuted,
-    letterSpacing: 2,
-    marginBottom: 3,
-  },
-  why: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 19,
-    marginBottom: spacing.sm,
-  },
-  hitsLabel: {
-    fontFamily: fonts.body,
-    fontSize: 9,
-    color: colors.textMuted,
-    letterSpacing: 2,
-    marginBottom: 3,
-  },
-  hits: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: spacing.sm,
-  },
-  drillCta: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm, borderLeftWidth: 3, borderWidth: 1, borderColor: colors.border },
+  question: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text, lineHeight: 21, marginBottom: spacing.sm },
+  whyLabel: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 2, marginBottom: 3 },
+  why: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: spacing.sm },
+  hitsLabel: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 2, marginBottom: 3 },
+  hits: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 19, marginBottom: spacing.sm },
+  drillCta: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted, marginTop: 2 },
 });
 
 function DayCard({ dayKey, dayNum, day, onStart }) {
@@ -207,76 +139,17 @@ function DayCard({ dayKey, dayNum, day, onStart }) {
 }
 
 const dayCardStyles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-  dayBadge: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.sm,
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayNumber: {
-    fontFamily: fonts.header,
-    fontSize: 20,
-    color: colors.text,
-    lineHeight: 22,
-  },
-  focus: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
-    lineHeight: 20,
-    paddingTop: 2,
-  },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
+  header: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, marginBottom: spacing.md },
+  dayBadge: { backgroundColor: colors.accent, borderRadius: radius.sm, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  dayNumber: { fontFamily: fonts.display, fontSize: 18, color: '#F2F1EE', lineHeight: 22 },
+  focus: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1, lineHeight: 20, paddingTop: 2 },
   questions: { marginBottom: spacing.md },
-  qRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  qDot: {
-    fontFamily: fonts.body,
-    fontSize: 18,
-    color: colors.textMuted,
-    lineHeight: 20,
-    width: 12,
-  },
-  qText: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    flex: 1,
-    lineHeight: 20,
-  },
-  startButton: {
-    backgroundColor: 'rgba(59, 130, 246, 0.12)',
-    borderRadius: radius.sm,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-  },
-  startText: {
-    fontFamily: fonts.header,
-    fontSize: 16,
-    color: colors.accent,
-    letterSpacing: 1.5,
-  },
+  qRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs },
+  qDot: { fontFamily: fonts.body, fontSize: 18, color: colors.textMuted, lineHeight: 20, width: 12 },
+  qText: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, flex: 1, lineHeight: 20 },
+  startButton: { backgroundColor: colors.accentDim, borderRadius: radius.sm, paddingVertical: spacing.sm, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(23,71,212,0.2)' },
+  startText: { fontFamily: fonts.displayMedium, fontSize: 14, color: colors.accent, letterSpacing: 1.5 },
 });
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
@@ -485,177 +358,39 @@ export default function PrepKitScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
-  content: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 80,
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-  },
+  content: { paddingTop: Platform.OS === 'ios' ? 60 : 40, paddingBottom: 80, paddingHorizontal: spacing.lg },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
   backButton: { paddingVertical: spacing.xs },
-  backText: {
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.textSecondary,
-  },
+  backText: { fontFamily: fonts.body, fontSize: 15, color: colors.textMuted },
   regenButton: { paddingVertical: spacing.xs },
-  regenText: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textMuted,
-    letterSpacing: 0.3,
-  },
+  regenText: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, letterSpacing: 0.3 },
   kitTitle: { marginBottom: spacing.xl },
-  companyName: {
-    fontFamily: fonts.header,
-    fontSize: 52,
-    color: colors.text,
-    lineHeight: 52,
-    letterSpacing: 1,
-  },
-  roleText: {
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.accent,
-    marginTop: spacing.xs,
-    letterSpacing: 0.3,
-  },
-  paragraph: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.text,
-    lineHeight: 22,
-    marginBottom: spacing.md,
-  },
-  subLabel: {
-    fontFamily: fonts.body,
-    fontSize: 9,
-    color: colors.textMuted,
-    letterSpacing: 2.5,
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  tabBar: {
-    marginBottom: spacing.md,
-  },
-  tabBarContent: {
-    gap: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  tab: {
-    paddingVertical: spacing.xs,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.textMuted,
-    letterSpacing: 0.5,
-  },
+  companyName: { fontFamily: fonts.display, fontSize: 44, color: colors.text, lineHeight: 44, letterSpacing: -1.5 },
+  roleText: { fontFamily: fonts.body, fontSize: 14, color: colors.accent, marginTop: spacing.xs, letterSpacing: 0.3 },
+  paragraph: { fontFamily: fonts.body, fontSize: 14, color: colors.text, lineHeight: 22, marginBottom: spacing.md },
+  subLabel: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 2.5, marginBottom: spacing.sm, marginTop: spacing.sm },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  tabBar: { marginBottom: spacing.md },
+  tabBarContent: { gap: spacing.lg, paddingBottom: spacing.sm },
+  tab: { paddingVertical: spacing.xs, borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.textMuted, letterSpacing: 0.5 },
   questionList: {},
-  numberedRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-  numberedIndex: {
-    fontFamily: fonts.header,
-    fontSize: 22,
-    color: colors.accent,
-    lineHeight: 24,
-    width: 24,
-  },
-  numberedText: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
-    lineHeight: 22,
-  },
-  redFlagCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    backgroundColor: 'rgba(255, 59, 48, 0.07)',
-    borderRadius: radius.sm,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.error,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  redFlagIcon: {
-    fontSize: 14,
-    color: colors.error,
-    lineHeight: 22,
-  },
-  redFlagText: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.text,
-    flex: 1,
-    lineHeight: 21,
-  },
+  numberedRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.md },
+  numberedIndex: { fontFamily: fonts.display, fontSize: 22, color: colors.accent, lineHeight: 24, width: 24 },
+  numberedText: { fontFamily: fonts.body, fontSize: 14, color: colors.text, flex: 1, lineHeight: 22 },
+  redFlagCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, backgroundColor: 'rgba(214,40,40,0.06)', borderRadius: radius.sm, borderLeftWidth: 2, borderLeftColor: colors.error, padding: spacing.md, marginBottom: spacing.sm },
+  redFlagIcon: { fontSize: 14, color: colors.error, lineHeight: 22 },
+  redFlagText: { fontFamily: fonts.body, fontSize: 13, color: colors.text, flex: 1, lineHeight: 21 },
 });
 
 const mockStyles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.accentDim,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.35)',
-  },
-  topRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.sm,
-  },
-  badge: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-  },
-  badgeText: {
-    fontFamily: fonts.body,
-    fontSize: 10,
-    color: colors.text,
-    letterSpacing: 1.5,
-  },
-  title: {
-    fontFamily: fonts.header,
-    fontSize: 32,
-    color: colors.text,
-    letterSpacing: 1.5,
-    lineHeight: 34,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 21,
-    marginBottom: spacing.md,
-  },
-  cta: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    color: colors.accent,
-  },
+  card: { backgroundColor: colors.accentDim, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.xl, borderWidth: 1, borderColor: 'rgba(23,71,212,0.2)' },
+  topRow: { flexDirection: 'row', marginBottom: spacing.sm },
+  badge: { backgroundColor: colors.accent, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3 },
+  badgeText: { fontFamily: fonts.body, fontSize: 10, color: '#F2F1EE', letterSpacing: 1.5 },
+  title: { fontFamily: fonts.display, fontSize: 26, color: colors.text, letterSpacing: -0.5, lineHeight: 30, marginBottom: spacing.xs },
+  subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.textSecondary, lineHeight: 21, marginBottom: spacing.md },
+  cta: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.accent },
 });

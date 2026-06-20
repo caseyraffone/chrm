@@ -1,20 +1,22 @@
 export const colors = {
-  background: '#0a0a0a',
-  surface: '#141414',
-  surfaceElevated: '#1c1c1c',
-  accent: '#3B82F6',
-  accentDim: 'rgba(59, 130, 246, 0.15)',
-  accentGlow: 'rgba(59, 130, 246, 0.4)',
-  text: '#ffffff',
-  textSecondary: '#888888',
-  textMuted: '#444444',
-  border: '#222222',
-  success: '#00c851',
-  error: '#ff3b30',
+  background: '#F2F1EE',
+  surface: '#FFFFFF',
+  surfaceElevated: '#F8F7F5',
+  accent: '#1747D4',
+  accentDim: 'rgba(23, 71, 212, 0.07)',
+  accentGlow: 'rgba(23, 71, 212, 0.2)',
+  text: '#0F0F0E',
+  textSecondary: '#686866',
+  textMuted: '#AEAEAE',
+  border: '#E3E2DE',
+  success: '#1A8047',
+  error: '#D62828',
 };
 
 export const fonts = {
   header: 'BebasNeue_400Regular',
+  display: 'SpaceGrotesk_700Bold',
+  displayMedium: 'SpaceGrotesk_600SemiBold',
   body: 'DMSans_400Regular',
   bodyMedium: 'DMSans_500Medium',
   bodyBold: 'DMSans_700Bold',
@@ -31,7 +33,7 @@ export const spacing = {
 
 export const radius = {
   sm: 8,
-  md: 12,
+  md: 14,
   lg: 20,
   full: 9999,
 };

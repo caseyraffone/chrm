@@ -166,6 +166,7 @@ export default function PracticeScreen({ route, navigation }) {
 
   const glowRadius = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 40] });
   const glowOpacity = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.6] });
+  const glowColor = '#1747D4';
 
   return (
     <View style={styles.container}>
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
   backText: {
     fontFamily: fonts.body,
     fontSize: 15,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
   counter: {
     fontFamily: fonts.body,
@@ -335,12 +336,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   skipIcon: {
-    fontSize: 26,
-    color: colors.textSecondary,
-    lineHeight: 30,
+    fontSize: 24,
+    color: colors.textMuted,
+    lineHeight: 28,
   },
   skipIconDisabled: {
-    color: colors.textMuted,
+    color: colors.border,
   },
   questionContainer: {
     paddingHorizontal: spacing.lg,
@@ -348,16 +349,18 @@ const styles = StyleSheet.create({
   },
   questionPrompt: {
     fontFamily: fonts.body,
-    fontSize: 11,
+    fontSize: 10,
     color: colors.textMuted,
-    letterSpacing: 2,
+    letterSpacing: 3,
     marginBottom: spacing.sm,
+    textTransform: 'uppercase',
   },
   questionText: {
-    fontFamily: fonts.header,
-    fontSize: 28,
+    fontFamily: fonts.display,
+    fontSize: 22,
     color: colors.text,
-    lineHeight: 34,
+    lineHeight: 30,
+    letterSpacing: -0.3,
     marginBottom: spacing.md,
   },
   browseButton: {
@@ -383,10 +386,10 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
   timer: {
-    fontFamily: fonts.header,
-    fontSize: 20,
+    fontFamily: fonts.display,
+    fontSize: 14,
     color: colors.textMuted,
-    letterSpacing: 3,
+    letterSpacing: 4,
     marginBottom: spacing.sm,
   },
   timerActive: {
@@ -418,30 +421,33 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   recordButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.surface,
-    borderWidth: 3,
-    borderColor: colors.border,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: colors.text,
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 6,
   },
   recordButtonActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accentDim,
+    backgroundColor: colors.text,
   },
   recordButtonInner: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.accent,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.background,
   },
   recordButtonInnerActive: {
     width: 32,
     height: 32,
     borderRadius: 6,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.background,
   },
   recordHint: {
     fontFamily: fonts.body,
@@ -453,7 +459,7 @@ const styles = StyleSheet.create({
   firstDrillBanner: {
     backgroundColor: colors.accentDim,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(59, 130, 246, 0.25)',
+    borderBottomColor: 'rgba(23, 71, 212, 0.15)',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,
   },
@@ -464,10 +470,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // ── Bottom Sheet ────────────────────────────────────────────────────────────
+  // Bottom Sheet
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   sheet: {
     backgroundColor: colors.surface,
@@ -475,6 +481,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radius.lg,
     maxHeight: '72%',
     paddingBottom: Platform.OS === 'ios' ? 34 : spacing.lg,
+    borderTopWidth: 1,
+    borderColor: colors.border,
   },
   sheetHandle: {
     width: 36,
@@ -493,9 +501,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   sheetTitle: {
-    fontFamily: fonts.header,
-    fontSize: 28,
+    fontFamily: fonts.display,
+    fontSize: 24,
     color: colors.text,
+    letterSpacing: -0.5,
   },
   sheetSubtitle: {
     fontFamily: fonts.body,
@@ -515,12 +524,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  sheetItemSelected: {
-    // subtle tint handled via text colors
-  },
   sheetItemNumber: {
-    fontFamily: fonts.header,
-    fontSize: 20,
+    fontFamily: fonts.display,
+    fontSize: 18,
     color: colors.textMuted,
     width: 24,
     lineHeight: 24,

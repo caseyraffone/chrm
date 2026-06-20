@@ -86,7 +86,7 @@ export default function FeedbackScreen({ route, navigation }) {
 
   function getScoreColor(score) {
     if (score >= 8) return colors.success;
-    if (score >= 6) return colors.accent;
+    if (score >= 5) return colors.text;
     return colors.error;
   }
 
@@ -136,6 +136,8 @@ export default function FeedbackScreen({ route, navigation }) {
               {getScoreLabel(feedback.score)}
             </Text>
           </View>
+
+          <View style={styles.divider} />
 
           {/* Question */}
           <View style={styles.section}>
@@ -237,24 +239,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.xl,
   },
-  loadingText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 18,
-    color: colors.text,
-    marginTop: spacing.lg,
-  },
-  loadingSubtext: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
   errorEmoji: {
-    fontSize: 40,
+    fontSize: 36,
     marginBottom: spacing.md,
   },
   errorTitle: {
-    fontFamily: fonts.bodyBold,
+    fontFamily: fonts.displayMedium,
     fontSize: 20,
     color: colors.text,
     marginBottom: spacing.sm,
@@ -265,6 +255,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
+    lineHeight: 22,
   },
   retryButton: {
     backgroundColor: colors.accent,
@@ -274,9 +265,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButtonText: {
-    fontFamily: fonts.bodyBold,
+    fontFamily: fonts.displayMedium,
     fontSize: 15,
-    color: colors.text,
+    color: '#F2F1EE',
     letterSpacing: 1,
   },
   backLinkButton: {
@@ -285,7 +276,7 @@ const styles = StyleSheet.create({
   backLinkText: {
     fontFamily: fonts.body,
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
   header: {
     flexDirection: 'row',
@@ -300,11 +291,11 @@ const styles = StyleSheet.create({
   backText: {
     fontFamily: fonts.body,
     fontSize: 15,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
   categoryLabel: {
     fontFamily: fonts.body,
-    fontSize: 11,
+    fontSize: 10,
     color: colors.accent,
     letterSpacing: 2,
   },
@@ -316,22 +307,30 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   scoreNumber: {
-    fontFamily: fonts.header,
-    fontSize: 96,
-    lineHeight: 104,
+    fontFamily: fonts.display,
+    fontSize: 100,
+    lineHeight: 88,
+    letterSpacing: -4,
   },
   scoreSlash: {
-    fontFamily: fonts.header,
-    fontSize: 36,
+    fontFamily: fonts.body,
+    fontSize: 22,
     color: colors.textMuted,
     marginBottom: 8,
   },
   scoreLabel: {
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: 9,
     letterSpacing: 3,
     marginBottom: 14,
     marginLeft: spacing.sm,
+    textTransform: 'uppercase',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
   },
   section: {
     paddingHorizontal: spacing.lg,
@@ -339,14 +338,15 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: fonts.body,
-    fontSize: 10,
+    fontSize: 9,
     color: colors.textMuted,
-    letterSpacing: 2.5,
+    letterSpacing: 3,
     marginBottom: spacing.sm,
+    textTransform: 'uppercase',
   },
   questionText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 22,
   },
@@ -357,13 +357,13 @@ const styles = StyleSheet.create({
   },
   bulletDot: {
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: 14,
     lineHeight: 22,
     width: 20,
   },
   bulletText: {
     fontFamily: fonts.body,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text,
     flex: 1,
     lineHeight: 22,
@@ -374,10 +374,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderLeftWidth: 3,
     borderLeftColor: colors.accent,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   strongerText: {
     fontFamily: fonts.body,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text,
     lineHeight: 22,
     fontStyle: 'italic',
@@ -388,7 +390,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 20,
   },
-  // Deep-dive CTA card
   deepDiveCard: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.lg,
@@ -396,7 +397,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.35)',
+    borderColor: 'rgba(23, 71, 212, 0.2)',
     backgroundColor: colors.accentDim,
   },
   deepDiveCardInner: {
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   deepDiveTitle: {
-    fontFamily: fonts.bodyBold,
+    fontFamily: fonts.displayMedium,
     fontSize: 15,
     color: colors.text,
   },
@@ -420,21 +421,20 @@ const styles = StyleSheet.create({
     color: colors.accent,
     marginTop: spacing.xs,
   },
-
   actions: {
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
   goAgainButton: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.text,
     paddingVertical: spacing.md + 2,
     borderRadius: radius.md,
     alignItems: 'center',
   },
   goAgainText: {
-    fontFamily: fonts.header,
-    fontSize: 22,
-    color: colors.text,
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: '#F2F1EE',
     letterSpacing: 2,
   },
   homeButton: {
@@ -447,8 +447,8 @@ const styles = StyleSheet.create({
   },
   homeButtonText: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
+    fontSize: 12,
+    color: colors.textMuted,
     letterSpacing: 2,
   },
 });

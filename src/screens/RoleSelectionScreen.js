@@ -232,27 +232,27 @@ const styles = StyleSheet.create({
   backText: {
     fontFamily: fonts.body,
     fontSize: 15,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
   categoryLabel: {
     fontFamily: fonts.body,
-    fontSize: 11,
+    fontSize: 10,
     color: colors.accent,
     letterSpacing: 2,
   },
   title: {
-    fontFamily: fonts.header,
-    fontSize: 52,
+    fontFamily: fonts.display,
+    fontSize: 36,
     color: colors.text,
-    lineHeight: 52,
-    letterSpacing: 1,
+    letterSpacing: -0.5,
+    lineHeight: 40,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },
   subtitle: {
     fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.textSecondary,
+    fontSize: 13,
+    color: colors.textMuted,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.xl,
     lineHeight: 20,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   input: {
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: 14,
     color: colors.text,
     paddingVertical: spacing.md,
     minHeight: 52,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   errorBanner: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    backgroundColor: 'rgba(214, 40, 40, 0.08)',
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.error,
@@ -332,12 +332,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs + 2,
   },
   chipActive: {
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    backgroundColor: colors.accentDim,
     borderColor: colors.accent,
   },
   chipText: {
     fontFamily: fonts.body,
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
   },
   chipTextActive: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   startButton: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.text,
     paddingVertical: spacing.md + 2,
     borderRadius: radius.md,
     alignItems: 'center',
@@ -360,9 +360,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   startButtonText: {
-    fontFamily: fonts.header,
-    fontSize: 22,
-    color: colors.text,
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: '#F2F1EE',
     letterSpacing: 2,
   },
   startButtonTextDisabled: {
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   refreshText: {
     fontFamily: fonts.body,
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.textMuted,
     letterSpacing: 0.5,
   },
 });

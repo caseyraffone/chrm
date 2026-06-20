@@ -83,7 +83,7 @@ export default function PaywallScreen({ route, navigation }) {
           {message ? (
             <Text style={styles.contextMessage}>{message}</Text>
           ) : null}
-          <Text style={styles.title}>UNLOCK{'\n'}CHRM PRO</Text>
+          <Text style={styles.title}>Unlock{'\n'}CHRM Pro</Text>
         </View>
 
         {/* Feature cards */}
@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: 60,
   },
-
   dismissButton: {
     alignSelf: 'flex-end',
     paddingVertical: spacing.xs,
@@ -172,10 +171,9 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     fontFamily: fonts.body,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.textMuted,
   },
-
   titleBlock: {
     marginBottom: spacing.xl,
   },
@@ -187,13 +185,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   title: {
-    fontFamily: fonts.header,
-    fontSize: 72,
+    fontFamily: fonts.display,
+    fontSize: 52,
     color: colors.text,
-    lineHeight: 70,
-    letterSpacing: 1,
+    lineHeight: 52,
+    letterSpacing: -2,
   },
-
   featuresBlock: {
     gap: spacing.sm,
     marginBottom: spacing.xl,
@@ -205,6 +202,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   featureCardAccent: {
     width: 3,
@@ -215,38 +217,37 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   featureTitle: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 15,
+    fontFamily: fonts.displayMedium,
+    fontSize: 14,
     color: colors.text,
     marginBottom: 3,
   },
   featureDescription: {
     fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 19,
+    fontSize: 12,
+    color: colors.textMuted,
+    lineHeight: 18,
   },
-
   pricingBlock: {
     gap: spacing.sm,
     marginBottom: spacing.xl,
   },
   monthlyButton: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.text,
     borderRadius: radius.md,
     paddingVertical: spacing.md + 2,
     alignItems: 'center',
   },
   monthlyButtonText: {
-    fontFamily: fonts.header,
-    fontSize: 26,
-    color: colors.text,
-    letterSpacing: 1,
+    fontFamily: fonts.display,
+    fontSize: 20,
+    color: '#F2F1EE',
+    letterSpacing: 0.5,
   },
   annualButton: {
     borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: colors.accent,
+    borderColor: colors.text,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
   },
@@ -257,18 +258,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   annualButtonText: {
-    fontFamily: fonts.header,
-    fontSize: 26,
-    color: colors.accent,
-    letterSpacing: 1,
+    fontFamily: fonts.display,
+    fontSize: 20,
+    color: colors.text,
+    letterSpacing: 0.5,
   },
   savingsBadge: {
     backgroundColor: colors.accentDim,
-    borderRadius: radius.sm,
+    borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
+    borderColor: 'rgba(23, 71, 212, 0.25)',
   },
   savingsText: {
     fontFamily: fonts.body,
@@ -286,7 +287,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     letterSpacing: 0.3,
   },
-
   maybeLaterButton: {
     alignItems: 'center',
     paddingVertical: spacing.md,

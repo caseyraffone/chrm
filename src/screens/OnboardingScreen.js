@@ -186,7 +186,7 @@ function WelcomeStep({ onGetStarted }) {
 function IntentStep({ onSelect }) {
   return (
     <View style={styles.stepInner}>
-      <Text style={styles.stepTitle}>WHAT BRINGS{'\n'}YOU HERE?</Text>
+      <Text style={styles.stepTitle}>What brings{'\n'}you here?</Text>
       <View style={styles.cards}>
         {INTENTS.map((intent) => (
           <TouchableOpacity
@@ -217,9 +217,9 @@ function RoleStep({ roleInput, setRoleInput, onContinue, continueEnabled }) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.stepTitle}>WHAT'S YOUR{'\n'}TARGET?</Text>
+        <Text style={styles.stepTitle}>What's your{'\n'}target?</Text>
         <Text style={styles.stepSubtitle}>
-          Be specific — the better the input, the better your practice.
+          The more specific, the better your practice.
         </Text>
 
         <TextInput

@@ -132,7 +132,7 @@ export default function HistoryScreen({ navigation }) {
         <Text style={styles.drillCount}>{drills.length} DRILLS</Text>
       </View>
 
-      <Text style={styles.title}>HISTORY</Text>
+      <Text style={styles.title}>History</Text>
 
       {loading ? null : drills.length === 0 ? (
         <View style={styles.emptyState}>

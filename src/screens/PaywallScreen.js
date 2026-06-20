@@ -19,11 +19,11 @@ const FEATURES = [
   },
   {
     title: 'Company Prep Kits',
-    description: 'AI-generated intelligence and training plans for any firm.',
+    description: 'AI-generated intel and training plans for any firm.',
   },
   {
     title: 'AI Mock Interviews',
-    description: 'Live voice interview simulation with real-time feedback.',
+    description: 'Live voice simulation with full debrief scorecard.',
   },
 ];
 
@@ -110,7 +110,7 @@ export default function PaywallScreen({ route, navigation }) {
             {loading ? (
               <ActivityIndicator color={colors.text} />
             ) : (
-              <Text style={styles.monthlyButtonText}>$12.99 / month</Text>
+              <Text style={styles.monthlyButtonText}>$7.99 / month</Text>
             )}
           </TouchableOpacity>
 
@@ -121,7 +121,7 @@ export default function PaywallScreen({ route, navigation }) {
             disabled={loading}
           >
             <View style={styles.annualButtonInner}>
-              <Text style={styles.annualButtonText}>$99 / year</Text>
+              <Text style={styles.annualButtonText}>$59.99 / year</Text>
               <View style={styles.savingsBadge}>
                 <Text style={styles.savingsText}>SAVE 36%</Text>
               </View>

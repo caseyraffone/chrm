@@ -116,10 +116,8 @@ export default function HomeScreen({ navigation }) {
 
       {/* Logo & Tagline */}
       <View style={styles.hero}>
-        <Pressable onPress={handleLogoTap} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <View style={{ paddingTop: 16, overflow: 'visible' }}>
-            <Text style={styles.logo}>CHRM</Text>
-          </View>
+        <Pressable onPress={handleLogoTap}>
+          <Text style={styles.logo}>CHRM</Text>
         </Pressable>
         <Text style={styles.tagline}>Clear. Confident. Under Pressure.</Text>
       </View>
@@ -202,7 +200,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     paddingHorizontal: spacing.lg,
-    paddingTop: 8,
+    paddingTop: 24,
     paddingBottom: 20,
   },
   logo: {

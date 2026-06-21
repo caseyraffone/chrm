@@ -207,7 +207,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.header,
     fontSize: 84,
     color: colors.accent,
-    lineHeight: 96,
+    lineHeight: 100,
+    paddingTop: 12,
     letterSpacing: 3,
   },
   tagline: {

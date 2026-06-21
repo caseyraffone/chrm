@@ -117,7 +117,9 @@ export default function HomeScreen({ navigation }) {
       {/* Logo & Tagline */}
       <View style={styles.hero}>
         <Pressable onPress={handleLogoTap} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={styles.logo}>CHRM</Text>
+          <View style={{ paddingTop: 16, overflow: 'visible' }}>
+            <Text style={styles.logo}>CHRM</Text>
+          </View>
         </Pressable>
         <Text style={styles.tagline}>Clear. Confident. Under Pressure.</Text>
       </View>

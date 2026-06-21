@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     paddingHorizontal: spacing.lg,
-    paddingTop: 24,
+    paddingTop: 4,
     paddingBottom: 20,
   },
   logo: {

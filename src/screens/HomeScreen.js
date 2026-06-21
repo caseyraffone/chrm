@@ -204,10 +204,11 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   logo: {
-    fontFamily: fonts.header,
+    fontFamily: fonts.display,
     fontSize: 72,
     color: colors.accent,
-    letterSpacing: 3,
+    letterSpacing: 2,
+    lineHeight: 72,
   },
   tagline: {
     fontFamily: fonts.body,

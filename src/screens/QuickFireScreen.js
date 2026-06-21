@@ -268,8 +268,7 @@ export default function QuickFireScreen({ navigation }) {
   const glowRadius = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 40] });
   const glowOpacity = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.6] });
 
-  const countdownColor =
-    countdown <= 10 ? colors.error : countdown <= 20 ? colors.accent : colors.text;
+  const countdownColor = countdown <= 10 ? colors.error : colors.accent;
 
   if (loadingQuestions || !questions) {
     return (
@@ -382,10 +381,10 @@ const styles = StyleSheet.create({
   recordingDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
   recordingText: { fontFamily: fonts.body, fontSize: 11, color: colors.error, letterSpacing: 2 },
   glowRing: { shadowColor: colors.accent, shadowOffset: { width: 0, height: 0 }, borderRadius: 65 },
-  recordButton: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 6 },
-  recordButtonActive: { backgroundColor: colors.text },
-  recordButtonInner: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.background },
-  recordButtonInnerActive: { width: 30, height: 30, borderRadius: 6, backgroundColor: colors.background },
+  recordButton: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 6 },
+  recordButtonActive: { backgroundColor: colors.accent },
+  recordButtonInner: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#F2F1EE' },
+  recordButtonInnerActive: { width: 30, height: 30, borderRadius: 6, backgroundColor: '#F2F1EE' },
   recordHint: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.5 },
   skipButton: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg },
   skipText: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, textAlign: 'center' },

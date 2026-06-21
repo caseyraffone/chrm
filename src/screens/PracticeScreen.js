@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: colors.text,
+    backgroundColor: colors.accent,
     borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
@@ -435,19 +435,19 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   recordButtonActive: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.accent,
   },
   recordButtonInner: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: colors.background,
+    backgroundColor: '#F2F1EE',
   },
   recordButtonInnerActive: {
     width: 32,
     height: 32,
     borderRadius: 6,
-    backgroundColor: colors.background,
+    backgroundColor: '#F2F1EE',
   },
   recordHint: {
     fontFamily: fonts.body,

@@ -114,6 +114,6 @@ const styles = StyleSheet.create({
   tipsBlock: { marginBottom: spacing.xl },
   tipsHeader: { fontFamily: fonts.body, fontSize: 10, color: colors.textMuted, letterSpacing: 2, marginBottom: spacing.sm },
   tipItem: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, lineHeight: 28 },
-  beginButton: { backgroundColor: colors.text, borderRadius: radius.md, paddingVertical: spacing.md + 2, alignItems: 'center', marginTop: spacing.md },
+  beginButton: { backgroundColor: colors.accent, borderRadius: radius.md, paddingVertical: spacing.md + 2, alignItems: 'center', marginTop: spacing.md },
   beginButtonText: { fontFamily: fonts.display, fontSize: 16, color: '#F2F1EE', letterSpacing: 2 },
 });

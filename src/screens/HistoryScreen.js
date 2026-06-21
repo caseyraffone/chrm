@@ -28,10 +28,8 @@ function formatDuration(seconds) {
   return `${m}m ${s}s`;
 }
 
-function getScoreColor(score) {
-  if (score >= 8) return colors.success;
-  if (score >= 5) return colors.text;
-  return colors.error;
+function getScoreColor() {
+  return colors.accent;
 }
 
 function DrillItem({ drill }) {

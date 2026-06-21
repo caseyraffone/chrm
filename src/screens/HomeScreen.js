@@ -205,10 +205,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: fonts.header,
-    fontSize: 84,
+    fontSize: 72,
     color: colors.accent,
-    lineHeight: 100,
-    paddingTop: 12,
     letterSpacing: 3,
   },
   tagline: {

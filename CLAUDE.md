@@ -17,7 +17,7 @@ A React Native / Expo app that helps students and young professionals practice h
 | AI (feedback, questions, mock interview) | Anthropic Claude (`claude-sonnet-4-6`) |
 | Monetization | RevenueCat (`react-native-purchases`) |
 | Storage | `@react-native-async-storage/async-storage` |
-| Fonts | Bebas Neue (headers), DM Sans (body) via `@expo-google-fonts` |
+| Fonts | Bebas Neue (wordmark), Space Grotesk (UI headings), DM Sans (body) via `@expo-google-fonts` |
 | Env vars | `react-native-dotenv` → import from `@env` |
 
 ---
@@ -33,21 +33,35 @@ npx expo start         # Start dev server
 
 ---
 
+## Remote Development (Claude Code on Web)
+
+When running in a remote cloud container, the `.env` file does not exist — it's gitignored and never cloned. API calls will fail silently until it's created.
+
+A session-start hook writes `.env` automatically from environment variables set in the Claude Code web session config. The required env vars are `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`.
+
+If the hook isn't set up yet, create `.env` manually:
+```
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+---
+
 ## Project Structure
 
 ```
-pitchiq/
+chrm/
 ├── App.js                          # Entry point: font loading, onboarding gate, nav setup
 ├── app.config.js                   # Expo config — injects env vars into `extra`
 ├── babel.config.js                 # Expo preset + react-native-dotenv plugin
-├── .env                            # API keys (never commit)
+├── .env                            # API keys (never commit — gitignored)
 ├── src/
 │   ├── screens/
-│   │   ├── OnboardingScreen.js         # First-launch walkthrough
+│   │   ├── OnboardingScreen.js         # First-launch walkthrough (3 steps: welcome → intent → role)
 │   │   ├── HomeScreen.js               # Dashboard: mode cards, rep counter
 │   │   ├── RoleSelectionScreen.js      # User enters role/job title before drilling
 │   │   ├── PracticeScreen.js           # Single-question drill (record → Whisper → Feedback)
-│   │   ├── QuickFireScreen.js          # Rapid-fire mode: back-to-back questions
+│   │   ├── QuickFireScreen.js          # Rapid-fire mode: 60s countdown per question
 │   │   ├── FeedbackScreen.js           # AI score + bullets + stronger version
 │   │   ├── HistoryScreen.js            # Past drills, expandable detail
 │   │   ├── PrepKitInputScreen.js       # User enters company + role for Prep Kit
@@ -57,7 +71,7 @@ pitchiq/
 │   │   ├── MockInterviewScreen.js      # Live multi-turn AI interview (gesture-locked)
 │   │   ├── MockInterviewDebriefScreen.js # Post-interview scorecard (gesture-locked)
 │   │   ├── MockInterviewTranscriptScreen.js # Full interview transcript view
-│   │   ├── PaywallScreen.js            # RevenueCat subscription gate (slide from bottom)
+│   │   ├── PaywallScreen.js            # Subscription gate (slide from bottom, gesture-locked)
 │   │   └── DevSettingsScreen.js        # Internal dev/debug tools
 │   ├── utils/
 │   │   ├── api.js       # All API calls (see section below)
@@ -75,7 +89,7 @@ pitchiq/
 ```
 Onboarding → Home
 Home → RoleSelection → Practice → Feedback
-Home → RoleSelection → QuickFire → Feedback
+Home → QuickFire → Feedback
 Home → PrepKitInput → PrepKit
 Home → PrepKitHub → PrepKit
 Home → MockInterviewSetup → MockInterview → MockInterviewDebrief → MockInterviewTranscript
@@ -108,25 +122,36 @@ All Claude calls return JSON. Responses are parsed with a markdown code-fence st
 
 ## Design System (`src/constants/theme.js`)
 
+**Current direction: Direction A — Light / Editorial**
+
 | Token | Value |
 |---|---|
-| `colors.background` | `#0a0a0a` |
-| `colors.surface` | `#141414` |
-| `colors.surfaceElevated` | `#1c1c1c` |
-| `colors.accent` | `#3B82F6` (blue) |
-| `colors.accentDim` | `rgba(59,130,246,0.15)` |
-| `colors.accentGlow` | `rgba(59,130,246,0.4)` |
-| `colors.text` | `#ffffff` |
-| `colors.textSecondary` | `#888888` |
-| `colors.textMuted` | `#444444` |
-| `colors.border` | `#222222` |
-| `colors.success` | `#00c851` |
-| `colors.error` | `#ff3b30` |
-| Header font | `BebasNeue_400Regular` |
-| Body font | `DMSans_400Regular / 500Medium / 700Bold` |
+| `colors.background` | `#F2F1EE` (warm off-white) |
+| `colors.surface` | `#FFFFFF` |
+| `colors.surfaceElevated` | `#F8F7F5` |
+| `colors.accent` | `#1747D4` (blue) |
+| `colors.accentDim` | `rgba(23, 71, 212, 0.07)` |
+| `colors.accentGlow` | `rgba(23, 71, 212, 0.2)` |
+| `colors.text` | `#0F0F0E` (near-black) |
+| `colors.textSecondary` | `#686866` |
+| `colors.textMuted` | `#AEAEAE` |
+| `colors.border` | `#E3E2DE` |
+| `colors.success` | `#1A8047` (green) |
+| `colors.error` | `#D62828` |
+
+**Fonts:**
+
+| Token | Font | Use |
+|---|---|---|
+| `fonts.header` | `BebasNeue_400Regular` | CHRM wordmark only |
+| `fonts.display` | `SpaceGrotesk_700Bold` | Screen titles, scores, card headers, buttons |
+| `fonts.displayMedium` | `SpaceGrotesk_600SemiBold` | Subheadings, feature titles |
+| `fonts.body` | `DMSans_400Regular` | Body copy, labels, hints |
+| `fonts.bodyMedium` | `DMSans_500Medium` | Slightly emphasized body |
+| `fonts.bodyBold` | `DMSans_700Bold` | Bold body text |
 
 Spacing scale: `xs=4, sm=8, md=16, lg=24, xl=32, xxl=48`
-Border radius: `sm=8, md=12, lg=20, full=9999`
+Border radius: `sm=8, md=14, lg=20, full=9999`
 
 ---
 
@@ -138,6 +163,8 @@ RevenueCat handles all subscription logic. `src/utils/purchases.js` exports:
 - `addSubscriptionListener()` — keeps AsyncStorage in sync during the session; returns a cleanup function
 
 Gating: screens check AsyncStorage for subscription status and navigate to `Paywall` if not subscribed.
+
+Pricing: $7.99 / month or $59.99 / year (36% savings).
 
 ---
 
@@ -157,7 +184,8 @@ Gating: screens check AsyncStorage for subscription status and navigate to `Payw
     stronger_version: "..."
   },
   duration: 45,              // seconds
-  date: "2026-02-26T..."     // ISO string
+  date: "2026-02-26T...",    // ISO string
+  company: "Goldman Sachs"   // or null
 }
 ```
 
@@ -209,3 +237,5 @@ import { OPENAI_API_KEY, ANTHROPIC_API_KEY } from '@env';
 - No global state manager — data flows via navigation params and AsyncStorage.
 - Claude always returns JSON; code defensively strips markdown fences before parsing.
 - `gestureEnabled: false` on any screen where back-swipe would corrupt flow (feedback, mock interview, paywall).
+- Titles and headings use `fonts.display` (Space Grotesk Bold) in mixed case — not all-caps strings.
+- The CHRM wordmark uses `fonts.header` (Bebas Neue) and is the only place that font appears.

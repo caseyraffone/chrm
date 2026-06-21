@@ -286,7 +286,6 @@ export default function QuickFireScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.counter}>{questionIndex + 1} of {questions.length}</Text>
         <TouchableOpacity
           onPress={skipQuestion}
           style={styles.skipButton}
@@ -306,7 +305,7 @@ export default function QuickFireScreen({ navigation }) {
 
       {/* Question */}
       <View style={styles.questionContainer}>
-        <Text style={styles.questionPrompt}>YOUR PROMPT</Text>
+        <Text style={styles.questionPrompt}>PROMPT</Text>
         <Text style={styles.questionText}>{questions[questionIndex]}</Text>
       </View>
 
@@ -351,7 +350,7 @@ export default function QuickFireScreen({ navigation }) {
             ? 'Time up'
             : isRecording
             ? 'Tap to stop'
-            : 'Tap to start your answer'}
+            : 'Tap to start · auto-submits at 0:00'}
         </Text>
       </View>
 

@@ -23,8 +23,8 @@ import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const CONFIG = {
   'Interview Prep': {
-    title: "WHAT'S YOUR\nTARGET ROLE?",
-    subtitle: 'Be specific — the more detail, the better your questions',
+    title: "What's your\ntarget role?",
+    subtitle: 'Be specific — the more detail, the better your questions.',
     placeholder: 'e.g. Private Credit at Ares, McKinsey Consultant, Meta PM...',
     chips: [
       'Investment Banking',
@@ -36,8 +36,8 @@ const CONFIG = {
     ],
   },
   'Persuade & Present': {
-    title: 'WHAT ARE YOU\nPREPARING FOR?',
-    subtitle: 'Be specific — the more detail, the better your scenarios',
+    title: 'What are you\npreparing for?',
+    subtitle: 'Be specific — the more detail, the better your scenarios.',
     placeholder:
       'e.g. Stock pitch to investment committee, sales presentation to client, defending a thesis to partners...',
     chips: [
@@ -242,10 +242,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.display,
-    fontSize: 36,
+    fontSize: 40,
     color: colors.text,
     letterSpacing: -0.5,
-    lineHeight: 40,
+    lineHeight: 44,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },

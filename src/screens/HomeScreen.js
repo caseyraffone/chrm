@@ -26,17 +26,17 @@ const hasAnthropic = !!ANTHROPIC_API_KEY;
 const DRILL_CATEGORIES = [
   {
     name: 'Interview Prep',
-    subtitle: 'Technical & behavioral — tailored to your target role',
+    subtitle: 'Technical & behavioral — tailored to your role',
     route: 'RoleSelection',
   },
   {
     name: 'Persuade & Present',
-    subtitle: 'Pitch, defend, and deliver ideas with clarity',
+    subtitle: 'Pitch and defend ideas with clarity',
     route: 'RoleSelection',
   },
   {
     name: 'Quick Fire',
-    subtitle: 'Think fast — random prompts, timed pressure',
+    subtitle: 'Random prompts, timed pressure',
     route: 'QuickFire',
   },
 ];
@@ -111,7 +111,7 @@ export default function HomeScreen({ navigation }) {
       {/* Rep Counter */}
       <View style={styles.repBadge}>
         <Text style={styles.repNumber}>{repCount}</Text>
-        <Text style={styles.repLabel}>DRILLS COMPLETED</Text>
+        <Text style={styles.repLabel}>DRILLS DONE</Text>
       </View>
 
       {/* Logo & Tagline */}
@@ -169,9 +169,6 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.historyButtonText}>VIEW HISTORY</Text>
         </Pressable>
 
-        <Text style={styles.debugText}>
-          API: {hasOpenAI && hasAnthropic ? 'connected' : `missing — OpenAI:${hasOpenAI} Anthropic:${hasAnthropic}`}
-        </Text>
       </ScrollView>
     </View>
   );

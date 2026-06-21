@@ -171,11 +171,11 @@ function WelcomeStep({ onGetStarted }) {
         <Text style={styles.subTagline}>Reps. Pressure. Feedback.</Text>
       </View>
       <TouchableOpacity
-        style={[styles.primaryBtn, { backgroundColor: colors.text }]}
+        style={styles.primaryBtn}
         onPress={onGetStarted}
         activeOpacity={0.85}
       >
-        <Text style={[styles.primaryBtnText, { color: '#F2F1EE' }]}>GET STARTED</Text>
+        <Text style={styles.primaryBtnText}>GET STARTED</Text>
       </TouchableOpacity>
     </View>
   );
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
 
   // Primary button
   primaryBtn: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.accent,
     paddingVertical: spacing.md + 4,
     borderRadius: radius.md,
     alignItems: 'center',

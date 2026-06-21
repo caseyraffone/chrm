@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   startButton: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.accent,
     paddingVertical: spacing.md + 2,
     borderRadius: radius.md,
     alignItems: 'center',

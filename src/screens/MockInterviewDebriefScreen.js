@@ -33,10 +33,8 @@ function countFillerWords(conversation) {
   return { total, counts };
 }
 
-function scoreColor(score) {
-  if (score >= 7) return colors.success;
-  if (score >= 5) return '#F59E0B';
-  return colors.error;
+function scoreColor() {
+  return colors.accent;
 }
 
 function ConfidenceCurve({ scores }) {
@@ -67,16 +65,8 @@ function ConfidenceCurve({ scores }) {
       </View>
       <View style={curveStyles.legend}>
         <View style={curveStyles.legendItem}>
-          <View style={[curveStyles.legendDot, { backgroundColor: colors.success }]} />
-          <Text style={curveStyles.legendText}>Strong (7+)</Text>
-        </View>
-        <View style={curveStyles.legendItem}>
-          <View style={[curveStyles.legendDot, { backgroundColor: '#F59E0B' }]} />
-          <Text style={curveStyles.legendText}>Solid (5-6)</Text>
-        </View>
-        <View style={curveStyles.legendItem}>
-          <View style={[curveStyles.legendDot, { backgroundColor: colors.error }]} />
-          <Text style={curveStyles.legendText}>Weak (&lt;5)</Text>
+          <View style={[curveStyles.legendDot, { backgroundColor: colors.accent }]} />
+          <Text style={curveStyles.legendText}>Per-exchange score</Text>
         </View>
       </View>
     </View>
@@ -204,7 +194,7 @@ export default function MockInterviewDebriefScreen({ route, navigation }) {
           <View style={styles.sectionCard}>
             <View style={styles.fillerRow}>
               <View style={styles.fillerCountBlock}>
-                <Text style={[styles.fillerCount, { color: fillerData.total > 15 ? colors.error : fillerData.total > 7 ? '#F59E0B' : colors.success }]}>
+                <Text style={[styles.fillerCount, { color: colors.error }]}>
                   {fillerData.total}
                 </Text>
                 <Text style={styles.fillerCountLabel}>total detected</Text>

@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: fonts.body, fontSize: 12, color: colors.textSecondary },
   chipTextActive: { color: colors.accent, fontFamily: fonts.bodyMedium },
   actions: { paddingHorizontal: spacing.lg, marginBottom: spacing.xl },
-  generateButton: { backgroundColor: colors.text, paddingVertical: spacing.md + 2, borderRadius: radius.md, alignItems: 'center' },
+  generateButton: { backgroundColor: colors.accent, paddingVertical: spacing.md + 2, borderRadius: radius.md, alignItems: 'center' },
   generateButtonDisabled: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   generateButtonText: { fontFamily: fonts.display, fontSize: 16, color: '#F2F1EE', letterSpacing: 2 },
   generateButtonTextDisabled: { color: colors.textMuted },

@@ -33,6 +33,13 @@ function countFillerWords(conversation) {
   return { total, counts };
 }
 
+function computeDurationMinutes(conversation) {
+  const timestamps = conversation.map((t) => t.timestamp).filter(Boolean);
+  if (timestamps.length < 2) return null;
+  const durationMs = Math.max(...timestamps) - Math.min(...timestamps);
+  return durationMs / 60000;
+}
+
 function scoreColor(score) {
   if (score >= 7) return colors.success;
   if (score >= 5) return '#F59E0B';
@@ -104,6 +111,8 @@ export default function MockInterviewDebriefScreen({ route, navigation }) {
   const [error, setError] = useState(null);
 
   const fillerData = countFillerWords(conversation);
+  const durationMin = computeDurationMinutes(conversation);
+  const fillersPerMin = durationMin && durationMin > 0 ? (fillerData.total / durationMin).toFixed(1) : null;
   const userAnswers = conversation.filter((t) => t.type === 'user');
 
   useEffect(() => {
@@ -207,7 +216,10 @@ export default function MockInterviewDebriefScreen({ route, navigation }) {
                 <Text style={[styles.fillerCount, { color: fillerData.total > 15 ? colors.error : fillerData.total > 7 ? '#F59E0B' : colors.success }]}>
                   {fillerData.total}
                 </Text>
-                <Text style={styles.fillerCountLabel}>total detected</Text>
+                <Text style={styles.fillerCountLabel}>total</Text>
+                {fillersPerMin !== null && (
+                  <Text style={styles.fillerRate}>{fillersPerMin}/min</Text>
+                )}
               </View>
               <View style={styles.fillerBreakdown}>
                 {Object.entries(fillerData.counts).map(([word, count]) => (
@@ -305,6 +317,7 @@ const styles = StyleSheet.create({
   fillerCountBlock: { alignItems: 'center', minWidth: 56 },
   fillerCount: { fontFamily: fonts.display, fontSize: 24, color: colors.error },
   fillerCountLabel: { fontFamily: fonts.body, fontSize: 10, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
+  fillerRate: { fontFamily: fonts.body, fontSize: 10, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
   fillerBreakdown: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   fillerChip: { backgroundColor: 'rgba(214,40,40,0.06)', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(214,40,40,0.2)' },
   fillerChipText: { fontFamily: fonts.body, fontSize: 11, color: colors.error },

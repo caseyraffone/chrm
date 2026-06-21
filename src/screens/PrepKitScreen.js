@@ -169,6 +169,7 @@ export default function PrepKitScreen({ route, navigation }) {
       role: drillRole,
       questions,
       company,
+      hubReturn: { company, role },
     });
   }
 
@@ -333,6 +334,15 @@ export default function PrepKitScreen({ route, navigation }) {
           })}
         </Section>
 
+        {/* ── Training Hub link ── */}
+        <TouchableOpacity
+          style={styles.hubLink}
+          onPress={() => navigation.navigate('PrepKitHub', { company, role, kit })}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.hubLinkText}>View Training Hub →</Text>
+        </TouchableOpacity>
+
         {/* ── Mock Interview CTA ── */}
         <TouchableOpacity
           style={mockStyles.card}
@@ -383,6 +393,8 @@ const styles = StyleSheet.create({
   redFlagCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, backgroundColor: 'rgba(214,40,40,0.06)', borderRadius: radius.sm, borderLeftWidth: 2, borderLeftColor: colors.error, padding: spacing.md, marginBottom: spacing.sm },
   redFlagIcon: { fontSize: 14, color: colors.error, lineHeight: 22 },
   redFlagText: { fontFamily: fonts.body, fontSize: 13, color: colors.text, flex: 1, lineHeight: 21 },
+  hubLink: { alignSelf: 'flex-start', paddingVertical: spacing.sm, marginBottom: spacing.lg },
+  hubLinkText: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.accent },
 });
 
 const mockStyles = StyleSheet.create({

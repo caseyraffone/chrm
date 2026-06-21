@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
-import { getPrepKitProgress, getSubscriptionStatus } from '../utils/storage';
+import { getPrepKitProgress, getSubscriptionStatus, getPrepKitVisited, markPrepKitVisited } from '../utils/storage';
 
 const Q_TABS = [
   { key: 'technical', label: 'Technical' },
@@ -24,6 +24,18 @@ export default function PrepKitHubScreen({ route, navigation }) {
   const { company, role, kit } = route.params;
   const [progress, setProgress] = useState({});
   const [activeTab, setActiveTab] = useState('technical');
+
+  // First-visit redirect: show Company Intelligence before Training Hub
+  useEffect(() => {
+    async function checkFirstVisit() {
+      const visited = await getPrepKitVisited(company, role);
+      if (!visited) {
+        await markPrepKitVisited(company, role);
+        navigation.replace('PrepKit', { company, role, kit });
+      }
+    }
+    checkFirstVisit();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

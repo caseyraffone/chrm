@@ -164,7 +164,7 @@ export default function MockInterviewScreen({ route, navigation }) {
                 type: 'server_vad',
                 threshold: 0.45,
                 prefix_padding_ms: 300,
-                silence_duration_ms: 400,
+                silence_duration_ms: 800,
               },
             },
           })
@@ -235,8 +235,10 @@ export default function MockInterviewScreen({ route, navigation }) {
     return (
       `You are conducting a realistic interview for a ${roleCtx} position at ${company}. ` +
       `You have the following intelligence about this firm: ${JSON.stringify(kitData)}. ` +
-      `Conduct the interview naturally and conversationally. Ask one question at a time. ` +
-      `Listen carefully and ask sharp follow-up questions when answers are vague or incomplete. ` +
+      `Conduct the interview naturally and conversationally. Ask one core question at a time. ` +
+      `Follow-up rules: if a candidate's answer is vague, hand-wavy, or incomplete, ask exactly one sharp follow-up probe before moving to the next core question — never more than one follow-up per question. ` +
+      `If the answer is solid, move directly to your next core question. ` +
+      `Pacing: aim to cover 5-7 distinct core questions across 8-10 total exchanges (follow-ups count toward the total). ` +
       `Be professional but challenging. CRITICAL: Keep every response to 1-3 sentences maximum. ` +
       `Be conversational and direct. Do not give long monologues or explanations. ` +
       `Respond like a real person in a real interview — concise, natural, occasionally informal. ` +

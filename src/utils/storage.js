@@ -287,3 +287,28 @@ export async function savePrepKitQuestionAttempt(company, role, question, score)
     console.error('Error saving prep kit progress:', error);
   }
 }
+
+// ─── PrepKit first-visit tracking ─────────────────────────────────────────────
+
+function prepKitVisitedKey(company, role) {
+  const c = company.toLowerCase().trim().replace(/\s+/g, '_');
+  const r = (role || '').toLowerCase().trim().replace(/\s+/g, '_');
+  return `@chrm_prepkit_visited_${c}${r ? `_${r}` : ''}`;
+}
+
+export async function getPrepKitVisited(company, role) {
+  try {
+    const val = await AsyncStorage.getItem(prepKitVisitedKey(company, role));
+    return val === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export async function markPrepKitVisited(company, role) {
+  try {
+    await AsyncStorage.setItem(prepKitVisitedKey(company, role), 'true');
+  } catch (error) {
+    console.error('Error marking prep kit visited:', error);
+  }
+}

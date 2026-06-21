@@ -18,12 +18,19 @@ import { transcribeAudio } from '../utils/api';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 export default function PracticeScreen({ route, navigation }) {
-  const { category, role, questions, company = null, isFirstDrill = false, hubReturn = null } = route.params;
+  const { category, role, questions: rawQuestions, company = null, isFirstDrill = false, hubReturn = null } = route.params;
+
+  // Guard against malformed params — questions must be a non-empty array of strings
+  const questions = Array.isArray(rawQuestions)
+    ? rawQuestions.filter((q) => typeof q === 'string' && q.trim().length > 0)
+    : [];
+
+  console.log('[Practice] entry — questions:', questions.length, 'company:', company, 'hubReturn:', hubReturn);
 
   const [questionIndex, setQuestionIndex] = useState(
-    () => Math.floor(Math.random() * questions.length)
+    () => (questions.length > 0 ? Math.floor(Math.random() * questions.length) : 0)
   );
-  const question = questions[questionIndex];
+  const question = questions[questionIndex] ?? '';
 
   const [browseVisible, setBrowseVisible] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(isFirstDrill);

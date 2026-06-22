@@ -2,6 +2,10 @@
 
 **Tagline:** Clear. Confident. Under Pressure.
 
+## Git Workflow
+
+**Always work on `main`.** Commit and push directly to `main` — do not create feature branches unless explicitly asked. Before making changes, ensure you're on main and it's up to date.
+
 A React Native / Expo app that helps students and young professionals practice high-stakes communication through AI-powered voice drills, mock interviews, and company-specific prep kits.
 
 ---

@@ -1,5 +1,11 @@
 import { OPENAI_API_KEY, ANTHROPIC_API_KEY } from '@env';
 
+function fetchWithTimeout(url, options, ms) {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { ...options, signal: ctrl.signal }).finally(() => clearTimeout(id));
+}
+
 // ─── Transcription ────────────────────────────────────────────────────────────
 
 export async function transcribeAudio(audioUri) {
@@ -13,14 +19,14 @@ export async function transcribeAudio(audioUri) {
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
 
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    const response = await fetchWithTimeout('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'multipart/form-data',
       },
       body: formData,
-    });
+    }, 30000);
 
     if (!response.ok) {
       const err = await response.json();
@@ -54,7 +60,7 @@ export async function generateQuestions(role, category) {
       prompt = `${vaguePrefix}You are a career coach specializing in ${role} recruiting. Generate 10 realistic practice questions for an interview at a ${role} position. Order them from foundational to advanced. Include a mix of technical and behavioral questions. Return ONLY a valid JSON array of question strings, no explanation.`;
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': ANTHROPIC_API_KEY,
@@ -66,7 +72,7 @@ export async function generateQuestions(role, category) {
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, 30000);
 
     if (!response.ok) {
       const err = await response.json();
@@ -170,7 +176,7 @@ function parsePrepKitResponse(responseText) {
 }
 
 async function callPrepKitAPI(prompt, maxTokens) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': ANTHROPIC_API_KEY,
@@ -182,7 +188,7 @@ async function callPrepKitAPI(prompt, maxTokens) {
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     }),
-  });
+  }, 90000);
 
   if (!response.ok) {
     const err = await response.json();
@@ -265,7 +271,7 @@ Return ONLY valid JSON: {"interviewer_line": "...", "internal_note": "...", "is_
     }
   }
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': ANTHROPIC_API_KEY,
@@ -278,7 +284,7 @@ Return ONLY valid JSON: {"interviewer_line": "...", "internal_note": "...", "is_
       system: systemPrompt,
       messages: apiMessages,
     }),
-  });
+  }, 30000);
 
   if (!response.ok) {
     const err = await response.json();
@@ -330,7 +336,7 @@ Analyze the candidate's performance and return ONLY valid JSON:
   "work_on": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': ANTHROPIC_API_KEY,
@@ -342,7 +348,7 @@ Analyze the candidate's performance and return ONLY valid JSON:
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     }),
-  });
+  }, 30000);
 
   if (!response.ok) {
     const err = await response.json();
@@ -378,7 +384,7 @@ Return exactly this JSON structure:
 Rules:
 - Be direct and honest. Score fairly — 10 is exceptional, 5 is average, below 4 is needs significant work.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': ANTHROPIC_API_KEY,
@@ -390,7 +396,7 @@ Rules:
         max_tokens: 800,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, 30000);
 
     if (!response.ok) {
       const err = await response.json();

@@ -60,6 +60,7 @@ export default function PrepKitInputScreen({ route, navigation }) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const loadingIntervalRef = useRef(null);
   const pulseRef = useRef(null);
+  const cancelledRef = useRef(false);
 
   const canGenerate = input.trim().length >= 5;
   const { company } = parseInput(input);
@@ -101,8 +102,15 @@ export default function PrepKitInputScreen({ route, navigation }) {
     Animated.timing(pulseAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
   }
 
+  function handleCancel() {
+    cancelledRef.current = true;
+    stopLoadingAnimation();
+    setLoading(false);
+  }
+
   async function handleGenerate(forceRefresh = false) {
     const { company: c, role: r } = parseInput(input);
+    cancelledRef.current = false;
     setError(null);
     setLoading(true);
     startLoadingAnimation();
@@ -119,13 +127,18 @@ export default function PrepKitInputScreen({ route, navigation }) {
         await savePrepKit(c, r, kit);
       }
 
-      stopLoadingAnimation();
-      navigation.navigate('PrepKitHub', { company: c, role: r, kit });
+      if (!cancelledRef.current) {
+        navigation.navigate('PrepKitHub', { company: c, role: r, kit });
+      }
     } catch (err) {
-      stopLoadingAnimation();
-      setError("Couldn't generate prep kit. Check your connection and try again.");
+      if (!cancelledRef.current) {
+        setError("Couldn't generate prep kit. Check your connection and try again.");
+      }
     } finally {
-      setLoading(false);
+      stopLoadingAnimation();
+      if (!cancelledRef.current) {
+        setLoading(false);
+      }
     }
   }
 
@@ -159,6 +172,9 @@ export default function PrepKitInputScreen({ route, navigation }) {
           <Text style={styles.loadingSubtext}>
             This may take a minute or two — we're building something thorough.
           </Text>
+          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView
@@ -274,6 +290,8 @@ const styles = StyleSheet.create({
   loadingDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.accent, marginBottom: spacing.xl },
   loadingTitle: { fontFamily: fonts.display, fontSize: 24, color: colors.text, textAlign: 'center', lineHeight: 30, marginBottom: spacing.sm },
   loadingSubtext: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, textAlign: 'center' },
+  cancelButton: { marginTop: spacing.xl, paddingVertical: spacing.sm, paddingHorizontal: spacing.lg },
+  cancelText: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, marginBottom: spacing.xl },
   backButton: { paddingVertical: spacing.xs },
   backText: { fontFamily: fonts.body, fontSize: 15, color: colors.textMuted },

@@ -8,9 +8,8 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 import { colors, fonts, spacing, radius } from '../constants/theme';
-import { syncSubscriptionStatus } from '../utils/purchases';
+import { presentPaywall, presentCustomerCenter } from '../utils/purchases';
 
 const FEATURES = [
   {
@@ -35,9 +34,8 @@ export default function PaywallScreen({ route, navigation }) {
     if (loading) return;
     setLoading(true);
     try {
-      const result = await RevenueCatUI.presentPaywall();
-      if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
-        await syncSubscriptionStatus();
+      const purchased = await presentPaywall();
+      if (purchased) {
         navigation.goBack();
       }
     } catch (error) {
@@ -51,9 +49,7 @@ export default function PaywallScreen({ route, navigation }) {
     if (loading) return;
     setLoading(true);
     try {
-      await RevenueCatUI.presentCustomerCenter();
-      // Sync in case a restore happened inside Customer Center
-      await syncSubscriptionStatus();
+      await presentCustomerCenter();
     } catch (error) {
       console.error('[Paywall] presentCustomerCenter error:', error);
     } finally {

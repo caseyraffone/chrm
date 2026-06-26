@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 import { REVENUECAT_API_KEY_IOS } from '@env';
 import { setSubscriptionStatus } from './storage';
 
@@ -68,4 +69,30 @@ export function addSubscriptionListener() {
     const isPro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
     await setSubscriptionStatus(isPro ? 'pro' : 'free');
   });
+}
+
+// ─── Paywall UI ──────────────────────────────────────────────────────────────
+// Wrappers around the native RevenueCat paywall UI. PaywallScreen imports these
+// instead of `react-native-purchases-ui` directly so the screen stays
+// platform-agnostic — `purchases.web.js` provides browser equivalents.
+
+/**
+ * Presents the native RevenueCat paywall. Resolves to `true` if the user
+ * purchased or restored an entitlement, `false` otherwise.
+ */
+export async function presentPaywall() {
+  const result = await RevenueCatUI.presentPaywall();
+  const success =
+    result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED;
+  if (success) await syncSubscriptionStatus();
+  return success;
+}
+
+/**
+ * Opens the RevenueCat Customer Center (manage / restore purchases), then
+ * re-syncs entitlement status in case a restore happened inside it.
+ */
+export async function presentCustomerCenter() {
+  await RevenueCatUI.presentCustomerCenter();
+  await syncSubscriptionStatus();
 }

@@ -246,17 +246,47 @@ Pricing: $7.99 / month or $59.99 / year (36% savings).
 
 ## Env Vars
 
-Set in `.env` (gitignored). Required:
+**The OpenAI/Anthropic keys live on the backend, not the client.** See `/server`.
+All AI calls (`src/utils/api.js`) go through that backend so secrets never ship
+in the web bundle or the native binary.
+
+**App `.env`** (gitignored) — only needs to know where the backend is:
+
+```
+API_BASE_URL=http://localhost:8787   # deployed backend URL in production
+```
+
+Accessed in code via:
+```js
+import { API_BASE_URL } from '@env';
+```
+
+**Server `.env`** (`server/.env`, gitignored) — holds the actual secrets:
 
 ```
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Accessed in code via:
-```js
-import { OPENAI_API_KEY, ANTHROPIC_API_KEY } from '@env';
-```
+---
+
+## Backend (`/server`)
+
+Host-agnostic [Hono](https://hono.dev) API that proxies OpenAI + Anthropic.
+Named endpoints (questions, prep-kit, feedback, mock-turn, mock-debrief,
+hirevue-questions, hirevue-debrief, transcribe, tts) construct prompts
+server-side. Run with `cd server && npm run dev` (port 8787). Deploys to
+Node/Vercel/Netlify/Cloudflare/Fly. See `server/README.md`.
+
+---
+
+## Web
+
+The same Expo codebase builds for web via React Native Web (`npm run web`,
+`npm run build:web` → static `dist/`). Native-only modules are platform-gated:
+`purchases.web.js` stubs RevenueCat (web treats users as free until Web Billing
+is added). The Mock Interview is turn-based (expo-speech + expo-av) so it runs
+on web and native from one screen — no WebRTC.
 
 ---
 

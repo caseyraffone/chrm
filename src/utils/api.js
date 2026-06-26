@@ -43,6 +43,9 @@ export async function generateQuestions(role, category) {
 
     if (category === 'Quick Fire') {
       prompt = `Generate 10 rapid-fire communication prompts. Mix of: explain a concept in 30 seconds, sell me something, defend a position, answer a curveball question. These should test quick thinking and verbal clarity, not domain knowledge. Return ONLY a valid JSON array of prompt strings, no explanation.`;
+    } else if (category === 'Behavioral') {
+      const roleContext = role && role.trim().length >= 3 ? ` Tailor a few of them to someone targeting a ${role} role, but keep most broadly applicable.` : '';
+      prompt = `You are an interview coach. Generate 10 realistic behavioral interview questions that test the STAR method (Situation, Task, Action, Result). Cover a range of competencies: leadership, teamwork, conflict, failure, initiative, handling pressure, and ethics. These apply to almost any role.${roleContext} Order them from approachable to challenging. Return ONLY a valid JSON array of question strings, no explanation.`;
     } else if (category === 'Persuade & Present') {
       prompt = `You are a communication coach. Generate 10 realistic practice scenarios for someone preparing to ${role}. Focus on persuasion, clarity, and structured delivery. Order from foundational to high-pressure. Return ONLY a valid JSON array of scenario prompt strings, no explanation.`;
     } else {
@@ -361,7 +364,11 @@ Analyze the candidate's performance and return ONLY valid JSON:
 export async function getFeedback(transcript, question, category, role) {
   try {
     const roleContext = role ? ` targeting a ${role} role` : '';
-    const prompt = `You are CHRM, an elite AI communication coach. Keep all feedback concise. Strengths: 1-2 sentences max. Areas to improve: 1-2 sentences max. Exemplary response: 3-4 sentences max. Total response should be under 200 words. Do not use emojis. Be direct and coach-like. Analyze this spoken answer and return ONLY valid JSON — no markdown, no extra text.
+    const isBehavioral = category === 'Behavioral';
+    const behavioralRubric = isBehavioral
+      ? ` This is a BEHAVIORAL question — judge it against the STAR method. A strong answer sets a clear Situation and Task, spends most of its time on specific Actions the speaker personally took, and ends with a concrete Result (ideally quantified). In your feedback, explicitly call out which STAR elements are present, weak, or missing.`
+      : '';
+    const prompt = `You are CHRM, an elite AI communication coach. Keep all feedback concise. Strengths: 1-2 sentences max. Areas to improve: 1-2 sentences max. Exemplary response: 3-4 sentences max. Total response should be under 200 words. Do not use emojis. Be direct and coach-like.${behavioralRubric} Analyze this spoken answer and return ONLY valid JSON — no markdown, no extra text.
 
 Category: ${category}${roleContext}
 Question: "${question}"
@@ -406,4 +413,125 @@ Rules:
     console.error('Feedback error:', error);
     throw error;
   }
+}
+
+// ─── HireVue Simulation ─────────────────────────────────────────────────────────
+
+// Generates the question set for a one-way HireVue-style digital interview.
+// `mix` is an array of categories to include, e.g. ['Behavioral', 'Company', 'Technical'].
+// When a saved prep kit is passed, its intel is used to make company/technical
+// questions specific to the firm.
+export async function generateHireVueQuestions(company, role, mix, count, prepKit = null) {
+  const roleContext = role ? `a ${role} position at ${company}` : `a role at ${company}`;
+  const mixList = mix && mix.length ? mix.join(', ') : 'Behavioral, Company, Technical';
+
+  let kitContext = '';
+  if (prepKit) {
+    const kitData = {
+      interview_style: prepKit.company_overview?.interview_style,
+      culture_signals: prepKit.company_overview?.culture_signals,
+      likely_questions: prepKit.likely_questions,
+    };
+    kitContext = `\n\nUse this intelligence about the firm to make Company and Technical questions specific and realistic: ${JSON.stringify(kitData)}`;
+  }
+
+  const prompt = `You are designing a HireVue-style one-way digital interview for someone interviewing for ${roleContext}. In a HireVue interview the candidate reads each question on screen and records a short spoken answer with no live interviewer.
+
+Generate exactly ${count} questions. Distribute them across these categories: ${mixList}.
+- "Behavioral" questions test the STAR method and general competencies (apply to any role).
+- "Company" questions test motivation and fit specific to ${company} — why this firm, knowledge of what they do, values alignment.
+- "Technical" questions test role-relevant knowledge for a ${role || 'candidate'}.
+Order from approachable to challenging.${kitContext}
+
+Return ONLY a valid JSON array, no markdown, no extra text. Each element must be an object:
+[{"question": "...", "category": "Behavioral"}, {"question": "...", "category": "Company"}]
+The "category" value must be exactly one of: Behavioral, Company, Technical.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'HireVue question generation failed');
+  }
+
+  const data = await response.json();
+  const raw = data.content[0].text.trim();
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const text = match ? match[1].trim() : raw;
+  const questions = JSON.parse(text);
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    throw new Error('Invalid HireVue questions format returned');
+  }
+  return questions;
+}
+
+// Produces an AI debrief for a completed HireVue simulation.
+// `items` = [{ question, category, transcript }] in answered order.
+// Returns an overall read plus per-question scoring and feedback.
+export async function generateHireVueDebrief(company, role, items) {
+  const roleContext = role ? `a ${role} position at ${company}` : `a role at ${company}`;
+  const transcriptBlock = items
+    .map(
+      (it, i) =>
+        `[Q${i + 1} · ${it.category}] ${it.question}\nANSWER: ${it.transcript || '(no answer recorded)'}`
+    )
+    .join('\n\n');
+
+  const n = items.length;
+  const prompt = `You are CHRM, an elite AI interview coach. You reviewed a candidate's recorded HireVue-style one-way interview for ${roleContext}. Behavioral answers should be judged against the STAR method (Situation, Task, Action, Result). Company answers should show genuine motivation and firm-specific knowledge. Technical answers should be accurate and well-structured. Be direct, honest, and concise.
+
+THE INTERVIEW (${n} questions):
+${transcriptBlock}
+
+Return ONLY valid JSON — no markdown, no extra text — with this exact structure:
+{
+  "overall_score": <number 1-10>,
+  "summary": "<2-3 sentence overall read of the candidate's performance>",
+  "strongest_index": <0-based index of their best answer>,
+  "weakest_index": <0-based index of their weakest answer>,
+  "per_question": [
+    {"score": <1-10>, "strong": "<1 sentence on what worked>", "improve": "<1 sentence on the single highest-impact fix>"}
+  ],
+  "work_on": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
+}
+
+"per_question" must have exactly ${n} elements, in the same order as the questions above. Score fairly — 10 is exceptional, 5 is average, below 4 needs significant work.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'HireVue debrief generation failed');
+  }
+
+  const data = await response.json();
+  const raw = data.content[0].text.trim();
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const text = match ? match[1].trim() : raw;
+  return JSON.parse(text);
 }

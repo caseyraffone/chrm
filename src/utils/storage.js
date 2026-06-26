@@ -196,6 +196,29 @@ export async function getMockInterviews() {
   }
 }
 
+// ─── HireVue Simulation storage ───────────────────────────────────────────────
+
+const HIREVUE_SESSIONS_KEY = '@chrm_hirevue_sessions';
+
+export async function saveHireVueSession(session) {
+  try {
+    const existing = await getHireVueSessions();
+    const updated = [session, ...existing];
+    await AsyncStorage.setItem(HIREVUE_SESSIONS_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Error saving HireVue session:', error);
+  }
+}
+
+export async function getHireVueSessions() {
+  try {
+    const data = await AsyncStorage.getItem(HIREVUE_SESSIONS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
 // ─── Prep Kit storage ─────────────────────────────────────────────────────────
 
 const PREP_KIT_INDEX_KEY = '@chrm_prepkit_index';

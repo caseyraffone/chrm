@@ -31,6 +31,9 @@ import MockInterviewSetupScreen from './src/screens/MockInterviewSetupScreen';
 import MockInterviewScreen from './src/screens/MockInterviewScreen';
 import MockInterviewDebriefScreen from './src/screens/MockInterviewDebriefScreen';
 import MockInterviewTranscriptScreen from './src/screens/MockInterviewTranscriptScreen';
+import HireVueSetupScreen from './src/screens/HireVueSetupScreen';
+import HireVueSimulationScreen from './src/screens/HireVueSimulationScreen';
+import HireVueDebriefScreen from './src/screens/HireVueDebriefScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
 import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import { colors } from './src/constants/theme';
@@ -113,6 +116,17 @@ export default function App() {
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen name="MockInterviewTranscript" component={MockInterviewTranscriptScreen} />
+        <Stack.Screen name="HireVueSetup" component={HireVueSetupScreen} />
+        <Stack.Screen
+          name="HireVueSimulation"
+          component={HireVueSimulationScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="HireVueDebrief"
+          component={HireVueDebriefScreen}
+          options={{ gestureEnabled: false }}
+        />
         <Stack.Screen name="Paywall" component={PaywallScreen} options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
         <Stack.Screen name="DevSettings" component={DevSettingsScreen} />
       </Stack.Navigator>

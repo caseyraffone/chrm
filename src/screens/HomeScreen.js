@@ -19,6 +19,7 @@ import {
   getDailyDrillCount,
   FREE_DAILY_LIMIT,
 } from '../utils/storage';
+import { BEHAVIORAL_QUESTIONS } from '../utils/questions';
 
 const hasOpenAI = !!OPENAI_API_KEY;
 const hasAnthropic = !!ANTHROPIC_API_KEY;
@@ -28,6 +29,11 @@ const DRILL_CATEGORIES = [
     name: 'Interview Prep',
     subtitle: 'Technical & behavioral — tailored to your role',
     route: 'RoleSelection',
+  },
+  {
+    name: 'Behavioral',
+    subtitle: 'STAR-method answers that work for any role',
+    route: 'Behavioral',
   },
   {
     name: 'Persuade & Present',
@@ -79,17 +85,32 @@ export default function HomeScreen({ navigation }) {
     }, [])
   );
 
+  async function isDailyLimitReached() {
+    const status = await getSubscriptionStatus();
+    if (status === 'free') {
+      const count = await getDailyDrillCount();
+      return count >= FREE_DAILY_LIMIT;
+    }
+    return false;
+  }
+
   async function handleCategoryPress(cat) {
     if (cat.route === 'QuickFire') {
-      const status = await getSubscriptionStatus();
-      if (status === 'free') {
-        const count = await getDailyDrillCount();
-        if (count >= FREE_DAILY_LIMIT) {
-          navigation.navigate('Paywall', { message: "You've hit today's free limit." });
-          return;
-        }
+      if (await isDailyLimitReached()) {
+        navigation.navigate('Paywall', { message: "You've hit today's free limit." });
+        return;
       }
       navigation.navigate('QuickFire');
+    } else if (cat.route === 'Behavioral') {
+      if (await isDailyLimitReached()) {
+        navigation.navigate('Paywall', { message: "You've hit today's free limit." });
+        return;
+      }
+      navigation.navigate('Practice', {
+        category: 'Behavioral',
+        role: null,
+        questions: BEHAVIORAL_QUESTIONS,
+      });
     } else {
       navigation.navigate('RoleSelection', { category: cat.name });
     }
@@ -102,6 +123,15 @@ export default function HomeScreen({ navigation }) {
       return;
     }
     navigation.navigate('PrepKitInput');
+  }
+
+  async function handleHireVuePress() {
+    const status = await getSubscriptionStatus();
+    if (status === 'free') {
+      navigation.navigate('Paywall', { message: 'HireVue Simulation is a Pro feature.' });
+      return;
+    }
+    navigation.navigate('HireVueSetup');
   }
 
   return (
@@ -146,6 +176,27 @@ export default function HomeScreen({ navigation }) {
             </View>
           </Pressable>
         ))}
+
+        {/* HireVue Simulation Card */}
+        <Pressable
+          style={({ pressed }) => [styles.hireVueCard, pressed && styles.prepKitCardPressed]}
+          onPress={handleHireVuePress}
+        >
+          <View style={styles.cardRow}>
+            <View style={{ flex: 1 }}>
+              <View style={styles.hireVueTitleRow}>
+                <Text style={styles.hireVueTitle}>HireVue Simulation</Text>
+                <View style={styles.proBadge}>
+                  <Text style={styles.proBadgeText}>PRO</Text>
+                </View>
+              </View>
+              <Text style={styles.hireVueSubtitle}>
+                One-way recorded interview, timed — then full AI feedback
+              </Text>
+            </View>
+            <Text style={styles.hireVueArrow}>›</Text>
+          </View>
+        </Pressable>
 
         {/* Prep Kit Card */}
         <Pressable
@@ -267,6 +318,46 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#ddd',
     marginLeft: 8,
+  },
+  hireVueCard: {
+    marginTop: 4,
+    borderRadius: radius.md,
+    backgroundColor: colors.accent,
+    padding: spacing.lg,
+  },
+  hireVueTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: 2,
+  },
+  hireVueTitle: {
+    fontFamily: fonts.display,
+    fontSize: 15,
+    color: '#F2F1EE',
+  },
+  hireVueSubtitle: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: 'rgba(242, 241, 238, 0.7)',
+    lineHeight: 16,
+  },
+  hireVueArrow: {
+    fontSize: 20,
+    color: 'rgba(242, 241, 238, 0.6)',
+    marginLeft: 8,
+  },
+  proBadge: {
+    backgroundColor: 'rgba(242, 241, 238, 0.18)',
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  proBadgeText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 9,
+    color: '#F2F1EE',
+    letterSpacing: 1,
   },
   prepKitCard: {
     marginTop: 4,

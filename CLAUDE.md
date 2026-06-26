@@ -75,6 +75,9 @@ chrm/
 │   │   ├── MockInterviewScreen.js      # Live multi-turn AI interview (gesture-locked)
 │   │   ├── MockInterviewDebriefScreen.js # Post-interview scorecard (gesture-locked)
 │   │   ├── MockInterviewTranscriptScreen.js # Full interview transcript view
+│   │   ├── HireVueSetupScreen.js       # Config for HireVue sim (company, role, question mix, count)
+│   │   ├── HireVueSimulationScreen.js  # One-way recorded interview: prep timer → record → 1 retake (gesture-locked)
+│   │   ├── HireVueDebriefScreen.js     # Post-sim AI scorecard: per-question scores + aggregate (gesture-locked)
 │   │   ├── PaywallScreen.js            # Subscription gate (slide from bottom, gesture-locked)
 │   │   └── DevSettingsScreen.js        # Internal dev/debug tools
 │   ├── utils/
@@ -97,13 +100,15 @@ Home → QuickFire → Feedback
 Home → PrepKitInput → PrepKit
 Home → PrepKitHub → PrepKit
 Home → MockInterviewSetup → MockInterview → MockInterviewDebrief → MockInterviewTranscript
+Home → HireVueSetup → HireVueSimulation → HireVueDebrief   (premium)
+Home → Behavioral drill → Practice → Feedback   (free; uses static STAR bank)
 Any screen → Paywall (slide from bottom, gesture-locked)
 Home → History
 Home → DevSettings
 ```
 
 - `initialRouteName` is determined at runtime: `Onboarding` if first launch, `Home` if returning user (checked via `getOnboardingCompleted()` from AsyncStorage).
-- `Feedback`, `MockInterview`, `MockInterviewDebrief`, and `Paywall` have `gestureEnabled: false` to prevent accidental back swipes mid-session.
+- `Feedback`, `MockInterview`, `MockInterviewDebrief`, `HireVueSimulation`, `HireVueDebrief`, and `Paywall` have `gestureEnabled: false` to prevent accidental back swipes mid-session.
 
 ---
 
@@ -114,11 +119,13 @@ All calls use `fetch` directly (no SDK wrappers).
 | Function | Purpose | Model / Endpoint |
 |---|---|---|
 | `transcribeAudio(uri)` | Sends m4a to Whisper, returns transcript string | `whisper-1` via OpenAI |
-| `generateQuestions(role, category)` | Returns 10 questions as JSON array | `claude-sonnet-4-6` |
+| `generateQuestions(role, category)` | Returns 10 questions as JSON array. Categories: Interview Prep, Behavioral (STAR), Persuade & Present, Quick Fire | `claude-sonnet-4-6` |
 | `generatePrepKit(company, role)` | Returns structured JSON prep kit (company overview, likely questions, 5-day training plan) | `claude-sonnet-4-6`, up to 8192 tokens with retry |
 | `getMockInterviewTurn(conversation, prepKit, company, role, exchangeCount)` | Returns next interviewer line + internal note + `is_closing` flag | `claude-sonnet-4-6` |
 | `generateMockInterviewDebrief(conversation, company, role)` | Returns overall score, per-exchange scores, best/worst moment analysis | `claude-sonnet-4-6` |
-| `getFeedback(transcript, question, category, role)` | Returns `{ score, strong[], improve[], stronger_version }` | `claude-sonnet-4-6` |
+| `getFeedback(transcript, question, category, role)` | Returns `{ score, strong[], improve[], stronger_version }`. For `category === 'Behavioral'`, scores against the STAR method | `claude-sonnet-4-6` |
+| `generateHireVueQuestions(company, role, mix, count, prepKit)` | Returns `count` HireVue-style questions as `[{ question, category }]` (category ∈ Behavioral/Company/Technical). Uses the saved prep kit for firm-specific questions when present | `claude-sonnet-4-6` |
+| `generateHireVueDebrief(company, role, items)` | Returns overall score, summary, per-question `{ score, strong, improve }`, strongest/weakest index, and `work_on[]` | `claude-sonnet-4-6` |
 
 All Claude calls return JSON. Responses are parsed with a markdown code-fence stripper before `JSON.parse()`.
 
@@ -166,7 +173,7 @@ RevenueCat handles all subscription logic. `src/utils/purchases.js` exports:
 - `syncSubscriptionStatus()` — writes entitlement status to AsyncStorage on launch
 - `addSubscriptionListener()` — keeps AsyncStorage in sync during the session; returns a cleanup function
 
-Gating: screens check AsyncStorage for subscription status and navigate to `Paywall` if not subscribed.
+Gating: screens check AsyncStorage for subscription status and navigate to `Paywall` if not subscribed. **Pro features:** Company Prep Kit, Mock Interview, and HireVue Simulation. **Free** (subject to the 3/day limit): Interview Prep, Behavioral, Persuade & Present, Quick Fire.
 
 Pricing: $7.99 / month or $59.99 / year (36% savings).
 
@@ -190,6 +197,24 @@ Pricing: $7.99 / month or $59.99 / year (36% savings).
   duration: 45,              // seconds
   date: "2026-02-26T...",    // ISO string
   company: "Goldman Sachs"   // or null
+}
+```
+
+**HireVue Session (saved via `saveHireVueSession`):**
+```js
+{
+  id: "1700000000000",
+  company: "JPMorgan",
+  role: "Investment Banking Analyst",  // or null
+  date: "2026-06-26T...",
+  items: [
+    {
+      question: "Why JPMorgan?",
+      category: "Company",        // Behavioral | Company | Technical
+      transcript: "...",          // Whisper transcript of the recorded answer
+      duration: 62                // seconds spoken
+    }
+  ]
 }
 ```
 

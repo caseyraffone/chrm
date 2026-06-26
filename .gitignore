@@ -34,8 +34,12 @@ yarn-error.*
 .env
 .env*.local
 
-# Claude Code local settings
-.claude/
+# Claude Code — ignore local settings, but track the shared SessionStart hook
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/session-start.sh
 
 # typescript
 *.tsbuildinfo

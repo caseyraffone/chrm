@@ -1,0 +1,16 @@
+{
+  "name": "chrm-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Host-agnostic backend that proxies OpenAI/Anthropic for the CHRM app, keeping API keys server-side.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --env-file=.env --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14"
+  }
+}

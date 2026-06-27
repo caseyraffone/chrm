@@ -226,3 +226,100 @@ Return ONLY valid JSON — no markdown, no extra text — with this exact struct
 
 "per_question" must have exactly ${n} elements, in the same order as the questions above. Score fairly — 10 is exceptional, 5 is average, below 4 needs significant work.`;
 }
+
+// Calibrated grading scale shared by the bank/resume graders so a "7" means the
+// same thing across every mode (matches the client's direct-path rubric).
+const SCORING_RUBRIC = `Use this calibrated 1-10 scale consistently:
+- 9-10: Exceptional — accurate, complete, well-structured, confidently delivered.
+- 7-8: Strong — mostly complete and correct, minor gaps.
+- 5-6: Average — gets the gist but vague, partial, or loosely structured.
+- 3-4: Weak — meaningful errors, missing core content, or rambling.
+- 1-2: Poor — largely incorrect, off-topic, or not substantive.
+Grade the answer AS DELIVERED, not its potential. Be fair but do not inflate.`;
+
+// Grades a spoken answer against a canonical reference answer + key points
+// (Interview Prep Technical, Fit, Markets, and PE banks).
+export function buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role) {
+  const target = role ? ` The candidate is recruiting for a ${role} role.` : '';
+  const points = (keyPoints || []).map((p) => `- ${p}`).join('\n');
+  return `You are CHRM, an elite technical interview coach for finance recruiting.${target} Grade the candidate's SPOKEN answer against the canonical answer. Reward accuracy and hitting the key points; penalize errors, vagueness, and missing core concepts. No emojis.
+
+${SCORING_RUBRIC}
+
+QUESTION: "${question}"
+
+CANONICAL REFERENCE ANSWER:
+${referenceAnswer}
+
+KEY POINTS AN INTERVIEWER LISTENS FOR:
+${points}
+
+CANDIDATE'S SPOKEN ANSWER:
+"${transcript}"
+
+Return ONLY valid JSON:
+{
+  "score": <1-10>,
+  "strong": ["<what was correct / hit, 1-2 sentences each>"],
+  "improve": ["<what was missed or wrong, 1-2 sentences each>"],
+  "stronger_version": "<a tight, correct model answer to say out loud>"
+}`;
+}
+
+// Grades a spoken "walk me through your resume" narrative against the resume.
+export function buildResumeFeedbackPrompt(transcript, resumeText, role) {
+  const target = role ? ` The candidate is recruiting for a ${role} role.` : '';
+  return `You are CHRM, an elite communication coach for finance recruiting. The candidate is practicing "Walk me through your resume" — a single continuous 60-90 second spoken narrative, NOT a Q&A.${target}
+
+${SCORING_RUBRIC}
+
+Grade against their resume: a clear story arc, smooth transitions, a consistent "why this path / why finance" thread, conciseness, specificity and impact over duties, and a strong landing toward the target role. Reward connecting the dots; penalize listing bullets, rambling, or starting too far back. No emojis.
+
+RESUME:
+"""
+${resumeText || '(No resume provided.)'}
+"""
+
+SPOKEN WALKTHROUGH:
+"${transcript}"
+
+Return ONLY valid JSON:
+{
+  "score": <1-10>,
+  "strong": ["<observation>", "<observation>"],
+  "improve": ["<observation>", "<observation>"],
+  "stronger_version": "<a model 60-90 second walkthrough grounded in THIS resume, natural spoken aloud>"
+}`;
+}
+
+// Premium resume rewrite for finance recruiting.
+export function buildResumeImprovePrompt(resumeText, role) {
+  const target = role ? `a ${role} role` : 'finance recruiting';
+  return `You are an elite resume coach for finance recruiting (IB/PE/consulting). Improve this resume for ${target}. Rewrite weak bullets to lead with a strong action verb and quantified impact, tighten language, and surface gaps a recruiter would notice.
+
+RESUME:
+"""
+${resumeText}
+"""
+
+Return ONLY valid JSON:
+{
+  "overall": ["<2-4 high-level observations about positioning>"],
+  "improved_bullets": [{"original": "<weak bullet>", "improved": "<stronger rewrite>", "why": "<1 sentence>"}],
+  "gaps": ["<2-4 specific things missing for ${target}>"]
+}
+Include 4-7 of the highest-impact rewrites. Keep every field concise.`;
+}
+
+// Messages payload (with a PDF document block) for extracting resume text.
+export function buildResumeExtractMessages(base64Pdf) {
+  return [
+    {
+      role: 'user',
+      content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Pdf } },
+        { type: 'text', text: 'Extract the full text of this resume as clean plain text. Preserve structure (sections, titles, bullets), but add no commentary or markdown. Return only the resume text.' },
+      ],
+    },
+  ];
+}

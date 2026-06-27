@@ -21,6 +21,10 @@ import {
   buildMockDebriefPrompt,
   buildHireVueQuestionsPrompt,
   buildHireVueDebriefPrompt,
+  buildTechnicalFeedbackPrompt,
+  buildResumeFeedbackPrompt,
+  buildResumeImprovePrompt,
+  buildResumeExtractMessages,
 } from './prompts.js';
 import { callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
 
@@ -87,6 +91,56 @@ app.post(
       maxTokens: 800,
     });
     return c.json(feedback);
+  })
+);
+
+// ─── Technical / bank grading ─────────────────────────────────────────────────
+app.post(
+  '/api/technical-feedback',
+  handle(async (c) => {
+    const { transcript, question, referenceAnswer, keyPoints, role } = await c.req.json();
+    const feedback = await callClaudeJson({
+      prompt: buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role),
+      maxTokens: 1024,
+    });
+    return c.json(feedback);
+  })
+);
+
+// ─── Resume walkthrough feedback ──────────────────────────────────────────────
+app.post(
+  '/api/resume-feedback',
+  handle(async (c) => {
+    const { transcript, resumeText, role } = await c.req.json();
+    const feedback = await callClaudeJson({
+      prompt: buildResumeFeedbackPrompt(transcript, resumeText, role),
+      maxTokens: 1024,
+    });
+    return c.json(feedback);
+  })
+);
+
+// ─── Resume improver (premium) ────────────────────────────────────────────────
+app.post(
+  '/api/resume-improve',
+  handle(async (c) => {
+    const { resumeText, role } = await c.req.json();
+    const result = await callClaudeJson({
+      prompt: buildResumeImprovePrompt(resumeText, role),
+      maxTokens: 2048,
+    });
+    return c.json(result);
+  })
+);
+
+// ─── Resume PDF text extraction ───────────────────────────────────────────────
+app.post(
+  '/api/resume-extract',
+  handle(async (c) => {
+    const { base64Pdf } = await c.req.json();
+    if (!base64Pdf) throw new Error('No PDF provided');
+    const data = await callClaudeRaw({ messages: buildResumeExtractMessages(base64Pdf), maxTokens: 2048 });
+    return c.json({ text: (data.content?.[0]?.text || '').trim() });
   })
 );
 

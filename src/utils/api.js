@@ -28,6 +28,11 @@ async function postJson(path, body) {
 // ─── Shared grading infrastructure (used by the direct path) ────────────────────
 
 const CLAUDE_MODEL = 'claude-sonnet-4-6';
+// Faster, cheaper model for the latency-sensitive single-answer grading path
+// (the "Analyzing your answer..." wait after every drill). Grading against a
+// fixed rubric / reference answer is well within Haiku's range; the heavier
+// generative work (questions, prep kit, mock interview, debriefs) stays on Sonnet.
+const FEEDBACK_MODEL = 'claude-haiku-4-5';
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 
 const SCORING_RUBRIC = `Use this calibrated 1-10 scale and apply it consistently:
@@ -88,8 +93,10 @@ function parseJsonLoose(raw) {
   return JSON.parse(text);
 }
 
-async function callClaude({ system, messages, maxTokens = 1024 }) {
-  const body = { model: CLAUDE_MODEL, max_tokens: maxTokens, messages };
+// Single Claude call with one automatic retry on transient (429/5xx/network)
+// failures. `model` lets callers pick a faster model for the grading path.
+async function callClaude({ system, messages, maxTokens = 1024, model = CLAUDE_MODEL }) {
+  const body = { model, max_tokens: maxTokens, messages };
   if (system) body.system = system;
   let lastError;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -382,7 +389,7 @@ Answer transcript: "${transcript}"
   "improve": ["<observation>", "<observation>"],
   "stronger_version": "<3-4 sentence spoken-sounding model answer>"
 }`;
-  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 900 });
+  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 900, model: FEEDBACK_MODEL });
 }
 
 // ─── Technical grading (Interview Prep / Fit / Markets / PE banks) ───────────────
@@ -429,7 +436,7 @@ Return ONLY valid JSON:
   "improve": ["<what was missed or wrong, 1-2 sentences each>"],
   "stronger_version": "<a tight, correct model answer to say out loud>"
 }`;
-  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 1024 });
+  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 1024, model: FEEDBACK_MODEL });
 }
 
 // ─── Resume Walkthrough + Improver ──────────────────────────────────────────────
@@ -471,7 +478,7 @@ Return ONLY valid JSON:
   "improve": ["<observation>", "<observation>"],
   "stronger_version": "<a model 60-90 second walkthrough grounded in THIS resume, natural spoken aloud>"
 }`;
-  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 1024 });
+  return callClaudeJson({ messages: [{ role: 'user', content: prompt }], maxTokens: 1024, model: FEEDBACK_MODEL });
 }
 
 export async function extractResumeTextFromPdf(base64Pdf) {

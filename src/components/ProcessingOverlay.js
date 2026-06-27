@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors, fonts } from '../constants/theme';
 
+// Light/editorial loading overlay — matches the app's warm off-white theme.
+
 export default function ProcessingOverlay({ visible, message = 'Analyzing your answer...' }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -89,7 +91,7 @@ export default function ProcessingOverlay({ visible, message = 'Analyzing your a
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 100,
@@ -103,20 +105,20 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.accentGlow,
   },
   logo: {
-    fontFamily: 'BebasNeue_400Regular',
+    fontFamily: fonts.header,
     fontSize: 72,
-    color: '#ffffff',
+    color: colors.accent,
     letterSpacing: 4,
     lineHeight: 72,
     zIndex: 1,
   },
   message: {
-    fontFamily: 'DMSans_400Regular',
+    fontFamily: fonts.body,
     fontSize: 14,
-    color: '#888888',
+    color: colors.textSecondary,
     marginTop: 24,
     letterSpacing: 0.5,
     zIndex: 1,

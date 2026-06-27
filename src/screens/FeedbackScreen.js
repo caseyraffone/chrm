@@ -25,6 +25,7 @@ export default function FeedbackScreen({ route, navigation }) {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showDeepDiveCard, setShowDeepDiveCard] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   useEffect(() => {
     loadFeedback();
@@ -253,10 +254,17 @@ export default function FeedbackScreen({ route, navigation }) {
             </View>
           </View>
 
-          {/* Transcript */}
+          {/* Transcript — collapsed by default; the feedback above is the point */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>YOUR ANSWER</Text>
-            <Text style={styles.transcriptText}>{transcript}</Text>
+            <TouchableOpacity
+              style={styles.transcriptToggle}
+              onPress={() => setShowTranscript((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.sectionLabel}>YOUR ANSWER</Text>
+              <Text style={styles.transcriptChevron}>{showTranscript ? '−' : '+'}</Text>
+            </TouchableOpacity>
+            {showTranscript && <Text style={styles.transcriptText}>{transcript}</Text>}
           </View>
 
           {/* Actions */}
@@ -389,6 +397,7 @@ const styles = StyleSheet.create({
     fontSize: 100,
     lineHeight: 104,
     letterSpacing: -4,
+    includeFontPadding: false,
   },
   scoreSlash: {
     fontFamily: fonts.body,
@@ -500,6 +509,17 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 22,
     fontStyle: 'italic',
+  },
+  transcriptToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  transcriptChevron: {
+    fontFamily: fonts.body,
+    fontSize: 18,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
   },
   transcriptText: {
     fontFamily: fonts.body,

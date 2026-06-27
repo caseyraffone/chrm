@@ -46,6 +46,13 @@ export default function FeedbackScreen({ route, navigation }) {
       }
       setFeedback(result);
 
+      // A non-answer (silence/dropped mic) shouldn't pollute history, progress,
+      // or analytics with a fake score. Show the friendly prompt and stop here.
+      if (result.insufficient) {
+        setLoading(false);
+        return;
+      }
+
       if (hubReturn) {
         await savePrepKitQuestionAttempt(hubReturn.company, hubReturn.role, question, result.score);
       }
@@ -160,13 +167,20 @@ export default function FeedbackScreen({ route, navigation }) {
           </View>
 
           {/* Score */}
-          <View style={styles.scoreBlock}>
-            <Text style={[styles.scoreNumber, { color: scoreColor }]}>{feedback.score}</Text>
-            <Text style={styles.scoreSlash}>/10</Text>
-            <Text style={[styles.scoreLabel, { color: scoreColor }]}>
-              {getScoreLabel(feedback.score)}
-            </Text>
-          </View>
+          {feedback.insufficient ? (
+            <View style={styles.scoreBlock}>
+              <Text style={[styles.scoreNumber, { color: colors.textMuted }]}>—</Text>
+              <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>NO ANSWER DETECTED</Text>
+            </View>
+          ) : (
+            <View style={styles.scoreBlock}>
+              <Text style={[styles.scoreNumber, { color: scoreColor }]}>{feedback.score}</Text>
+              <Text style={styles.scoreSlash}>/10</Text>
+              <Text style={[styles.scoreLabel, { color: scoreColor }]}>
+                {getScoreLabel(feedback.score)}
+              </Text>
+            </View>
+          )}
 
           <View style={styles.divider} />
 

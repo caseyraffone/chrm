@@ -35,6 +35,73 @@ function getScoreColor(score) {
   return colors.error;
 }
 
+// Small category glyph for faster scanning of the drill list.
+const CATEGORY_ICONS = {
+  Technical: '📊',
+  Behavioral: '💬',
+  'Interview Prep': '🎯',
+  'Quick Fire': '⚡',
+  'Persuade & Present': '🎤',
+  'Resume Walkthrough': '📄',
+  'Fit & Motivation': '🧭',
+  Markets: '📈',
+  LBO: '💼',
+  'Deal Sense': '💼',
+};
+function categoryIcon(category) {
+  return CATEGORY_ICONS[category] || '🎤';
+}
+
+function dayKey(d) {
+  return (d || '').slice(0, 10);
+}
+
+// Aggregate stats for the History summary header.
+function computeStats(drills) {
+  const scores = drills.map((d) => d.score).filter((s) => typeof s === 'number');
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+
+  const days = [...new Set(drills.map((d) => dayKey(d.date)).filter(Boolean))].sort();
+  let best = 0;
+  let run = 0;
+  let prev = null;
+  for (const k of days) {
+    if (prev) {
+      const diff = (new Date(k) - new Date(prev)) / 86400000;
+      run = diff === 1 ? run + 1 : 1;
+    } else {
+      run = 1;
+    }
+    best = Math.max(best, run);
+    prev = k;
+  }
+
+  const weekAgo = Date.now() - 7 * 86400000;
+  const thisWeek = drills.filter((d) => new Date(d.date).getTime() >= weekAgo).length;
+
+  return { avg, bestStreak: best, thisWeek };
+}
+
+function StatsHeader({ drills }) {
+  const { avg, bestStreak, thisWeek } = computeStats(drills);
+  return (
+    <View style={styles.statsRow}>
+      <View style={styles.statTile}>
+        <Text style={[styles.statValue, { color: getScoreColor(avg) }]}>{avg.toFixed(1)}</Text>
+        <Text style={styles.statLabel}>AVG SCORE</Text>
+      </View>
+      <View style={styles.statTile}>
+        <Text style={styles.statValue}>{bestStreak}</Text>
+        <Text style={styles.statLabel}>BEST STREAK</Text>
+      </View>
+      <View style={styles.statTile}>
+        <Text style={styles.statValue}>{thisWeek}</Text>
+        <Text style={styles.statLabel}>THIS WEEK</Text>
+      </View>
+    </View>
+  );
+}
+
 function DrillItem({ drill }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -48,6 +115,7 @@ function DrillItem({ drill }) {
       <View style={styles.drillSummary}>
         <View style={styles.drillMeta}>
           <View style={styles.drillCategoryRow}>
+            <Text style={styles.drillIcon}>{categoryIcon(drill.category)}</Text>
             <Text style={styles.drillCategory}>{drill.category}</Text>
             {drill.company ? (
               <View style={styles.companyTag}>
@@ -156,6 +224,7 @@ export default function HistoryScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          <StatsHeader drills={drills} />
           <ActivityCalendar drills={drills} />
           {drills.map((drill) => (
             <DrillItem key={drill.id} drill={drill} />
@@ -181,6 +250,11 @@ const styles = StyleSheet.create({
   startButtonText: { fontFamily: fonts.display, fontSize: 16, color: '#F2F1EE', letterSpacing: 2 },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: spacing.lg, paddingBottom: 60, gap: spacing.sm },
+  statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  statTile: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, paddingVertical: spacing.md, alignItems: 'center' },
+  statValue: { fontFamily: fonts.display, fontSize: 24, color: colors.text, lineHeight: 28 },
+  statLabel: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 1.5, marginTop: 4 },
+  drillIcon: { fontSize: 14 },
   drillItem: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   drillSummary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   drillMeta: { flex: 1 },

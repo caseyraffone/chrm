@@ -11,7 +11,7 @@ export const FINANCE_INDUSTRIES = [
     blurb: 'Technicals, behaviorals, fit & markets',
     status: 'active',
   },
-  { key: 'PE', name: 'Private Equity', blurb: 'LBOs, deal sense, fit', status: 'soon' },
+  { key: 'PE', name: 'Private Equity', blurb: 'LBOs, deal sense, fit', status: 'active' },
   { key: 'ST', name: 'Sales & Trading', blurb: 'Markets, products, brainteasers', status: 'soon' },
   { key: 'ER', name: 'Equity Research', blurb: 'Valuation, theses, modeling', status: 'soon' },
   { key: 'Consulting', name: 'Consulting', blurb: 'Case interviews, frameworks', status: 'soon' },
@@ -24,5 +24,11 @@ export const INDUSTRY_TRACKS = {
     { key: 'Behavioral', name: 'Behavioral', blurb: 'STAR stories & competencies', status: 'active' },
     { key: 'Fit', name: 'Fit & Motivation', blurb: 'Why banking, why this group', status: 'active' },
     { key: 'Markets', name: 'Markets', blurb: 'Markets awareness & a stock pitch', status: 'active' },
+  ],
+  PE: [
+    { key: 'LBO', name: 'LBO & Modeling', blurb: 'LBO mechanics, returns math, paper LBO', status: 'active' },
+    { key: 'Deal', name: 'Deal Sense', blurb: 'Investment judgment & value creation', status: 'active' },
+    { key: 'Technical', name: 'Technical', blurb: 'Valuation, accounting & credit', status: 'active' },
+    { key: 'Fit', name: 'Fit & Motivation', blurb: 'Why PE, why this firm', status: 'active' },
   ],
 };

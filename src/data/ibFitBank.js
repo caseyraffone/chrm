@@ -198,6 +198,71 @@ export const IB_FIT_BANK = [
       'Show motivation that justifies the hours, plus a sustainable approach',
     ],
   },
+  {
+    id: 'ib_fit_why_04',
+    topic: 'Why Banking',
+    difficulty: 3,
+    question: 'Why pursue banking now, rather than staying on your current path?',
+    reference_answer:
+      'A strong answer frames the switch as intentional progression, not escape. It connects what the candidate has done so far to skills and interests that banking builds on, articulates what specifically drew them to make the move now — a class, a project, an experience that crystallized it — and shows they understand what they’re giving up and why banking is worth it. It should feel like a logical next step, not a random pivot.',
+    key_points: [
+      'Frame as intentional progression, not escape',
+      'A specific catalyst for the move now',
+      'Show it’s a logical next step that builds on your path',
+    ],
+  },
+  {
+    id: 'ib_fit_firm_04',
+    topic: 'Why This Firm',
+    difficulty: 2,
+    question: 'What do you know about our recent deals or news?',
+    reference_answer:
+      'A strong answer names one or two specific, reasonably recent transactions or developments the firm was involved in, briefly explains them, and connects them to why they’re interesting or what they reveal about the firm’s strengths. It signals genuine homework and real interest, far beyond generic praise, and ideally ties back to the group or work the candidate wants to do.',
+    key_points: [
+      'Cite one or two specific recent deals / developments',
+      'Briefly explain and why they’re notable',
+      'Tie back to your interest and the group you want',
+    ],
+  },
+  {
+    id: 'ib_fit_story_05',
+    topic: 'Your Story',
+    difficulty: 2,
+    question: 'What class or experience first got you interested in finance?',
+    reference_answer:
+      'A strong answer pinpoints a specific, genuine moment — a class, an internship, a personal investing experience, a competition — and explains what about it sparked the interest and how that interest grew from there. Specificity and authenticity matter; it should feel like a real origin story that connects naturally to wanting to pursue banking now.',
+    key_points: [
+      'A specific, genuine origin moment',
+      'What about it sparked the interest',
+      'How it grew into pursuing banking',
+    ],
+  },
+  {
+    id: 'ib_fit_goal_05',
+    topic: 'Goals & Curveballs',
+    difficulty: 2,
+    question: 'What questions do you have for me?',
+    reference_answer:
+      'A strong answer treats this as part of the evaluation, not a throwaway. The candidate asks one or two thoughtful, specific questions — about the interviewer’s own experience, the group’s deal flow, how analysts grow, or the culture — that show genuine curiosity and that they’ve done their homework. Avoid questions easily answered by the website, and never ask only about hours or pay.',
+    key_points: [
+      'Thoughtful, specific questions — not generic or website-answerable',
+      'Good angles: interviewer’s experience, deal flow, development, culture',
+      'Shows curiosity; don’t lead with hours/pay',
+    ],
+  },
+  {
+    id: 'ib_fit_goal_06',
+    topic: 'Goals & Curveballs',
+    difficulty: 3,
+    question: 'Tell me something about you that’s not on your resume.',
+    reference_answer:
+      'A strong answer shares something genuine and memorable that adds dimension — an interest, a background detail, a pursuit that shows character, drive, or a unique perspective — while staying professional and ideally revealing a transferable trait like discipline or curiosity. It should make the candidate more relatable and human without being inappropriate or trivial.',
+    key_points: [
+      'Genuine, memorable, and professional',
+      'Reveals a transferable trait (discipline, curiosity, drive)',
+      'Adds dimension / makes you relatable',
+    ],
+  },
 ];
 
 // Distinct topics in display order, for grouping the question list.

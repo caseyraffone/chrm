@@ -1562,6 +1562,475 @@ export const IB_TECHNICAL_BANK = [
       '1 − ¼ = ¾',
     ],
   },
+
+  // ── Accounting (deeper) ────────────────────────────────────────────────────────
+  {
+    id: 'ib_acct_19',
+    topic: 'Accounting',
+    difficulty: 2,
+    question: 'What is the difference between an operating lease and a finance lease?',
+    reference_answer:
+      'A finance (capital) lease transfers substantially all the risks and rewards of ownership, so the asset and a corresponding liability go on the balance sheet and you record depreciation and interest. An operating lease is more like a rental. Under current standards both now sit on the balance sheet as a right-of-use asset and lease liability, but the income statement treatment differs — a finance lease front-loads expense via interest plus depreciation, while an operating lease records a single, generally straight-line lease expense.',
+    key_points: [
+      'Finance lease ≈ ownership: asset + liability, depreciation + interest',
+      'Operating lease ≈ rental; both now on the balance sheet (ROU asset + liability)',
+      'Finance front-loads expense; operating is roughly straight-line',
+    ],
+  },
+  {
+    id: 'ib_acct_20',
+    topic: 'Accounting',
+    difficulty: 2,
+    question: 'What is the treasury stock method and what is it used for?',
+    reference_answer:
+      'The treasury stock method estimates how many new shares are created by in-the-money options and warrants when calculating diluted share count. You assume the options are exercised, bringing in cash at the strike price, and that the company uses that cash to buy back shares at the current market price. The net new shares — options exercised minus shares repurchased — are added to the diluted count.',
+    key_points: [
+      'Estimates dilution from in-the-money options/warrants',
+      'Assume exercise (cash in at strike) then buy back at market price',
+      'Net new shares = exercised − repurchased, added to diluted count',
+    ],
+  },
+  {
+    id: 'ib_acct_21',
+    topic: 'Accounting',
+    difficulty: 3,
+    question: 'What is a deferred tax asset and how does one arise?',
+    reference_answer:
+      'A deferred tax asset is a future tax benefit — it arises when a company pays more in cash taxes now than its book tax expense implies, so it expects to pay less later. Common causes are net operating loss carryforwards, which shelter future taxable income, or timing differences like warranty reserves recognized for books before they’re deductible for tax. It’s an asset because it reduces future tax payments.',
+    key_points: [
+      'Future tax benefit: cash taxes now > book tax expense',
+      'Common causes: NOL carryforwards, timing differences (e.g. reserves)',
+      'Reduces future tax payments, so it’s an asset',
+    ],
+  },
+  {
+    id: 'ib_acct_22',
+    topic: 'Accounting',
+    difficulty: 1,
+    question: 'What are the three main profitability margins?',
+    reference_answer:
+      'Gross margin is gross profit over revenue — what’s left after the direct cost of goods sold. Operating margin is operating income (EBIT) over revenue — after operating expenses but before interest and taxes. Net margin is net income over revenue — the bottom line after everything. Each strips out more costs as you go down the income statement.',
+    key_points: [
+      'Gross margin: gross profit / revenue (after COGS)',
+      'Operating margin: EBIT / revenue (after opex, pre interest/tax)',
+      'Net margin: net income / revenue (bottom line)',
+    ],
+  },
+  {
+    id: 'ib_acct_23',
+    topic: 'Accounting',
+    difficulty: 2,
+    question: 'When can a company recognize revenue?',
+    reference_answer:
+      'Under accrual accounting, revenue is recognized when it’s earned — when the company has delivered the good or performed the service and control has transferred to the customer — not necessarily when cash changes hands. The modern standard frames it as recognizing revenue as performance obligations are satisfied. So cash collected before delivery sits as deferred revenue until it’s earned.',
+    key_points: [
+      'Recognize when earned / control transfers, not when cash moves',
+      'Tied to satisfying performance obligations',
+      'Cash before delivery = deferred revenue until earned',
+    ],
+  },
+
+  // ── Valuation (deeper) ─────────────────────────────────────────────────────────
+  {
+    id: 'ib_val_19',
+    topic: 'Valuation',
+    difficulty: 2,
+    question: 'What is net debt and why does it matter?',
+    reference_answer:
+      'Net debt is total debt minus cash and cash equivalents. It matters because it’s the bridge between enterprise value and equity value — equity value equals enterprise value minus net debt. It reflects the real leverage of the business after accounting for cash that could be used to pay debt down, and a company with more cash than debt is in a net cash position.',
+    key_points: [
+      'Net debt = total debt − cash & equivalents',
+      'Bridges EV and equity value (equity = EV − net debt)',
+      'Negative net debt = net cash position',
+    ],
+  },
+  {
+    id: 'ib_val_20',
+    topic: 'Valuation',
+    difficulty: 3,
+    question: 'How do you get from enterprise value to equity value per share?',
+    reference_answer:
+      'Start with enterprise value, subtract net debt — and also subtract preferred stock and minority interest — to get equity value, the value attributable to common shareholders. Then divide equity value by the fully diluted share count, using the treasury stock method for options, to get equity value per share. It’s essentially the EV bridge run in reverse and then put on a per-share basis.',
+    key_points: [
+      'EV − net debt − preferred − minority interest = equity value',
+      'Divide by fully diluted shares (treasury stock method)',
+      'Yields equity value per share',
+    ],
+  },
+  {
+    id: 'ib_val_21',
+    topic: 'Valuation',
+    difficulty: 2,
+    question: 'What does the 52-week trading range tell you in a valuation?',
+    reference_answer:
+      'For a public company, the 52-week high and low show where the market has actually valued the stock over the past year, giving a reality check and a sense of volatility and sentiment. In a football field it’s often shown alongside the intrinsic and relative methods as a market-based reference range, especially relevant when advising on a deal price relative to where the stock has traded.',
+    key_points: [
+      'Range the market actually paid over the last year',
+      'Reality check on sentiment/volatility',
+      'Used as a market reference in a football field / deal pricing',
+    ],
+  },
+  {
+    id: 'ib_val_22',
+    topic: 'Valuation',
+    difficulty: 3,
+    question: 'Why might a company be worth more to one buyer than another?',
+    reference_answer:
+      'Because value depends on the buyer’s synergies and strategic fit, not just the standalone business. A strategic acquirer that can cut duplicate costs or cross-sell can justify a higher price than a financial buyer relying on leverage and standalone cash flows. Differences in cost of capital, tax position, and how the target fills a strategic gap all mean the same company can be worth different amounts to different buyers.',
+    key_points: [
+      'Synergies and strategic fit differ by buyer',
+      'Strategics can pay up for cost/revenue synergies vs financial buyers',
+      'Cost of capital, tax position, and strategic gaps drive the difference',
+    ],
+  },
+
+  // ── DCF (deeper) ───────────────────────────────────────────────────────────────
+  {
+    id: 'ib_dcf_17',
+    topic: 'DCF',
+    difficulty: 2,
+    question: 'At a high level, how do you forecast the free cash flow line items in a DCF?',
+    reference_answer:
+      'You typically start by projecting revenue off growth assumptions or a driver-based build, then apply margin assumptions to get EBIT. You tax EBIT to get NOPAT, project D&A and capex usually as a percentage of revenue, and forecast the change in net working capital from its historical relationship to revenue. Combining those gives unlevered free cash flow for each forecast year.',
+    key_points: [
+      'Project revenue → apply margins → EBIT',
+      'Tax EBIT to NOPAT; D&A and capex often as % of revenue',
+      'Change in working capital from its revenue relationship',
+    ],
+  },
+  {
+    id: 'ib_dcf_18',
+    topic: 'DCF',
+    difficulty: 3,
+    question: 'Does a share buyback change a DCF valuation?',
+    reference_answer:
+      'It doesn’t change the enterprise value, because a buyback is a financing decision that doesn’t alter the operating cash flows you’re discounting. It does change equity value per share: spending cash reduces the cash on the balance sheet, lowering equity value modestly, but it reduces the share count more, so value per share for remaining holders can rise. The operating DCF and enterprise value are unaffected.',
+    key_points: [
+      'Enterprise value unchanged — operations don’t change',
+      'Cash down lowers equity value, but share count falls more',
+      'Value per remaining share can rise; it’s a financing move',
+    ],
+  },
+  {
+    id: 'ib_dcf_19',
+    topic: 'DCF',
+    difficulty: 2,
+    question: 'Why do you discount the terminal value back to the present?',
+    reference_answer:
+      'Because the terminal value represents all cash flows from the end of the explicit forecast period onward, expressed as a lump sum at that future point in time. To add it to the present-value sum of the explicit cash flows, it has to be in today’s dollars too, so you discount it back over the same number of years as the final forecast period using WACC.',
+    key_points: [
+      'TV is a future-dated lump sum (end of forecast period)',
+      'Must be in today’s dollars to add to the other PVs',
+      'Discount it back at WACC over the forecast horizon',
+    ],
+  },
+  {
+    id: 'ib_dcf_20',
+    topic: 'DCF',
+    difficulty: 3,
+    question: 'Walk me through getting from unlevered free cash flow all the way to equity value per share.',
+    reference_answer:
+      'Discount each year’s unlevered free cash flow and the terminal value back at WACC and sum them to get enterprise value. Then subtract net debt, preferred stock, and minority interest to get equity value. Finally divide equity value by the fully diluted share count to get equity value per share. It’s the DCF building enterprise value, then the EV-to-equity bridge, then a per-share step.',
+    key_points: [
+      'Discount UFCF + TV at WACC, sum → enterprise value',
+      'Subtract net debt, preferred, minority interest → equity value',
+      'Divide by fully diluted shares → equity value per share',
+    ],
+  },
+
+  // ── LBO (deeper) ───────────────────────────────────────────────────────────────
+  {
+    id: 'ib_lbo_16',
+    topic: 'LBO',
+    difficulty: 2,
+    question: 'What is the leverage ratio in an LBO and what is typical?',
+    reference_answer:
+      'The leverage ratio is total debt divided by EBITDA — how many turns of EBITDA the company is borrowing. In a typical buyout it often lands somewhere around four to six times EBITDA, though it moves with credit market conditions, the stability of the company’s cash flows, and the industry. More stable, predictable businesses can support higher leverage.',
+    key_points: [
+      'Leverage ratio = total debt / EBITDA (“turns”)',
+      'Often ~4–6x in a typical LBO',
+      'Varies with credit markets, cash-flow stability, industry',
+    ],
+  },
+  {
+    id: 'ib_lbo_17',
+    topic: 'LBO',
+    difficulty: 3,
+    question: 'What is PIK interest and why would a deal use it?',
+    reference_answer:
+      'PIK, or payment-in-kind, interest is interest that accrues and is added to the loan’s principal instead of being paid in cash. Deals use it to preserve cash in the early years when the company is tight, easing the burden on free cash flow. The trade-off is that the debt balance compounds and grows over time, so it’s more expensive and riskier — you pay later, with interest on interest.',
+    key_points: [
+      'Interest accrues onto principal instead of cash payment',
+      'Preserves cash early in the hold',
+      'Debt compounds — more expensive and riskier',
+    ],
+  },
+  {
+    id: 'ib_lbo_18',
+    topic: 'LBO',
+    difficulty: 2,
+    question: 'What is a debt covenant, and what is the difference between maintenance and incurrence covenants?',
+    reference_answer:
+      'A covenant is a condition in a loan agreement that protects lenders. A maintenance covenant is tested regularly — for example a maximum leverage ratio the borrower must stay under every quarter — and breaching it is a default. An incurrence covenant is only tested when the company takes a specific action, like raising more debt or paying a dividend. Maintenance covenants are stricter; many recent deals are “covenant-lite” with mostly incurrence covenants.',
+    key_points: [
+      'Covenant = lender-protection condition in the loan',
+      'Maintenance: tested regularly (e.g. max leverage); breach = default',
+      'Incurrence: tested only on an action (more debt, dividend); cov-lite trend',
+    ],
+  },
+  {
+    id: 'ib_lbo_19',
+    topic: 'LBO',
+    difficulty: 3,
+    question: 'All else equal, how does using more leverage affect equity returns and risk in an LBO?',
+    reference_answer:
+      'More leverage means a smaller equity check, so for a given dollar of value creation the percentage return on that equity is amplified — IRR and MOIC rise when the deal goes well. But the same leverage magnifies losses if performance disappoints, raises interest and mandatory payments that consume cash, and increases default risk. So leverage boosts expected returns while widening the range of outcomes in both directions.',
+    key_points: [
+      'Less equity in → returns amplified when it works',
+      'Magnifies losses and raises default risk when it doesn’t',
+      'Higher interest/mandatory payments squeeze cash; wider outcome range',
+    ],
+  },
+
+  // ── M&A (deeper) ───────────────────────────────────────────────────────────────
+  {
+    id: 'ib_ma_14',
+    topic: 'M&A',
+    difficulty: 2,
+    question: 'How do synergies affect an accretion/dilution analysis?',
+    reference_answer:
+      'Synergies improve the combined company’s earnings, so they make a deal more accretive or less dilutive. In the analysis you add expected cost or revenue synergies (after tax) to combined net income, which raises pro forma EPS. Because synergies can swing a deal from dilutive to accretive, bankers often show accretion/dilution both with and without synergies to see how much the deal relies on them.',
+    key_points: [
+      'Synergies lift combined earnings → more accretive / less dilutive',
+      'Add after-tax synergies to pro forma net income → higher EPS',
+      'Often shown with and without synergies for sensitivity',
+    ],
+  },
+  {
+    id: 'ib_ma_15',
+    topic: 'M&A',
+    difficulty: 3,
+    question: 'What is an exchange ratio in a stock-for-stock deal?',
+    reference_answer:
+      'The exchange ratio is the number of acquirer shares each target shareholder receives per target share. It can be fixed — a set number of shares regardless of price moves, so the target bears price risk — or floating, where the ratio adjusts to deliver a fixed dollar value, so the acquirer bears the risk. It’s derived from the agreed per-share offer price relative to the acquirer’s share price.',
+    key_points: [
+      'Acquirer shares received per target share',
+      'Fixed ratio (target bears price risk) vs floating (acquirer bears it)',
+      'Derived from offer price ÷ acquirer share price',
+    ],
+  },
+  {
+    id: 'ib_ma_16',
+    topic: 'M&A',
+    difficulty: 2,
+    question: 'What is the difference between a merger, an acquisition, and a tender offer?',
+    reference_answer:
+      'In a merger two companies combine, typically negotiated and approved by both boards and shareholders, often framed as a combination. An acquisition is one company buying another, which can be friendly or hostile. A tender offer is a specific mechanism where the acquirer goes directly to the target’s shareholders to buy their shares at a premium, bypassing the board — often used in hostile situations.',
+    key_points: [
+      'Merger: negotiated combination, both boards/shareholders approve',
+      'Acquisition: one buys another, friendly or hostile',
+      'Tender offer: buy shares directly from holders, can bypass the board',
+    ],
+  },
+  {
+    id: 'ib_ma_17',
+    topic: 'M&A',
+    difficulty: 3,
+    question: 'When would an all-cash acquisition actually be dilutive?',
+    reference_answer:
+      'An all-cash deal is dilutive when the cost of the cash exceeds the earnings yield of the target being acquired. If the acquirer funds it with debt whose after-tax interest rate is higher than the target’s earnings divided by the purchase price, or gives up interest income on its own cash that exceeds those acquired earnings, pro forma EPS falls. In short, if you’re paying a high multiple — a low earnings yield — with relatively expensive cash or debt, it dilutes.',
+    key_points: [
+      'Dilutive when financing cost > target’s earnings yield',
+      'High purchase multiple (low yield) funded by costly debt / forgone interest',
+      'Compare after-tax cost of cash/debt to acquired earnings / price',
+    ],
+  },
+
+  // ── Capital Markets & IPOs ─────────────────────────────────────────────────────
+  {
+    id: 'ib_ecm_01',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 1,
+    question: 'What is an IPO and why do companies go public?',
+    reference_answer:
+      'An IPO, or initial public offering, is the first time a company sells shares to public investors and lists on an exchange. Companies do it to raise capital for growth, to give early investors and employees liquidity to sell their stakes, to gain a public currency for acquisitions, and for the prestige and visibility of being listed. The trade-offs are disclosure requirements, regulatory burden, and public-market scrutiny.',
+    key_points: [
+      'First sale of shares to the public + exchange listing',
+      'Raise capital, provide liquidity, create acquisition currency, prestige',
+      'Trade-offs: disclosure, regulation, public scrutiny',
+    ],
+  },
+  {
+    id: 'ib_ecm_02',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 2,
+    question: 'Walk me through the IPO process at a high level.',
+    reference_answer:
+      'The company hires underwriting banks, then goes through due diligence and drafts the registration statement, the S-1, which is filed with the SEC. After SEC review and amendments, management and the bankers go on a roadshow to market the deal to institutional investors and build a book of demand. Based on that demand the price is set the night before, shares are allocated, and the stock begins trading the next day.',
+    key_points: [
+      'Hire underwriters; due diligence; draft and file the S-1 with the SEC',
+      'SEC review/amendments, then roadshow to build the book',
+      'Price off demand, allocate shares, begin trading',
+    ],
+  },
+  {
+    id: 'ib_ecm_03',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 2,
+    question: 'What is the difference between primary and secondary shares in an offering?',
+    reference_answer:
+      'Primary shares are newly issued by the company, so the proceeds go to the company itself to fund growth or pay down debt, and they dilute existing holders. Secondary shares are existing shares sold by current shareholders like founders or early investors, so the proceeds go to those selling holders, not the company, and there’s no new dilution. Many offerings mix both.',
+    key_points: [
+      'Primary: newly issued; proceeds to the company; dilutive',
+      'Secondary: existing shares sold by holders; proceeds to them; no dilution',
+      'Offerings often combine both',
+    ],
+  },
+  {
+    id: 'ib_ecm_04',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 3,
+    question: 'How is an IPO priced, and what is the bookbuild?',
+    reference_answer:
+      'Bankers set an initial price range using valuation methods and comparable public companies, then during the roadshow they collect indications of interest from institutions — how many shares they’d buy and at what price — which is the bookbuilding process. The final price is set based on that aggregated demand, usually aiming to price slightly below where the bankers think it will trade to leave a modest first-day pop and ensure the deal clears.',
+    key_points: [
+      'Initial range from valuation + comps',
+      'Bookbuild: collect institutional demand on the roadshow',
+      'Final price set off demand, often slightly below fair value for a pop',
+    ],
+  },
+  {
+    id: 'ib_ecm_05',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 2,
+    question: 'What is a follow-on offering and how is it different from an IPO?',
+    reference_answer:
+      'A follow-on is an offering of additional shares by a company that is already public, whereas an IPO is the first time it sells shares. Follow-ons are generally faster and simpler because the company already has public disclosure and a market price to reference. Like IPOs they can be primary, secondary, or a mix, and they’re typically priced at a small discount to the current trading price.',
+    key_points: [
+      'Offering by an already-public company (vs first-time IPO)',
+      'Faster/simpler — existing disclosure and market price',
+      'Priced at a small discount to the current stock price',
+    ],
+  },
+  {
+    id: 'ib_ecm_06',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 2,
+    question: 'What is the difference between ECM and DCM?',
+    reference_answer:
+      'Equity capital markets, ECM, helps companies raise money by issuing equity — IPOs, follow-ons, and convertibles. Debt capital markets, DCM, helps them raise money by issuing debt — bonds and loans. ECM deals are priced off equity valuation and market sentiment, while DCM deals are priced off credit quality, ratings, and interest rates. Both are capital-raising advisory and origination businesses within a bank.',
+    key_points: [
+      'ECM: raising equity (IPOs, follow-ons, convertibles)',
+      'DCM: raising debt (bonds, loans)',
+      'ECM priced on equity/sentiment; DCM on credit/ratings/rates',
+    ],
+  },
+  {
+    id: 'ib_ecm_07',
+    topic: 'Capital Markets & IPOs',
+    difficulty: 3,
+    question: 'What is a greenshoe or over-allotment option?',
+    reference_answer:
+      'A greenshoe is an over-allotment option that lets the underwriters sell up to about 15% more shares than originally planned if demand is strong. It also gives them a stabilization tool: they can oversell the deal and then either exercise the option if the stock rises or buy shares back in the market to support the price if it falls. It helps manage demand and reduce post-IPO volatility.',
+    key_points: [
+      'Option to sell ~15% extra shares on strong demand',
+      'Used to stabilize the price post-IPO',
+      'Underwriters oversell, then exercise or buy back as needed',
+    ],
+  },
+
+  // ── Restructuring ──────────────────────────────────────────────────────────────
+  {
+    id: 'ib_rx_01',
+    topic: 'Restructuring',
+    difficulty: 1,
+    question: 'What is restructuring and what does a restructuring banker do?',
+    reference_answer:
+      'Restructuring advises companies that are financially distressed — over-leveraged or facing a liquidity crisis — on how to fix their balance sheet, whether through negotiating with creditors, raising new financing, selling assets, or going through bankruptcy. A restructuring banker can work for the company (the debtor) or for its creditors, helping to maximize or recover value. It’s often counter-cyclical, busier when the economy is weak.',
+    key_points: [
+      'Advises distressed / over-leveraged companies',
+      'Balance-sheet fixes: creditor negotiation, new financing, asset sales, bankruptcy',
+      'Works debtor-side or creditor-side; counter-cyclical',
+    ],
+  },
+  {
+    id: 'ib_rx_02',
+    topic: 'Restructuring',
+    difficulty: 2,
+    question: 'What is the difference between Chapter 7 and Chapter 11 bankruptcy?',
+    reference_answer:
+      'Chapter 7 is liquidation — the company ceases operating, a trustee sells off its assets, and the proceeds are distributed to creditors by priority. Chapter 11 is reorganization — the company keeps operating, restructures its debts and operations under court protection, and emerges as a going concern with a new capital structure. Restructuring bankers mostly work on Chapter 11, where there’s a business to save and value to preserve.',
+    key_points: [
+      'Chapter 7: liquidation, company wound down, assets sold off',
+      'Chapter 11: reorganization, keeps operating, restructures and emerges',
+      'RX work centers on Chapter 11 (going concern)',
+    ],
+  },
+  {
+    id: 'ib_rx_03',
+    topic: 'Restructuring',
+    difficulty: 3,
+    question: 'What is the absolute priority rule?',
+    reference_answer:
+      'The absolute priority rule governs the order in which claims are paid in a bankruptcy. Secured creditors are paid first up to their collateral, then unsecured creditors like bondholders and trade creditors, then preferred equity, and common equity holders last — often getting little or nothing. Each class must be satisfied in full before the next one recovers, which is why distressed debt investors focus on where in the capital structure they sit.',
+    key_points: [
+      'Sets the payment order / waterfall in bankruptcy',
+      'Secured → unsecured → preferred → common equity',
+      'Each class paid in full before the next; equity often gets little',
+    ],
+  },
+  {
+    id: 'ib_rx_04',
+    topic: 'Restructuring',
+    difficulty: 2,
+    question: 'What are a distressed company’s main options, in court versus out of court?',
+    reference_answer:
+      'Out of court, a company can negotiate directly with creditors to amend terms, extend maturities, or swap debt for equity, which is faster, cheaper, and more private but requires nearly all creditors to agree. In court, through Chapter 11, it gets court protection, can bind holdout creditors with a confirmed plan, access debtor-in-possession financing, and reject contracts, but it’s slower, costly, and public. Companies generally prefer out-of-court if they can get the consent.',
+    key_points: [
+      'Out of court: amend/extend/swap with creditors — fast, cheap, needs broad consent',
+      'In court (Ch. 11): protection, bind holdouts, DIP financing — slower, costly, public',
+      'Prefer out-of-court when consent is achievable',
+    ],
+  },
+  {
+    id: 'ib_rx_05',
+    topic: 'Restructuring',
+    difficulty: 3,
+    question: 'What is debtor-in-possession (DIP) financing?',
+    reference_answer:
+      'DIP financing is new financing provided to a company while it’s operating in Chapter 11 bankruptcy. It’s attractive to lenders because it typically gets super-priority status — paid back ahead of existing creditors — and is often well-secured, so it’s relatively safe despite the company’s distress. It gives the company the liquidity to keep operating through the reorganization and is a sign the business can be a going concern.',
+    key_points: [
+      'New financing during Chapter 11',
+      'Super-priority / senior status, often well-secured → safer for lenders',
+      'Provides liquidity to operate through reorganization',
+    ],
+  },
+  {
+    id: 'ib_rx_06',
+    topic: 'Restructuring',
+    difficulty: 2,
+    question: 'Who does a restructuring banker represent — the debtor or the creditors?',
+    reference_answer:
+      'Either, and the two are distinct mandates. On the debtor side, the banker represents the distressed company and works to keep it alive, raise financing, and negotiate a manageable restructuring. On the creditor side, the banker represents lenders or bondholders trying to maximize their recovery. The goals can be adversarial, so a banker is on one side of a given deal, and many groups have expertise on both.',
+    key_points: [
+      'Debtor side: represent the company, keep it alive, ease the restructuring',
+      'Creditor side: represent lenders/bondholders, maximize recovery',
+      'Adversarial goals; a banker is on one side per deal',
+    ],
+  },
+  {
+    id: 'ib_rx_07',
+    topic: 'Restructuring',
+    difficulty: 3,
+    question: 'What is a debt-for-equity swap?',
+    reference_answer:
+      'A debt-for-equity swap is when creditors agree to cancel some of the company’s debt in exchange for equity in the restructured company. It de-levers the balance sheet, reducing the interest burden and giving the company a sustainable capital structure, while creditors trade a claim they might not fully recover for ownership and potential upside. It’s a common outcome in restructurings, including many Chapter 11 reorganizations.',
+    key_points: [
+      'Creditors cancel debt in exchange for equity',
+      'De-levers the company, cuts the interest burden',
+      'Creditors swap an impaired claim for ownership/upside',
+    ],
+  },
 ];
 
 // Distinct topics in display order, for grouping the question list.
@@ -1573,6 +2042,8 @@ export const IB_TECHNICAL_TOPICS = [
   'DCF',
   'LBO',
   'M&A',
+  'Capital Markets & IPOs',
+  'Restructuring',
   'Financial Modeling',
   'Markets & Economy',
   'Brain Teasers',

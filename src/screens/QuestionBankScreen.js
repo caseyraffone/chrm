@@ -23,6 +23,16 @@ import {
 import { IB_BEHAVIORAL_BANK, IB_BEHAVIORAL_TOPICS } from '../data/ibBehavioralBank';
 import { IB_FIT_BANK, IB_FIT_TOPICS } from '../data/ibFitBank';
 import { IB_MARKETS_BANK, IB_MARKETS_TOPICS } from '../data/ibMarketsBank';
+import {
+  PE_LBO_BANK,
+  PE_LBO_TOPICS,
+  PE_DEAL_BANK,
+  PE_DEAL_TOPICS,
+  PE_TECHNICAL_BANK,
+  PE_TECHNICAL_TOPICS,
+  PE_FIT_BANK,
+  PE_FIT_TOPICS,
+} from '../data/peBank';
 
 const FILTERS = [
   { key: 0, label: 'All' },
@@ -39,6 +49,8 @@ const TRACK_CATEGORY = {
   Behavioral: 'Behavioral',
   Fit: 'Fit & Motivation',
   Markets: 'Markets',
+  LBO: 'LBO',
+  Deal: 'Deal Sense',
 };
 
 // Difficulty 1 (Foundational) is free; 2 and 3 are Pro.
@@ -47,19 +59,35 @@ function isLocked(difficulty, isPro) {
 }
 
 function getBank(industry, track) {
-  if (industry !== 'IB') return { items: [], topics: [] };
-  switch (track) {
-    case 'Technical':
-      return { items: IB_TECHNICAL_BANK, topics: IB_TECHNICAL_TOPICS };
-    case 'Behavioral':
-      return { items: IB_BEHAVIORAL_BANK, topics: IB_BEHAVIORAL_TOPICS };
-    case 'Fit':
-      return { items: IB_FIT_BANK, topics: IB_FIT_TOPICS };
-    case 'Markets':
-      return { items: IB_MARKETS_BANK, topics: IB_MARKETS_TOPICS };
-    default:
-      return { items: [], topics: [] };
+  if (industry === 'IB') {
+    switch (track) {
+      case 'Technical':
+        return { items: IB_TECHNICAL_BANK, topics: IB_TECHNICAL_TOPICS };
+      case 'Behavioral':
+        return { items: IB_BEHAVIORAL_BANK, topics: IB_BEHAVIORAL_TOPICS };
+      case 'Fit':
+        return { items: IB_FIT_BANK, topics: IB_FIT_TOPICS };
+      case 'Markets':
+        return { items: IB_MARKETS_BANK, topics: IB_MARKETS_TOPICS };
+      default:
+        return { items: [], topics: [] };
+    }
   }
+  if (industry === 'PE') {
+    switch (track) {
+      case 'LBO':
+        return { items: PE_LBO_BANK, topics: PE_LBO_TOPICS };
+      case 'Deal':
+        return { items: PE_DEAL_BANK, topics: PE_DEAL_TOPICS };
+      case 'Technical':
+        return { items: PE_TECHNICAL_BANK, topics: PE_TECHNICAL_TOPICS };
+      case 'Fit':
+        return { items: PE_FIT_BANK, topics: PE_FIT_TOPICS };
+      default:
+        return { items: [], topics: [] };
+    }
+  }
+  return { items: [], topics: [] };
 }
 
 export default function QuestionBankScreen({ route, navigation }) {

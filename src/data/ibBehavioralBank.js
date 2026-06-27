@@ -130,6 +130,66 @@ export const IB_BEHAVIORAL_BANK = [
     question: 'Tell me about a time you had to learn something difficult very quickly.',
     prompt_tip: 'Show your learning process and how you applied it — analysts get thrown into the deep end constantly.',
   },
+  {
+    id: 'ib_beh_self_04',
+    topic: 'Self-Awareness',
+    difficulty: 1,
+    question: 'What motivates you?',
+    prompt_tip: 'Be authentic and tie it to drivers that fit the job — growth, mastery, impact — backed by a quick concrete example.',
+  },
+
+  // ── Leadership / Teamwork / Drive / Failure (deeper) ─────────────────────────────
+  {
+    id: 'ib_beh_lead_04',
+    topic: 'Leadership',
+    difficulty: 3,
+    question: 'Tell me about a time you developed or mentored someone else.',
+    prompt_tip: 'Show that you can lift others, not just perform yourself — frame the actions you took and their growth as the Result.',
+  },
+  {
+    id: 'ib_beh_team_04',
+    topic: 'Teamwork',
+    difficulty: 2,
+    question: 'Tell me about a time a teammate dropped the ball and you had to step up.',
+    prompt_tip: 'Stay generous about the teammate; focus on how you covered the gap and protected the outcome without making it about blame.',
+  },
+  {
+    id: 'ib_beh_fail_04',
+    topic: 'Failure & Resilience',
+    difficulty: 2,
+    question: 'Tell me about a high-pressure deadline that did not go as planned.',
+    prompt_tip: 'Show composure under pressure: what broke, how you triaged it in the moment, and what you changed afterward.',
+  },
+  {
+    id: 'ib_beh_drive_05',
+    topic: 'Drive & Achievement',
+    difficulty: 2,
+    question: 'Tell me about an ambitious goal you set for yourself and how you pursued it.',
+    prompt_tip: 'Quantify the goal and the outcome; emphasize the self-driven plan and persistence, which is exactly what banking selects for.',
+  },
+
+  // ── Ethics & Judgment ────────────────────────────────────────────────────────────
+  {
+    id: 'ib_beh_eth_01',
+    topic: 'Ethics & Judgment',
+    difficulty: 2,
+    question: 'Tell me about a time you faced an ethical dilemma.',
+    prompt_tip: 'Show a clear sense of right and wrong, the trade-off you weighed, and that you did the right thing even when it was costly.',
+  },
+  {
+    id: 'ib_beh_eth_02',
+    topic: 'Ethics & Judgment',
+    difficulty: 3,
+    question: 'Tell me about a time you disagreed with a decision made by someone in authority.',
+    prompt_tip: 'Demonstrate respectful pushback: how you raised it with evidence, and how you handled the outcome whether or not you prevailed.',
+  },
+  {
+    id: 'ib_beh_eth_03',
+    topic: 'Ethics & Judgment',
+    difficulty: 2,
+    question: 'Tell me about a time you had to make a decision without all the information you wanted.',
+    prompt_tip: 'Show structured judgment under uncertainty: how you used what you had, made the call, and owned the result.',
+  },
 ];
 
 // Distinct topics in display order, for grouping the question list.
@@ -139,4 +199,5 @@ export const IB_BEHAVIORAL_TOPICS = [
   'Failure & Resilience',
   'Drive & Achievement',
   'Self-Awareness',
+  'Ethics & Judgment',
 ];

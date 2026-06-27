@@ -144,6 +144,71 @@ export const IB_MARKETS_BANK = [
       'Show real sector knowledge and address the counterargument',
     ],
   },
+  {
+    id: 'ib_mkt_aware_04',
+    topic: 'Markets Awareness',
+    difficulty: 1,
+    question: 'Roughly where is the fed funds rate and the 10-year Treasury yield right now?',
+    reference_answer:
+      'A strong answer gives a reasonable current level for both, notes the recent direction, and — most importantly — explains why they matter: the fed funds rate is the Fed’s policy lever that ripples into all borrowing costs, and the 10-year is a benchmark that influences mortgages, corporate borrowing, and equity discount rates. Knowing the direction and the “so what” matters more than nailing the decimal.',
+    key_points: [
+      'Reasonable current level + recent direction for both',
+      'Fed funds = policy lever; 10-year = benchmark for borrowing/discounting',
+      'Direction and significance over exact decimals',
+    ],
+  },
+  {
+    id: 'ib_mkt_aware_05',
+    topic: 'Markets Awareness',
+    difficulty: 2,
+    question: 'Tell me about a company in the news you’ve been following.',
+    reference_answer:
+      'A strong answer picks a specific company, summarizes the recent news or development, and offers a point of view on what it means — for the company’s strategy, valuation, or industry. It shows the candidate processes business news analytically rather than just consuming headlines, and ideally connects it to a broader theme.',
+    key_points: [
+      'Specific company + the recent development',
+      'A point of view on what it means',
+      'Analytical, connected to a broader theme — not just a headline',
+    ],
+  },
+  {
+    id: 'ib_mkt_pitch_05',
+    topic: 'Stock Pitch',
+    difficulty: 2,
+    question: 'What’s your favorite company, and would you invest in it?',
+    reference_answer:
+      'A strong answer separates admiring a company from the investment decision: it explains what makes the business excellent — moat, growth, management — and then assesses whether the stock is actually a good buy at its current valuation. Recognizing that a great company can be a bad investment if it’s overpriced shows real investing judgment, which is what the question tests.',
+    key_points: [
+      'Distinguish a great business from a great stock',
+      'Cover the business quality: moat, growth, management',
+      'Assess valuation — great company can be a bad buy if overpriced',
+    ],
+  },
+  {
+    id: 'ib_mkt_pitch_06',
+    topic: 'Stock Pitch',
+    difficulty: 3,
+    question: 'Walk me through your investment process — how do you decide what to buy?',
+    reference_answer:
+      'A strong answer lays out a repeatable framework: how the candidate generates ideas, the fundamental analysis they do — business quality, financials, competitive position — how they think about valuation and margin of safety, the risks they check, and what would make them sell. It shows disciplined, structured thinking rather than picking stocks on tips or hype.',
+    key_points: [
+      'Repeatable framework: idea generation → analysis → valuation',
+      'Business quality, financials, competitive position, risks',
+      'Margin of safety and a sell discipline',
+    ],
+  },
+  {
+    id: 'ib_mkt_macro_04',
+    topic: 'Macro Views',
+    difficulty: 3,
+    question: 'What do you see as the biggest risk to markets right now?',
+    reference_answer:
+      'A strong answer names a specific, credible risk — for example the rate path, inflation reaccelerating, geopolitical tension, or a stretched valuation in part of the market — and explains the transmission mechanism: how it would actually hit earnings, valuations, or liquidity. It should be balanced, acknowledging uncertainty and that markets price in known risks, rather than doom-saying.',
+    key_points: [
+      'Name a specific, credible risk',
+      'Explain the transmission: how it hits earnings/valuations/liquidity',
+      'Balanced — acknowledge markets price in known risks',
+    ],
+  },
 ];
 
 // Distinct topics in display order, for grouping the question list.

@@ -10,6 +10,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { getDrills } from '../utils/storage';
+import ActivityCalendar from '../components/ActivityCalendar';
 
 function formatDate(isoString) {
   const date = new Date(isoString);
@@ -153,6 +154,7 @@ export default function HistoryScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          <ActivityCalendar drills={drills} />
           {drills.map((drill) => (
             <DrillItem key={drill.id} drill={drill} />
           ))}

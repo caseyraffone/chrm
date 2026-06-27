@@ -36,6 +36,11 @@ const DRILL_CATEGORIES = [
     route: 'Behavioral',
   },
   {
+    name: 'Resume Walkthrough',
+    subtitle: 'Nail the "walk me through your resume" opener',
+    route: 'ResumeWalkthrough',
+  },
+  {
     name: 'Persuade & Present',
     subtitle: 'Pitch and defend ideas with clarity',
     route: 'RoleSelection',
@@ -111,6 +116,8 @@ export default function HomeScreen({ navigation }) {
         role: null,
         questions: BEHAVIORAL_QUESTIONS,
       });
+    } else if (cat.route === 'ResumeWalkthrough') {
+      navigation.navigate('ResumeWalkthrough');
     } else {
       navigation.navigate('RoleSelection', { category: cat.name });
     }

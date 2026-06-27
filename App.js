@@ -34,6 +34,8 @@ import MockInterviewTranscriptScreen from './src/screens/MockInterviewTranscript
 import HireVueSetupScreen from './src/screens/HireVueSetupScreen';
 import HireVueSimulationScreen from './src/screens/HireVueSimulationScreen';
 import HireVueDebriefScreen from './src/screens/HireVueDebriefScreen';
+import ResumeWalkthroughScreen from './src/screens/ResumeWalkthroughScreen';
+import ResumeImproverScreen from './src/screens/ResumeImproverScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
 import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import { colors } from './src/constants/theme';
@@ -116,6 +118,8 @@ export default function App() {
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen name="MockInterviewTranscript" component={MockInterviewTranscriptScreen} />
+        <Stack.Screen name="ResumeWalkthrough" component={ResumeWalkthroughScreen} />
+        <Stack.Screen name="ResumeImprover" component={ResumeImproverScreen} />
         <Stack.Screen name="HireVueSetup" component={HireVueSetupScreen} />
         <Stack.Screen
           name="HireVueSimulation"

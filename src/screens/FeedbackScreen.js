@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
-import { getFeedback } from '../utils/api';
-import { saveDrill, savePrepKitQuestionAttempt } from '../utils/storage';
+import { getFeedback, getResumeFeedback } from '../utils/api';
+import { saveDrill, savePrepKitQuestionAttempt, getResume } from '../utils/storage';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const DEEP_DIVE_SHOWN_KEY = '@chrm_deep_dive_shown';
@@ -31,7 +31,13 @@ export default function FeedbackScreen({ route, navigation }) {
   async function loadFeedback() {
     try {
       setLoading(true);
-      const result = await getFeedback(transcript, question, category, role);
+      let result;
+      if (category === 'Resume Walkthrough') {
+        const resumeText = await getResume();
+        result = await getResumeFeedback(transcript, resumeText, role);
+      } else {
+        result = await getFeedback(transcript, question, category, role);
+      }
       setFeedback(result);
 
       if (hubReturn) {

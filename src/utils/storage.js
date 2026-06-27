@@ -196,6 +196,27 @@ export async function getMockInterviews() {
   }
 }
 
+// ─── Resume storage ───────────────────────────────────────────────────────────
+
+const RESUME_KEY = '@chrm_resume';
+
+export async function saveResume(text) {
+  try {
+    await AsyncStorage.setItem(RESUME_KEY, text);
+  } catch (error) {
+    console.error('Error saving resume:', error);
+  }
+}
+
+export async function getResume() {
+  try {
+    const text = await AsyncStorage.getItem(RESUME_KEY);
+    return text || '';
+  } catch (error) {
+    return '';
+  }
+}
+
 // ─── HireVue Simulation storage ───────────────────────────────────────────────
 
 const HIREVUE_SESSIONS_KEY = '@chrm_hirevue_sessions';

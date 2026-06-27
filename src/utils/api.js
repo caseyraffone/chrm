@@ -415,6 +415,105 @@ Rules:
   }
 }
 
+// ─── Resume Walkthrough ─────────────────────────────────────────────────────────
+
+// Grades a spoken "walk me through your resume" answer against the resume.
+// Returns the same shape as getFeedback so it reuses FeedbackScreen.
+export async function getResumeFeedback(transcript, resumeText, role) {
+  const target = role ? ` The candidate is recruiting for a ${role} role.` : '';
+  const prompt = `You are CHRM, an elite communication coach for finance recruiting. The candidate is practicing the interview opener "Walk me through your resume" / "Tell me about yourself" — a single continuous 60-90 second spoken narrative, NOT a Q&A.${target}
+
+Grade the spoken walkthrough against their resume. Judge: a clear story arc (logical chronological or thematic flow), smooth transitions between experiences, a consistent "why this path / why finance" thread, conciseness (~60-90 seconds), specificity and impact over duties, and a strong landing that points at the target role. Reward a narrative that connects the dots; penalize listing bullets, rambling, or starting too far back. Keep feedback concise. Do not use emojis.
+
+RESUME:
+"""
+${resumeText || '(No resume provided.)'}
+"""
+
+SPOKEN WALKTHROUGH (transcript):
+"${transcript}"
+
+Return ONLY valid JSON — no markdown, no extra text:
+{
+  "score": <number 1-10>,
+  "strong": ["<1-2 sentence observation>", "<1-2 sentence observation>"],
+  "improve": ["<1-2 sentence observation>", "<1-2 sentence observation>"],
+  "stronger_version": "<a model 60-90 second walkthrough script, grounded in THIS resume, written to sound natural spoken aloud>"
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Resume feedback generation failed');
+  }
+
+  const data = await response.json();
+  const raw = data.content[0].text.trim();
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const text = match ? match[1].trim() : raw;
+  return JSON.parse(text);
+}
+
+// Premium: rewrites resume bullets for finance recruiting and flags gaps.
+export async function improveResume(resumeText, role) {
+  const target = role ? `a ${role} role` : 'finance recruiting';
+  const prompt = `You are an elite resume coach for finance recruiting (IB/PE/consulting). Improve this resume for ${target}. Rewrite weak bullets to lead with action + quantified impact (numbers, scale, outcome), tighten language, and surface gaps a recruiter would notice.
+
+RESUME:
+"""
+${resumeText}
+"""
+
+Return ONLY valid JSON — no markdown, no extra text:
+{
+  "overall": ["<2-4 high-level observations about the resume's positioning>"],
+  "improved_bullets": [
+    {"original": "<a weak bullet from the resume>", "improved": "<stronger rewrite, action + quantified impact>", "why": "<1 sentence on what changed and why>"}
+  ],
+  "gaps": ["<2-4 specific things missing or worth adding for ${target}>"]
+}
+
+Include 4-7 of the highest-impact bullet rewrites. Keep every field concise.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Resume improvement failed');
+  }
+
+  const data = await response.json();
+  const raw = data.content[0].text.trim();
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const text = match ? match[1].trim() : raw;
+  return JSON.parse(text);
+}
+
 // ─── HireVue Simulation ─────────────────────────────────────────────────────────
 
 // Generates the question set for a one-way HireVue-style digital interview.

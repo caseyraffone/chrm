@@ -244,6 +244,45 @@ Pricing: $7.99 / month or $59.99 / year (36% savings).
 
 ---
 
+## Interview Prep Verticals (`src/data/`)
+
+Interview Prep is a curated, vertical → track → question-bank flow (separate from
+the legacy free-text "Other role" AI generator). Config lives in
+`src/data/interviewPrep.js` (`FINANCE_INDUSTRIES`, `INDUSTRY_TRACKS`); flip a
+track/industry `status` to `'active'` to light it up.
+
+- **Screens:** `InterviewPrepIndustryScreen` → `InterviewPrepTrackScreen` →
+  `QuestionBankScreen` → `Practice` → `Feedback`. No per-vertical screens — adding
+  a vertical is a data file + a `getBank()` case + a status flip.
+- **Banks (242 curated Qs):** `ibTechnicalBank.js` (151, 12 topics),
+  `ibBehavioralBank.js` (24), `ibFitBank.js` (19), `ibMarketsBank.js` (15),
+  `peBank.js` (33 across LBO/Deal/Technical/Fit). Each item: `id, topic,
+  difficulty (1 free / 2-3 Pro), question`, plus `reference_answer + key_points`
+  (graded by `getTechnicalFeedback`) — except Behavioral, which has no reference
+  and grades via the STAR path (`getFeedback`, category `'Behavioral'`).
+- **Grading:** all modes share one calibrated `SCORING_RUBRIC` in `api.js`, so a
+  "7" means the same thing everywhere. `api.js` also has an insufficient-answer
+  guard, tolerant JSON parsing, score clamping, and a `callClaude` retry helper.
+- **Progress:** best score per bank question is stored via `saveBankAttempt` /
+  `getBankProgress` (`bankItemId` threads Practice → Feedback) and shown as
+  "BEST n/10" pills in the bank list.
+
+## Analytics (`src/utils/analytics.js`)
+
+PII-free event tracking to PostHog over plain HTTPS — no native SDK, no
+`app.config.js` change, and a no-op until `POSTHOG_API_KEY` is set in `.env`.
+Use `track(EVENTS.X, props)` / `identify(props)`; events are defined in `EVENTS`.
+Rule: events only, never transcripts/names/emails.
+
+## Backend (`server/`)
+
+Vercel serverless functions that will proxy the OpenAI/Anthropic calls so keys
+leave the client (commercial-build initiative; see `GOAL.md`). Currently
+standalone — `/api/transcribe` (Whisper proxy) + `/api/health`. The client is
+not yet pointed at it.
+
+---
+
 ## Env Vars
 
 Set in `.env` (gitignored). Required:
@@ -251,6 +290,13 @@ Set in `.env` (gitignored). Required:
 ```
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Optional:
+```
+POSTHOG_API_KEY=phc_...        # turns analytics on; omit to keep it a no-op
+POSTHOG_HOST=https://us.i.posthog.com
+REVENUECAT_API_KEY_IOS=...     # RevenueCat public SDK key
 ```
 
 Accessed in code via:

@@ -188,6 +188,29 @@ to be tuned with real data).
 data collection in Apple's App Privacy section and needs a Privacy Policy URL.
 Events are PII-free (no transcripts/names/emails) — keep it that way.
 
+---
+
+### Overnight A-grade push (2026-06-27, by Claude)
+
+Done in this run (all pushed to main, each bundles clean):
+- **Grading overhaul** (`src/utils/api.js`): one calibrated SCORING_RUBRIC across
+  every mode; insufficient-answer guard; tolerant JSON parsing + score clamping;
+  shared callClaude with retry; per-category guidance; richer mock-interview
+  persona; category-aware HireVue debrief. All return shapes unchanged.
+- **Content → 242 curated questions:** IB Technical 116→151 (+Capital Markets &
+  IPOs, +Restructuring); IB Behavioral→24 (+Ethics & Judgment); Fit→19;
+  Markets→15; **new PE vertical** (LBO & Modeling, Deal Sense, Technical, Fit;
+  33 Qs) flipped active.
+- **Per-question mastery tracking:** best score + attempts per bank item; "BEST
+  n/10" pills and an "X of N practiced" line in the question bank.
+- **Analytics:** free funnel + premium completions (mock, HireVue, prep kit,
+  resume) instrumented; PII-free; no-ops without a PostHog key.
+
+Next opportunities (not yet done): point client at the backend + strip keys
+(unit 1d, needs sign-off — touches app.config.js); add the remaining verticals
+(S&T, ER, Consulting); onboarding/paywall conversion pass (deferred by Casey
+until there's data); device-test the PDF resume upload.
+
 > Note: a separate, already-shipped track in this repo expanded the IB Interview
 > Prep banks (116 technical Qs + Behavioral/Fit/Markets tracks). That is unrelated
 > to the commercial build and did not touch App Store / RevenueCat / app.config.js.

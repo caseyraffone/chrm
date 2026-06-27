@@ -8,9 +8,14 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
+import { File } from 'expo-file-system';
 import { colors, fonts, spacing, radius } from '../constants/theme';
+import { extractResumeTextFromPdf } from '../utils/api';
+import ProcessingOverlay from '../components/ProcessingOverlay';
 import {
   getResume,
   saveResume,
@@ -26,6 +31,7 @@ export default function ResumeWalkthroughScreen({ navigation }) {
   const [resume, setResume] = useState('');
   const [role, setRole] = useState('');
   const [focusedField, setFocusedField] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -38,6 +44,26 @@ export default function ResumeWalkthroughScreen({ navigation }) {
 
   const canProceed = resume.trim().length >= 40;
   const roleParam = role.trim() || null;
+
+  async function handleUploadPdf() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      setUploading(true);
+      const base64 = await new File(result.assets[0].uri).base64();
+      const text = await extractResumeTextFromPdf(base64);
+      setResume(text);
+      await saveResume(text);
+    } catch (err) {
+      console.error('PDF upload error:', err);
+      Alert.alert('Upload failed', 'Could not read that PDF. Try again, or paste your resume text instead.');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function isDailyLimitReached() {
     const status = await getSubscriptionStatus();
@@ -114,8 +140,13 @@ export default function ResumeWalkthroughScreen({ navigation }) {
           />
         </View>
 
-        {/* Resume paste */}
-        <Text style={styles.fieldLabel}>YOUR RESUME</Text>
+        {/* Resume paste / upload */}
+        <View style={styles.resumeLabelRow}>
+          <Text style={styles.fieldLabel}>YOUR RESUME</Text>
+          <TouchableOpacity onPress={handleUploadPdf} style={styles.uploadButton} activeOpacity={0.7}>
+            <Text style={styles.uploadButtonText}>⬆  Upload PDF</Text>
+          </TouchableOpacity>
+        </View>
         <View
           style={[
             styles.resumeContainer,
@@ -135,8 +166,7 @@ export default function ResumeWalkthroughScreen({ navigation }) {
           />
         </View>
         <Text style={styles.hint}>
-          Tip: paste the whole thing — the more detail, the sharper the feedback. (PDF upload coming
-          soon.)
+          Tip: paste the whole thing or upload your PDF — the more detail, the sharper the feedback.
         </Text>
       </ScrollView>
 
@@ -165,6 +195,8 @@ export default function ResumeWalkthroughScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </View>
+
+      <ProcessingOverlay visible={uploading} message="Reading your resume..." />
     </KeyboardAvoidingView>
   );
 }
@@ -178,6 +210,9 @@ const styles = StyleSheet.create({
   title: { fontFamily: fonts.display, fontSize: 40, color: colors.text, letterSpacing: -1, lineHeight: 42, marginBottom: spacing.sm },
   subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, lineHeight: 20, marginBottom: spacing.xl },
   fieldLabel: { fontFamily: fonts.body, fontSize: 10, color: colors.textMuted, letterSpacing: 2.5, marginBottom: spacing.sm },
+  resumeLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  uploadButton: { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.accent, marginBottom: spacing.sm },
+  uploadButtonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.accent },
   inputContainer: { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.border, paddingHorizontal: spacing.md, marginBottom: spacing.lg },
   inputContainerFocused: { borderColor: colors.accent },
   input: { fontFamily: fonts.body, fontSize: 14, color: colors.text, paddingVertical: spacing.md, minHeight: 50 },

@@ -522,6 +522,46 @@ Return ONLY valid JSON — no markdown, no extra text:
   return JSON.parse(text);
 }
 
+// Extracts clean plain-text resume content from an uploaded PDF (base64).
+// Claude reads the PDF natively via a document content block.
+export async function extractResumeTextFromPdf(base64Pdf) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64Pdf },
+            },
+            {
+              type: 'text',
+              text: 'Extract the full text of this resume as clean plain text. Preserve the structure (sections, role titles, and bullet points), but do not add commentary, headers, or markdown formatting. Return only the resume text.',
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Could not read the PDF');
+  }
+
+  const data = await response.json();
+  return data.content[0].text.trim();
+}
+
 // Premium: rewrites resume bullets for finance recruiting and flags gaps.
 export async function improveResume(resumeText, role) {
   const target = role ? `a ${role} role` : 'finance recruiting';

@@ -31,7 +31,7 @@ const DRILL_CATEGORIES = [
     route: 'InterviewPrep',
   },
   {
-    name: 'Behavioral',
+    name: 'Behaviorals',
     subtitle: 'STAR-method answers that work for any role',
     route: 'Behavioral',
   },
@@ -214,7 +214,12 @@ export default function HomeScreen({ navigation }) {
         >
           <View style={styles.cardRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.prepKitTitle}>Company Prep Kit</Text>
+              <View style={styles.hireVueTitleRow}>
+                <Text style={styles.prepKitTitle}>Company Prep Kit</Text>
+                <View style={styles.proBadge}>
+                  <Text style={styles.proBadgeText}>PRO</Text>
+                </View>
+              </View>
               <Text style={styles.prepKitSubtitle}>Deep intel + custom training plan</Text>
             </View>
             <Text style={styles.prepKitArrow}>›</Text>
@@ -371,7 +376,7 @@ const styles = StyleSheet.create({
   prepKitCard: {
     marginTop: 4,
     borderRadius: radius.md,
-    backgroundColor: colors.text,
+    backgroundColor: colors.accent,
     padding: spacing.lg,
   },
   prepKitCardPressed: {
@@ -381,17 +386,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     fontSize: 15,
     color: '#F2F1EE',
-    marginBottom: 2,
   },
   prepKitSubtitle: {
     fontFamily: fonts.body,
     fontSize: 11,
-    color: '#555555',
+    color: 'rgba(242, 241, 238, 0.7)',
     lineHeight: 16,
   },
   prepKitArrow: {
     fontSize: 20,
-    color: '#444444',
+    color: 'rgba(242, 241, 238, 0.6)',
     marginLeft: 8,
   },
   historyButton: {

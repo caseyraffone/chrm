@@ -11,8 +11,6 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import * as DocumentPicker from 'expo-document-picker';
-import { File } from 'expo-file-system';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { extractResumeTextFromPdf } from '../utils/api';
 import ProcessingOverlay from '../components/ProcessingOverlay';
@@ -46,6 +44,22 @@ export default function ResumeWalkthroughScreen({ navigation }) {
   const roleParam = role.trim() || null;
 
   async function handleUploadPdf() {
+    // Loaded lazily so the screen still works on dev builds that don't include
+    // these native modules — the rest of the app boots fine and only this button
+    // degrades gracefully.
+    let DocumentPicker;
+    let File;
+    try {
+      DocumentPicker = require('expo-document-picker');
+      ({ File } = require('expo-file-system'));
+    } catch (e) {
+      Alert.alert(
+        'PDF upload unavailable',
+        'PDF upload needs the latest build of the app. For now, paste your resume text below instead.'
+      );
+      return;
+    }
+
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',

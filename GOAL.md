@@ -161,17 +161,32 @@ source of entitlement truth across platforms.
 
 ## Current Phase
 
-**Status:** Phase 1 started. Decisions made (Vercel + Supabase + RevenueCat Web
-Billing). Unit 1b in progress: backend skeleton + `/transcribe` Whisper proxy
-under `server/`, standalone (client NOT yet wired — that's unit 1d, and it touches
-the client + key handling, which needs explicit sign-off + a device test).
+**Status:**
+- Backend (Phase 1b): `server/` skeleton + `/transcribe` Whisper proxy built &
+  tested; standalone (client not wired). Awaiting Vercel deploy by Casey.
+- Analytics foundation: `src/utils/analytics.js` added — PII-free PostHog-over-
+  HTTPS tracker (no native SDK, no build/app.config impact, no-ops without a key).
+  Wired into the funnel: app_opened, onboarding (started/intent/role/skipped/
+  completed), drill_completed (category+score+role, never transcript), and
+  paywall (shown/purchase_tapped/subscription_purchased). Bundles clean.
+
+Casey's chosen build order: (1) analytics ✅ → (3) deepen interview-prep content
+→ (4) backend Phase 1c → (2) onboarding/paywall conversion LAST (research-heavy,
+to be tuned with real data).
+
 **Last updated:** 2026-06-27 (by Claude)
-**Next session should:** Review the `server/` skeleton, then deploy it to Vercel
-(set `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` as server env vars) and smoke-test
-`/api/health` + `/api/transcribe`. Then continue Phase 1: unit 1c (port the
-Claude endpoints behind the backend) and 1e (real rate limiting via Upstash).
-Hold unit 1d (point iOS `api.js` at the backend + strip keys from the client)
-until Casey confirms — it touches app.config.js, which is constraint-protected.
+**Next session should:**
+1. Casey: deploy `server/` to Vercel (root dir `server`, set OPENAI/ANTHROPIC
+   keys), smoke-test `/api/health`. And to turn analytics on, add
+   `POSTHOG_API_KEY` (+ optional `POSTHOG_HOST`) to `.env` / the web session env.
+2. Then build next: deepen interview-prep content (IB Technical → 150+, expand
+   Behavioral/Fit/Markets, and/or stand up the first non-IB vertical, e.g. PE).
+3. Hold unit 1d (point client at backend + strip keys) until Casey confirms —
+   touches app.config.js (constraint-protected) and needs a device test.
+
+**App Store / privacy reminder:** analytics now means the submission must declare
+data collection in Apple's App Privacy section and needs a Privacy Policy URL.
+Events are PII-free (no transcripts/names/emails) — keep it that way.
 
 > Note: a separate, already-shipped track in this repo expanded the IB Interview
 > Prep banks (116 technical Qs + Behavioral/Fit/Markets tracks). That is unrelated

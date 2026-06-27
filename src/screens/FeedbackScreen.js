@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { getFeedback, getResumeFeedback, getTechnicalFeedback } from '../utils/api';
 import { saveDrill, savePrepKitQuestionAttempt, getResume } from '../utils/storage';
+import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const DEEP_DIVE_SHOWN_KEY = '@chrm_deep_dive_shown';
@@ -72,6 +73,15 @@ export default function FeedbackScreen({ route, navigation }) {
         company: company || null,
       };
       await saveDrill(drill);
+
+      // PII-free funnel event — category/score/role only, never the transcript.
+      track(EVENTS.DRILL_COMPLETED, {
+        category,
+        score: result.score,
+        role: role || null,
+        has_company: Boolean(company),
+        is_first_drill: isFirstDrill,
+      });
     } catch (err) {
       console.error('Feedback error:', err);
       setError(err.message || 'Could not generate feedback. Check your API key and try again.');

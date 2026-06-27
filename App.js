@@ -44,6 +44,7 @@ import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import { colors } from './src/constants/theme';
 import { getOnboardingCompleted } from './src/utils/storage';
 import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } from './src/utils/purchases';
+import { initAnalytics, track, identify, EVENTS } from './src/utils/analytics';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,7 +65,13 @@ export default function App() {
     // Initialize RevenueCat before anything else, then sync entitlement status
     // into AsyncStorage so gating logic has an up-to-date value on first load.
     initializePurchases();
-    syncSubscriptionStatus();
+    // Sync entitlement, then tag the analytics profile with subscription status.
+    syncSubscriptionStatus().then((isPro) =>
+      identify({ subscription_status: isPro ? 'pro' : 'free' })
+    );
+
+    // Fire up analytics (no-ops without a key) and log the session open.
+    initAnalytics().then(() => track(EVENTS.APP_OPENED));
 
     // Keep AsyncStorage in sync whenever RevenueCat detects a status change
     // (renewal, cancellation, billing retry, etc.) during the app session.

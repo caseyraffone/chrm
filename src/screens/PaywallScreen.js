@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { syncSubscriptionStatus } from '../utils/purchases';
+import { track, identify, EVENTS } from '../utils/analytics';
 
 const FEATURES = [
   {
@@ -31,12 +32,24 @@ export default function PaywallScreen({ route, navigation }) {
   const { message = null } = route.params ?? {};
   const [loading, setLoading] = useState(false);
 
+  // Where the paywall was triggered from (the gating message) — useful for
+  // knowing which locked feature drives the most upgrades.
+  useEffect(() => {
+    track(EVENTS.PAYWALL_SHOWN, { source: message || 'unspecified' });
+  }, [message]);
+
   async function handlePurchase() {
     if (loading) return;
+    track(EVENTS.PAYWALL_PURCHASE_TAPPED, { source: message || 'unspecified' });
     setLoading(true);
     try {
       const result = await RevenueCatUI.presentPaywall();
       if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
+        track(EVENTS.SUBSCRIPTION_PURCHASED, {
+          result: result === PAYWALL_RESULT.PURCHASED ? 'purchased' : 'restored',
+          source: message || 'unspecified',
+        });
+        identify({ subscription_status: 'pro' });
         await syncSubscriptionStatus();
         navigation.goBack();
       }

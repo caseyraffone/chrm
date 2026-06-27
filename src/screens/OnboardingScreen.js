@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { generateQuestions } from '../utils/api';
 import { getCachedQuestions, setCachedQuestions } from '../utils/storage';
+import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -58,6 +59,7 @@ export default function OnboardingScreen({ navigation }) {
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    track(EVENTS.ONBOARDING_STARTED);
     Animated.timing(containerOpacity, {
       toValue: 1,
       duration: 500,
@@ -82,15 +84,18 @@ export default function OnboardingScreen({ navigation }) {
   }
 
   async function handleSkip() {
+    track(EVENTS.ONBOARDING_SKIPPED, { step });
     await AsyncStorage.setItem('@chrm_onboarding_completed', 'true');
     navigation.replace('Home');
   }
 
   async function handleSelectIntent(intent) {
+    track(EVENTS.ONBOARDING_INTENT_SELECTED, { intent: intent.id });
     await AsyncStorage.setItem('@chrm_user_intent', intent.id);
     if (intent.id === 'interview') {
       goToStep(2);
     } else {
+      track(EVENTS.ONBOARDING_COMPLETED, { path: 'home', intent: intent.id });
       await AsyncStorage.setItem('@chrm_onboarding_completed', 'true');
       navigation.replace('Home');
     }
@@ -99,6 +104,7 @@ export default function OnboardingScreen({ navigation }) {
   async function handleContinueRole() {
     const role = roleInput.trim();
     if (role.length < 3) return;
+    track(EVENTS.ONBOARDING_ROLE_SUBMITTED, { role });
     await AsyncStorage.setItem('@chrm_user_target_role', role);
     setIsGenerating(true);
 
@@ -108,6 +114,7 @@ export default function OnboardingScreen({ navigation }) {
         questions = await generateQuestions(role, 'Interview Prep');
         await setCachedQuestions(role, 'Interview Prep', questions);
       }
+      track(EVENTS.ONBOARDING_COMPLETED, { path: 'first_drill', intent: 'interview' });
       navigation.replace('Practice', {
         category: 'Interview Prep',
         role,

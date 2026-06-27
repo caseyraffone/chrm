@@ -412,11 +412,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
   },
   historyButtonText: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.text,
     letterSpacing: 2,
   },
   debugText: {

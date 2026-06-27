@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   scoreNumber: {
     fontFamily: fonts.display,
     fontSize: 100,
-    lineHeight: 88,
+    lineHeight: 104,
     letterSpacing: -4,
   },
   scoreSlash: {

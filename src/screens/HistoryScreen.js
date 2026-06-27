@@ -29,8 +29,10 @@ function formatDuration(seconds) {
   return `${m}m ${s}s`;
 }
 
-function getScoreColor() {
-  return colors.accent;
+function getScoreColor(score) {
+  if (score >= 8) return colors.success;
+  if (score >= 5) return colors.text;
+  return colors.error;
 }
 
 function DrillItem({ drill }) {
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
   backButton: { paddingVertical: spacing.xs },
   backText: { fontFamily: fonts.body, fontSize: 15, color: colors.textMuted },
   drillCount: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted, letterSpacing: 2 },
-  title: { fontFamily: fonts.display, fontSize: 52, color: colors.text, paddingHorizontal: spacing.lg, marginBottom: spacing.lg, lineHeight: 48, letterSpacing: -2 },
+  title: { fontFamily: fonts.display, fontSize: 52, color: colors.text, paddingHorizontal: spacing.lg, marginBottom: spacing.lg, lineHeight: 56, letterSpacing: -2 },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   emptyIcon: { fontSize: 36, marginBottom: spacing.md },
   emptyTitle: { fontFamily: fonts.displayMedium, fontSize: 20, color: colors.text, marginBottom: spacing.sm },
@@ -188,8 +190,8 @@ const styles = StyleSheet.create({
   companyTagText: { fontFamily: fonts.body, fontSize: 10, color: colors.accent, letterSpacing: 0.3 },
   drillDate: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
   drillRight: { flexDirection: 'row', alignItems: 'flex-end', gap: 3 },
-  drillScore: { fontFamily: fonts.display, fontSize: 30, lineHeight: 28 },
-  drillScoreLabel: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, marginBottom: 2 },
+  drillScore: { fontFamily: fonts.display, fontSize: 32, lineHeight: 38 },
+  drillScoreLabel: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, marginBottom: 5 },
   expandIcon: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted, marginLeft: spacing.sm, marginBottom: 3 },
   drillDetail: { marginTop: spacing.md },
   divider: { height: 1, backgroundColor: colors.border, marginBottom: spacing.md },

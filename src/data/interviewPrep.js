@@ -21,8 +21,8 @@ export const FINANCE_INDUSTRIES = [
 export const INDUSTRY_TRACKS = {
   IB: [
     { key: 'Technical', name: 'Technical', blurb: 'Accounting, valuation, DCF, LBO, M&A', status: 'active' },
-    { key: 'Behavioral', name: 'Behavioral', blurb: 'STAR stories & competencies', status: 'soon' },
-    { key: 'Fit', name: 'Fit & Motivation', blurb: 'Why banking, why this group', status: 'soon' },
-    { key: 'Markets', name: 'Markets', blurb: 'Markets awareness & a stock pitch', status: 'soon' },
+    { key: 'Behavioral', name: 'Behavioral', blurb: 'STAR stories & competencies', status: 'active' },
+    { key: 'Fit', name: 'Fit & Motivation', blurb: 'Why banking, why this group', status: 'active' },
+    { key: 'Markets', name: 'Markets', blurb: 'Markets awareness & a stock pitch', status: 'active' },
   ],
 };

@@ -35,7 +35,9 @@ export default function FeedbackScreen({ route, navigation }) {
       if (category === 'Resume Walkthrough') {
         const resumeText = await getResume();
         result = await getResumeFeedback(transcript, resumeText, role);
-      } else if (category === 'Technical' && referenceAnswer) {
+      } else if (referenceAnswer) {
+        // Technical, Fit & Motivation, and Markets all grade against a reference
+        // answer + key points. Behavioral has no reference and uses the STAR path.
         result = await getTechnicalFeedback(transcript, question, referenceAnswer, keyPoints, role);
       } else {
         result = await getFeedback(transcript, question, category, role);

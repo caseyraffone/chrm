@@ -20,6 +20,9 @@ import {
   IB_TECHNICAL_TOPICS,
   DIFFICULTY_LABELS,
 } from '../data/ibTechnicalBank';
+import { IB_BEHAVIORAL_BANK, IB_BEHAVIORAL_TOPICS } from '../data/ibBehavioralBank';
+import { IB_FIT_BANK, IB_FIT_TOPICS } from '../data/ibFitBank';
+import { IB_MARKETS_BANK, IB_MARKETS_TOPICS } from '../data/ibMarketsBank';
 
 const FILTERS = [
   { key: 0, label: 'All' },
@@ -28,16 +31,35 @@ const FILTERS = [
   { key: 3, label: 'Advanced' },
 ];
 
+// How each track is graded. Behavioral runs through the STAR path (getFeedback);
+// the rest grade against their reference answer via getTechnicalFeedback. The
+// value is the `category` passed through to Practice/Feedback.
+const TRACK_CATEGORY = {
+  Technical: 'Technical',
+  Behavioral: 'Behavioral',
+  Fit: 'Fit & Motivation',
+  Markets: 'Markets',
+};
+
 // Difficulty 1 (Foundational) is free; 2 and 3 are Pro.
 function isLocked(difficulty, isPro) {
   return difficulty > 1 && !isPro;
 }
 
 function getBank(industry, track) {
-  if (industry === 'IB' && track === 'Technical') {
-    return { items: IB_TECHNICAL_BANK, topics: IB_TECHNICAL_TOPICS };
+  if (industry !== 'IB') return { items: [], topics: [] };
+  switch (track) {
+    case 'Technical':
+      return { items: IB_TECHNICAL_BANK, topics: IB_TECHNICAL_TOPICS };
+    case 'Behavioral':
+      return { items: IB_BEHAVIORAL_BANK, topics: IB_BEHAVIORAL_TOPICS };
+    case 'Fit':
+      return { items: IB_FIT_BANK, topics: IB_FIT_TOPICS };
+    case 'Markets':
+      return { items: IB_MARKETS_BANK, topics: IB_MARKETS_TOPICS };
+    default:
+      return { items: [], topics: [] };
   }
-  return { items: [], topics: [] };
 }
 
 export default function QuestionBankScreen({ route, navigation }) {
@@ -86,12 +108,15 @@ export default function QuestionBankScreen({ route, navigation }) {
         return;
       }
     }
+    // Behavioral grades via STAR (no reference); other tracks grade against the
+    // bank's reference answer and key points.
+    const usesStar = track === 'Behavioral';
     navigation.navigate('Practice', {
-      category: 'Technical',
+      category: TRACK_CATEGORY[track] || 'Technical',
       role: industryName,
       questions: [item.question],
-      referenceAnswer: item.reference_answer,
-      keyPoints: item.key_points,
+      referenceAnswer: usesStar ? null : item.reference_answer,
+      keyPoints: usesStar ? null : item.key_points,
     });
   }
 

@@ -415,6 +415,61 @@ Rules:
   }
 }
 
+// ─── Technical grading (Interview Prep bank) ────────────────────────────────────
+
+// Grades a spoken technical answer against a canonical reference answer and the
+// key points an interviewer listens for. Returns the same shape as getFeedback
+// so it reuses FeedbackScreen.
+export async function getTechnicalFeedback(transcript, question, referenceAnswer, keyPoints, role) {
+  const target = role ? ` The candidate is recruiting for a ${role} role.` : '';
+  const points = (keyPoints || []).map((p) => `- ${p}`).join('\n');
+  const prompt = `You are CHRM, an elite technical interview coach for finance recruiting.${target} You are grading a candidate's SPOKEN answer to a technical question against the canonical answer. Reward technical accuracy and hitting the key points; penalize errors, vagueness, and missing core concepts. A confident, correct, well-structured answer scores high; a hand-wavy or wrong one scores low. Keep feedback concise and direct. Do not use emojis.
+
+QUESTION: "${question}"
+
+CANONICAL REFERENCE ANSWER:
+${referenceAnswer}
+
+KEY POINTS AN INTERVIEWER LISTENS FOR:
+${points}
+
+CANDIDATE'S SPOKEN ANSWER (transcript):
+"${transcript}"
+
+Return ONLY valid JSON — no markdown, no extra text:
+{
+  "score": <number 1-10>,
+  "strong": ["<key points they hit / what was correct, 1-2 sentences each>"],
+  "improve": ["<key points missed or stated incorrectly, 1-2 sentences each>"],
+  "stronger_version": "<a tight, correct model answer they could say out loud>"
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Technical feedback generation failed');
+  }
+
+  const data = await response.json();
+  const raw = data.content[0].text.trim();
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const text = match ? match[1].trim() : raw;
+  return JSON.parse(text);
+}
+
 // ─── Resume Walkthrough ─────────────────────────────────────────────────────────
 
 // Grades a spoken "walk me through your resume" answer against the resume.

@@ -27,8 +27,8 @@ const hasAnthropic = !!ANTHROPIC_API_KEY;
 const DRILL_CATEGORIES = [
   {
     name: 'Interview Prep',
-    subtitle: 'Technical & behavioral — tailored to your role',
-    route: 'RoleSelection',
+    subtitle: 'Curated banks by finance vertical — IB technicals & more',
+    route: 'InterviewPrep',
   },
   {
     name: 'Behavioral',
@@ -118,6 +118,8 @@ export default function HomeScreen({ navigation }) {
       });
     } else if (cat.route === 'ResumeWalkthrough') {
       navigation.navigate('ResumeWalkthrough');
+    } else if (cat.route === 'InterviewPrep') {
+      navigation.navigate('InterviewPrepIndustry');
     } else {
       navigation.navigate('RoleSelection', { category: cat.name });
     }

@@ -10,14 +10,14 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
-import { getFeedback, getResumeFeedback } from '../utils/api';
+import { getFeedback, getResumeFeedback, getTechnicalFeedback } from '../utils/api';
 import { saveDrill, savePrepKitQuestionAttempt, getResume } from '../utils/storage';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const DEEP_DIVE_SHOWN_KEY = '@chrm_deep_dive_shown';
 
 export default function FeedbackScreen({ route, navigation }) {
-  const { category, role, questions, question, transcript, duration, company = null, isFirstDrill = false, hubReturn = null } = route.params;
+  const { category, role, questions, question, transcript, duration, company = null, isFirstDrill = false, hubReturn = null, referenceAnswer = null, keyPoints = null } = route.params;
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,6 +35,8 @@ export default function FeedbackScreen({ route, navigation }) {
       if (category === 'Resume Walkthrough') {
         const resumeText = await getResume();
         result = await getResumeFeedback(transcript, resumeText, role);
+      } else if (category === 'Technical' && referenceAnswer) {
+        result = await getTechnicalFeedback(transcript, question, referenceAnswer, keyPoints, role);
       } else {
         result = await getFeedback(transcript, question, category, role);
       }
@@ -86,7 +88,7 @@ export default function FeedbackScreen({ route, navigation }) {
     if (category === 'Quick Fire') {
       navigation.navigate('QuickFire');
     } else {
-      navigation.navigate('Practice', { category, role, questions });
+      navigation.navigate('Practice', { category, role, questions, referenceAnswer, keyPoints });
     }
   }
 

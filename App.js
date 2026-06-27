@@ -36,6 +36,9 @@ import HireVueSimulationScreen from './src/screens/HireVueSimulationScreen';
 import HireVueDebriefScreen from './src/screens/HireVueDebriefScreen';
 import ResumeWalkthroughScreen from './src/screens/ResumeWalkthroughScreen';
 import ResumeImproverScreen from './src/screens/ResumeImproverScreen';
+import InterviewPrepIndustryScreen from './src/screens/InterviewPrepIndustryScreen';
+import InterviewPrepTrackScreen from './src/screens/InterviewPrepTrackScreen';
+import QuestionBankScreen from './src/screens/QuestionBankScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
 import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import { colors } from './src/constants/theme';
@@ -95,6 +98,9 @@ export default function App() {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ animation: 'none' }} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+        <Stack.Screen name="InterviewPrepIndustry" component={InterviewPrepIndustryScreen} />
+        <Stack.Screen name="InterviewPrepTrack" component={InterviewPrepTrackScreen} />
+        <Stack.Screen name="QuestionBank" component={QuestionBankScreen} />
         <Stack.Screen name="Practice" component={PracticeScreen} />
         <Stack.Screen name="QuickFire" component={QuickFireScreen} />
         <Stack.Screen name="PrepKitInput" component={PrepKitInputScreen} />

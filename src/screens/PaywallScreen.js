@@ -8,9 +8,8 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 import { colors, fonts, spacing, radius } from '../constants/theme';
-import { syncSubscriptionStatus } from '../utils/purchases';
+import { presentPaywall, presentCustomerCenter } from '../utils/purchases';
 import { track, identify, EVENTS } from '../utils/analytics';
 
 const FEATURES = [
@@ -43,14 +42,10 @@ export default function PaywallScreen({ route, navigation }) {
     track(EVENTS.PAYWALL_PURCHASE_TAPPED, { source: message || 'unspecified' });
     setLoading(true);
     try {
-      const result = await RevenueCatUI.presentPaywall();
-      if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED) {
-        track(EVENTS.SUBSCRIPTION_PURCHASED, {
-          result: result === PAYWALL_RESULT.PURCHASED ? 'purchased' : 'restored',
-          source: message || 'unspecified',
-        });
+      const purchased = await presentPaywall();
+      if (purchased) {
+        track(EVENTS.SUBSCRIPTION_PURCHASED, { source: message || 'unspecified' });
         identify({ subscription_status: 'pro' });
-        await syncSubscriptionStatus();
         navigation.goBack();
       }
     } catch (error) {
@@ -64,9 +59,7 @@ export default function PaywallScreen({ route, navigation }) {
     if (loading) return;
     setLoading(true);
     try {
-      await RevenueCatUI.presentCustomerCenter();
-      // Sync in case a restore happened inside Customer Center
-      await syncSubscriptionStatus();
+      await presentCustomerCenter();
     } catch (error) {
       console.error('[Paywall] presentCustomerCenter error:', error);
     } finally {

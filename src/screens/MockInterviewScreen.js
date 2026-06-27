@@ -7,21 +7,22 @@ import {
   Animated,
   Platform,
   Alert,
+  Linking,
 } from 'react-native';
-import { RTCPeerConnection, mediaDevices, registerGlobals } from 'react-native-webrtc';
-import InCallManager from 'react-native-incall-manager';
-import { OPENAI_API_KEY } from '@env';
+import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 import { colors, fonts, spacing, radius } from '../constants/theme';
+import { getMockInterviewTurn, transcribeAudio } from '../utils/api';
 import { saveMockInterview } from '../utils/storage';
+import ProcessingOverlay from '../components/ProcessingOverlay';
 
-// Register WebRTC globals (RTCPeerConnection, MediaStream, etc.) in the JS runtime
-registerGlobals();
+// Turn-based voice interview: the interviewer speaks a question (expo-speech),
+// the candidate records a spoken answer (expo-av), it's transcribed via the
+// backend, and the next turn is generated. Works on web and native with no
+// native-only modules — replaces the old realtime WebRTC implementation.
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const REALTIME_MODEL = 'gpt-4o-realtime-preview-2024-12-17';
-const SESSIONS_URL = 'https://api.openai.com/v1/realtime/sessions';
-const SDP_URL = `https://api.openai.com/v1/realtime?model=${REALTIME_MODEL}`;
+const MAX_ANSWER_SECONDS = 120;
+const MAX_EXCHANGES = 10;
 
 // ─── Waveform visualizer ──────────────────────────────────────────────────────
 
@@ -80,23 +81,23 @@ const waveStyles = StyleSheet.create({
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
-// status: connecting → ready → ai_speaking → listening → user_speaking
-//         → thinking → ai_speaking (loop) … → closing → ending
-
+// status: idle → thinking → ai_speaking → ready → recording → transcribing
+//         → thinking → … → closing → ending
 export default function MockInterviewScreen({ route, navigation }) {
   const { company, role, kit } = route.params;
 
-  const [status, setStatus] = useState('connecting');
+  const [status, setStatus] = useState('idle');
   const [questionNum, setQuestionNum] = useState(0);
+  const [answerCountdown, setAnswerCountdown] = useState(MAX_ANSWER_SECONDS);
 
-  const pcRef = useRef(null);           // RTCPeerConnection
-  const dcRef = useRef(null);           // RTCDataChannel for JSON events
-  const localStreamRef = useRef(null);  // mic MediaStream
   const conversationRef = useRef([]);
-  const mountedRef = useRef(true);
-  const statusRef = useRef('connecting');
   const exchangeCountRef = useRef(0);
-  const aiSpeakingRef = useRef(false);
+  const mountedRef = useRef(true);
+  const statusRef = useRef('idle');
+  const recordingRef = useRef(null);
+  const answerTimerRef = useRef(null);
+  const elapsedRef = useRef(0);
+  const permissionGrantedRef = useRef(false);
 
   function setStatusSafe(val) {
     if (!mountedRef.current) return;
@@ -105,208 +106,189 @@ export default function MockInterviewScreen({ route, navigation }) {
   }
 
   useEffect(() => {
-    init();
     return () => {
       mountedRef.current = false;
-      teardown();
+      clearTimers();
+      Speech.stop();
+      cleanupRecording();
+      Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
     };
   }, []);
 
-  // ── Init ────────────────────────────────────────────────────────────────────
+  function clearTimers() {
+    if (answerTimerRef.current) {
+      clearInterval(answerTimerRef.current);
+      answerTimerRef.current = null;
+    }
+  }
 
-  async function init() {
+  async function cleanupRecording() {
+    const rec = recordingRef.current;
+    recordingRef.current = null;
+    if (rec) {
+      try {
+        await rec.stopAndUnloadAsync();
+      } catch (_) {}
+    }
+  }
+
+  // ── Permissions ───────────────────────────────────────────────────────────────
+  async function ensureMicPermission() {
+    if (permissionGrantedRef.current) return true;
+    const { status: perm } = await Audio.requestPermissionsAsync();
+    if (perm !== 'granted') {
+      Alert.alert(
+        'Microphone Access Required',
+        'CHRM needs microphone access to hear your answers. Please enable it in Settings.',
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => navigation.goBack() },
+          ...(Platform.OS === 'web'
+            ? []
+            : [{ text: 'Open Settings', onPress: () => Linking.openSettings() }]),
+        ]
+      );
+      return false;
+    }
+    permissionGrantedRef.current = true;
+    return true;
+  }
+
+  // ── Start (user gesture — also unlocks web speech/mic) ──────────────────────────
+  async function handleStart() {
+    const ok = await ensureMicPermission();
+    if (!ok || !mountedRef.current) return;
+    setStatusSafe('thinking');
+    nextAiTurn();
+  }
+
+  // ── Interviewer turn ────────────────────────────────────────────────────────────
+  async function nextAiTurn() {
     try {
-      // Route audio to the main speaker (not earpiece) and keep screen active
-      InCallManager.start({ media: 'audio' });
-      InCallManager.setSpeakerphoneOn(true);
+      const turn = await getMockInterviewTurn(
+        conversationRef.current,
+        kit,
+        company,
+        role,
+        exchangeCountRef.current
+      );
+      if (!mountedRef.current) return;
 
-      // Step 1: get a short-lived ephemeral key so the real API key never
-      // leaves this device in the WebRTC handshake
-      const tokenRes = await fetch(SESSIONS_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ model: REALTIME_MODEL, voice: 'verse', speed: 1.08 }),
+      const line = turn.interviewer_line || '';
+      conversationRef.current.push({
+        type: 'ai',
+        line,
+        note: turn.internal_note || '',
+        timestamp: Date.now(),
       });
+      exchangeCountRef.current += 1;
+      setQuestionNum((q) => q + 1);
 
-      if (!tokenRes.ok) {
-        throw new Error(`Ephemeral token request failed: ${tokenRes.status}`);
-      }
-
-      const tokenData = await tokenRes.json();
-      const ephemeralKey = tokenData.client_secret.value;
-
-      // Step 2: create peer connection (no ICE servers — direct to OpenAI)
-      const pc = new RTCPeerConnection();
-      pcRef.current = pc;
-
-      // Incoming audio from OpenAI plays automatically via the WebRTC stack —
-      // no manual decoding, no WAV files, no expo-av playback needed.
-      pc.ontrack = (event) => {
-        console.log('[WebRTC] remote track received:', event.track.kind);
-      };
-
-      // Step 3: data channel for JSON control events (transcripts, VAD, errors)
-      const dc = pc.createDataChannel('oai-events');
-      dcRef.current = dc;
-
-      dc.onopen = () => {
-        console.log('[DC] open — configuring session');
-        dc.send(
-          JSON.stringify({
-            type: 'session.update',
-            session: {
-              instructions: buildSystemPrompt(),
-              input_audio_transcription: { model: 'whisper-1' },
-              turn_detection: {
-                type: 'server_vad',
-                threshold: 0.45,
-                prefix_padding_ms: 300,
-                silence_duration_ms: 400,
-              },
-            },
-          })
-        );
-        // Prompt the AI to open the interview
-        dc.send(JSON.stringify({ type: 'response.create' }));
-        setStatusSafe('ready');
-      };
-
-      dc.onmessage = (e) => {
-        try {
-          handleEvent(JSON.parse(e.data));
-        } catch (err) {
-          console.error('[DC] parse error:', err);
-        }
-      };
-
-      dc.onerror = (err) => console.error('[DC] error:', err);
-
-      // Step 4: capture mic and add audio track to the peer connection
-      const stream = await mediaDevices.getUserMedia({ audio: true, video: false });
-      localStreamRef.current = stream;
-      stream.getAudioTracks().forEach((track) => pc.addTrack(track, stream));
-
-      // Step 5: create SDP offer and set as local description
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      // Step 6: send offer SDP to OpenAI, get answer SDP back
-      const sdpRes = await fetch(SDP_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${ephemeralKey}`,
-          'Content-Type': 'application/sdp',
-        },
-        body: offer.sdp,
-      });
-
-      if (!sdpRes.ok) {
-        throw new Error(`SDP exchange failed: ${sdpRes.status}`);
-      }
-
-      const answerSdp = await sdpRes.text();
-      await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
-
-      console.log('[WebRTC] connection established');
+      const isClosing = !!turn.is_closing || exchangeCountRef.current >= MAX_EXCHANGES;
+      speakLine(line, isClosing);
     } catch (err) {
-      console.error('[WebRTC] init error:', err);
+      console.error('Mock interview turn error:', err);
       if (mountedRef.current) {
-        Alert.alert(
-          'Connection Failed',
-          'Could not connect to the interview service. Check your internet connection and try again.',
-          [{ text: 'OK', onPress: () => navigation.goBack() }]
-        );
+        Alert.alert('Connection Problem', 'Could not reach the interview service. Please try again.', [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
       }
     }
   }
 
-  // ── System prompt ────────────────────────────────────────────────────────────
-
-  function buildSystemPrompt() {
-    const roleCtx = role || 'the open position';
-    const kitData = {
-      interview_style: kit.company_overview?.interview_style,
-      culture_signals: kit.company_overview?.culture_signals,
-      likely_questions: kit.likely_questions,
+  function speakLine(line, isClosing) {
+    setStatusSafe('ai_speaking');
+    const finish = () => {
+      if (!mountedRef.current) return;
+      setStatusSafe(isClosing ? 'closing' : 'ready');
     };
-    return (
-      `You are conducting a realistic interview for a ${roleCtx} position at ${company}. ` +
-      `You have the following intelligence about this firm: ${JSON.stringify(kitData)}. ` +
-      `Conduct the interview naturally and conversationally. Ask one question at a time. ` +
-      `Listen carefully and ask sharp follow-up questions when answers are vague or incomplete. ` +
-      `Be professional but challenging. CRITICAL: Keep every response to 1-3 sentences maximum. ` +
-      `Be conversational and direct. Do not give long monologues or explanations. ` +
-      `Respond like a real person in a real interview — concise, natural, occasionally informal. ` +
-      `Never lecture. Never summarize what the candidate just said back to them. ` +
-      `After 8-10 exchanges, wrap up naturally: "That covers everything I had. Thanks for your time today."`
-    );
+    if (!line) {
+      finish();
+      return;
+    }
+    Speech.stop();
+    Speech.speak(line, {
+      rate: Platform.OS === 'ios' ? 0.5 : 1.0,
+      onDone: finish,
+      onStopped: finish,
+      onError: finish,
+    });
   }
 
-  // ── Data channel event handler ───────────────────────────────────────────────
+  function skipSpeaking() {
+    if (statusRef.current !== 'ai_speaking') return;
+    Speech.stop();
+    // onStopped fires finish(); guard in case it doesn't on some platforms.
+  }
 
-  function handleEvent(ev) {
-    switch (ev.type) {
-      // AI started sending audio — update waveform
-      case 'response.audio.delta':
-        if (!aiSpeakingRef.current) {
-          aiSpeakingRef.current = true;
-          setStatusSafe('ai_speaking');
-        }
-        break;
+  // ── Candidate answer ────────────────────────────────────────────────────────────
+  async function beginRecording() {
+    try {
+      const ok = await ensureMicPermission();
+      if (!ok || !mountedRef.current) return;
 
-      // AI finished its full response — capture transcript, update counter
-      case 'response.audio_transcript.done':
-        aiSpeakingRef.current = false;
-        if (ev.transcript?.trim()) {
-          conversationRef.current.push({
-            type: 'ai',
-            line: ev.transcript,
-            timestamp: Date.now(),
-          });
-          exchangeCountRef.current += 1;
-          setQuestionNum((q) => q + 1);
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
 
-          const lower = ev.transcript.toLowerCase();
-          const isClosing =
-            lower.includes('that covers everything') ||
-            lower.includes('thanks for your time') ||
-            lower.includes('do you have any questions for me') ||
-            exchangeCountRef.current >= 10;
+      setStatusSafe('recording');
+      elapsedRef.current = 0;
+      setAnswerCountdown(MAX_ANSWER_SECONDS);
 
-          setStatusSafe(isClosing ? 'closing' : 'listening');
-        }
-        break;
-
-      // User speech transcribed — add to conversation log
-      case 'conversation.item.input_audio_transcription.completed':
-        if (ev.transcript?.trim()) {
-          conversationRef.current.push({
-            type: 'user',
-            transcript: ev.transcript,
-            timestamp: Date.now(),
-          });
-        }
-        break;
-
-      case 'input_audio_buffer.speech_started':
-        setStatusSafe('user_speaking');
-        break;
-
-      case 'input_audio_buffer.speech_stopped':
-        setStatusSafe('thinking');
-        break;
-
-      case 'error':
-        console.error('[Realtime] API error:', ev.error?.message);
-        break;
+      answerTimerRef.current = setInterval(() => {
+        elapsedRef.current += 1;
+        setAnswerCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(answerTimerRef.current);
+            answerTimerRef.current = null;
+            stopRecording();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+      Alert.alert('Error', 'Could not start recording. Please try again.');
     }
   }
 
-  // ── End interview ────────────────────────────────────────────────────────────
+  async function stopRecording() {
+    const rec = recordingRef.current;
+    if (!rec) return;
+    try {
+      clearTimers();
+      const duration = elapsedRef.current;
+      await rec.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      const uri = rec.getURI();
+      recordingRef.current = null;
 
+      setStatusSafe('transcribing');
+      const transcript = await transcribeAudio(uri);
+      if (!mountedRef.current) return;
+
+      conversationRef.current.push({
+        type: 'user',
+        transcript: transcript || '',
+        duration,
+        timestamp: Date.now(),
+      });
+
+      setStatusSafe('thinking');
+      nextAiTurn();
+    } catch (err) {
+      console.error('Failed to process answer:', err);
+      if (mountedRef.current) {
+        Alert.alert('Error', 'Could not process your answer. Please try again.', [
+          { text: 'Retry', onPress: () => setStatusSafe('ready') },
+        ]);
+      }
+    }
+  }
+
+  // ── End ─────────────────────────────────────────────────────────────────────────
   function confirmEnd() {
     Alert.alert('End Interview?', "You'll see your full debrief and performance analysis.", [
       { text: 'Keep Going', style: 'cancel' },
@@ -316,7 +298,9 @@ export default function MockInterviewScreen({ route, navigation }) {
 
   async function endInterview() {
     setStatusSafe('ending');
-    await teardown();
+    Speech.stop();
+    clearTimers();
+    await cleanupRecording();
     const conv = conversationRef.current;
     try {
       await saveMockInterview({
@@ -327,55 +311,35 @@ export default function MockInterviewScreen({ route, navigation }) {
         date: new Date().toISOString(),
       });
     } catch (_) {}
+    if (!mountedRef.current) return;
     navigation.replace('MockInterviewDebrief', { company, role, kit, conversation: conv });
   }
 
-  async function teardown() {
-    InCallManager.stop();
-    if (dcRef.current) {
-      dcRef.current.close();
-      dcRef.current = null;
-    }
-    if (pcRef.current) {
-      pcRef.current.close();
-      pcRef.current = null;
-    }
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((t) => t.stop());
-      localStreamRef.current = null;
-    }
-  }
-
   // ── Render ────────────────────────────────────────────────────────────────────
-
   const isAiSpeaking = status === 'ai_speaking';
-  const isUserSpeaking = status === 'user_speaking';
-  const waveActive = isAiSpeaking || isUserSpeaking;
-  const waveColor = isAiSpeaking ? colors.accent : isUserSpeaking ? '#ffffff' : colors.textMuted;
+  const isRecording = status === 'recording';
+  const waveActive = isAiSpeaking || isRecording;
+  const waveColor = isAiSpeaking ? colors.accent : isRecording ? colors.error : colors.textMuted;
 
-  const statusLabel = {
-    connecting: 'Connecting...',
-    ready: 'Starting...',
-    ai_speaking: 'Interviewer speaking...',
-    listening: 'Listening...',
-    user_speaking: 'Listening...',
-    thinking: 'Thinking...',
-    closing: 'Interview complete',
-    ending: 'Saving...',
-    error: 'Connection error',
-  }[status] ?? '';
-
-  const footerHint =
-    status === 'listening' || status === 'user_speaking'
-      ? 'Speak naturally — no button needed'
-      : status === 'ai_speaking'
-      ? 'Interviewer is responding...'
-      : status === 'thinking'
-      ? 'Processing your answer...'
-      : '';
+  const statusLabel =
+    {
+      idle: 'Ready when you are',
+      thinking: 'Interviewer is thinking...',
+      ai_speaking: 'Interviewer speaking...',
+      ready: 'Your turn',
+      recording: `Recording · ${answerCountdown}s left`,
+      transcribing: 'Processing your answer...',
+      closing: 'Interview complete',
+      ending: 'Saving...',
+    }[status] ?? '';
 
   return (
     <View style={styles.container}>
+      <ProcessingOverlay
+        visible={status === 'transcribing' || status === 'thinking'}
+        message={status === 'transcribing' ? 'Processing your answer...' : 'Interviewer is thinking...'}
+      />
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.endBtn} onPress={confirmEnd} activeOpacity={0.7}>
@@ -398,14 +362,36 @@ export default function MockInterviewScreen({ route, navigation }) {
         <Text style={styles.statusLabel}>{statusLabel}</Text>
       </View>
 
-      {/* Footer */}
+      {/* Footer — context-dependent action */}
       <View style={styles.footer}>
-        {status === 'closing' ? (
-          <TouchableOpacity style={styles.debriefBtn} onPress={endInterview} activeOpacity={0.85}>
-            <Text style={styles.debriefBtnText}>VIEW DEBRIEF →</Text>
+        {status === 'idle' && (
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleStart} activeOpacity={0.85}>
+            <Text style={styles.primaryBtnText}>START INTERVIEW</Text>
           </TouchableOpacity>
-        ) : (
-          <Text style={styles.footerHint}>{footerHint}</Text>
+        )}
+
+        {status === 'ai_speaking' && (
+          <TouchableOpacity style={styles.ghostBtn} onPress={skipSpeaking} activeOpacity={0.7}>
+            <Text style={styles.ghostBtnText}>Skip</Text>
+          </TouchableOpacity>
+        )}
+
+        {status === 'ready' && (
+          <TouchableOpacity style={styles.recordBtn} onPress={beginRecording} activeOpacity={0.85}>
+            <Text style={styles.recordBtnText}>● ANSWER</Text>
+          </TouchableOpacity>
+        )}
+
+        {status === 'recording' && (
+          <TouchableOpacity style={styles.stopBtn} onPress={stopRecording} activeOpacity={0.85}>
+            <Text style={styles.stopBtnText}>■ DONE</Text>
+          </TouchableOpacity>
+        )}
+
+        {status === 'closing' && (
+          <TouchableOpacity style={styles.primaryBtn} onPress={endInterview} activeOpacity={0.85}>
+            <Text style={styles.primaryBtnText}>VIEW DEBRIEF →</Text>
+          </TouchableOpacity>
         )}
       </View>
     </View>
@@ -424,8 +410,13 @@ const styles = StyleSheet.create({
   qBadgeText: { fontFamily: fonts.displayMedium, fontSize: 14, color: colors.accent, letterSpacing: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
   statusLabel: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, letterSpacing: 1.2 },
-  footer: { paddingHorizontal: spacing.lg, paddingBottom: Platform.OS === 'ios' ? 48 : spacing.xl, paddingTop: spacing.md, alignItems: 'center', minHeight: 80, justifyContent: 'center' },
-  debriefBtn: { backgroundColor: colors.text, borderRadius: radius.md, paddingVertical: spacing.md, paddingHorizontal: spacing.xxl },
-  debriefBtnText: { fontFamily: fonts.display, fontSize: 18, color: '#F2F1EE', letterSpacing: 2 },
-  footerHint: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.5 },
+  footer: { paddingHorizontal: spacing.lg, paddingBottom: Platform.OS === 'ios' ? 48 : spacing.xl, paddingTop: spacing.md, alignItems: 'center', minHeight: 96, justifyContent: 'center' },
+  primaryBtn: { backgroundColor: colors.text, borderRadius: radius.md, paddingVertical: spacing.md, paddingHorizontal: spacing.xxl },
+  primaryBtnText: { fontFamily: fonts.display, fontSize: 18, color: '#F2F1EE', letterSpacing: 2 },
+  recordBtn: { backgroundColor: colors.accent, borderRadius: radius.full, paddingVertical: spacing.md, paddingHorizontal: spacing.xxl },
+  recordBtnText: { fontFamily: fonts.display, fontSize: 18, color: '#FFFFFF', letterSpacing: 2 },
+  stopBtn: { backgroundColor: colors.error, borderRadius: radius.full, paddingVertical: spacing.md, paddingHorizontal: spacing.xxl },
+  stopBtnText: { fontFamily: fonts.display, fontSize: 18, color: '#FFFFFF', letterSpacing: 2 },
+  ghostBtn: { paddingVertical: spacing.sm, paddingHorizontal: spacing.xl },
+  ghostBtnText: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted, letterSpacing: 1 },
 });

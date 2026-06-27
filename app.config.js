@@ -10,7 +10,8 @@ module.exports = {
   },
   extra: {
     ...appJson.expo.extra,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    // AI keys now live on the backend (see /server) and are never shipped to
+    // the client. The app only needs to know where that backend is.
+    API_BASE_URL: process.env.API_BASE_URL,
   },
 };

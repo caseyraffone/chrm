@@ -1,51 +1,45 @@
 # CHRM Backend
 
-Serverless API that proxies CHRM's AI calls so the OpenAI/Anthropic keys never
-ship inside the client app. Deploys as **Vercel** functions.
+Host-agnostic [Hono](https://hono.dev) API that proxies OpenAI and Anthropic so
+API keys stay server-side. Both the native app and the web app call this service
+instead of hitting OpenAI/Anthropic directly.
 
-> Part of the commercial-build initiative (see `../GOAL.md`). This is **standalone**
-> — the iOS/web client is not pointed at it yet. Wiring the client + removing keys
-> from the client bundle is a later Phase 1 unit (1d) that needs explicit sign-off
-> because it touches `app.config.js`.
+## Why this exists
 
-## Endpoints
+The app used to embed `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` in the client and
+call the providers directly. That leaks keys in a web bundle (plain JS) and in
+the native binary. This backend holds the keys; clients call named endpoints.
 
-| Method | Path | Purpose | Returns |
-|---|---|---|---|
-| GET | `/api/health` | Liveness + which keys are configured (booleans only) | `{ ok, service, time, config }` |
-| POST | `/api/transcribe` | Proxy an audio upload to OpenAI Whisper | `{ text }` |
-
-`/api/transcribe` accepts `multipart/form-data` with a single `file` field — the
-same shape the client already used — and returns `{ text }`, identical to the old
-direct Whisper call, so the client can be repointed with no response changes.
-
-## Local development
+## Run locally
 
 ```bash
 cd server
+cp .env.example .env   # fill in OPENAI_API_KEY and ANTHROPIC_API_KEY
 npm install
-npm test          # runs the proxy tests (OpenAI call is mocked — no key needed)
+npm run dev            # http://localhost:8787
 ```
 
-To run the functions locally you need the Vercel CLI (`npm i -g vercel`), then
-`vercel dev` with `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` set in `.env.local`.
+Point the app at it by setting `API_BASE_URL` in the app's root `.env`
+(e.g. `API_BASE_URL=http://localhost:8787`). On a physical device use your
+machine's LAN IP, not `localhost`.
 
-## Deploy (Vercel)
+## Endpoints
 
-1. Create a Vercel project with **root directory = `server`**.
-2. Set env vars in Vercel project settings (see `.env.example`):
-   - `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
-   - `ALLOWED_ORIGINS` (web app origins; native Expo requests need no Origin)
-3. Deploy. Smoke-test:
-   ```bash
-   curl https://<your-project>.vercel.app/api/health
-   ```
+| Method | Path | Body | Returns |
+|---|---|---|---|
+| GET | `/health` | — | `{ ok: true }` |
+| POST | `/api/questions` | `{ role, category }` | `{ questions: [...] }` |
+| POST | `/api/prep-kit` | `{ company, role }` | prep kit object |
+| POST | `/api/feedback` | `{ transcript, question, category, role }` | feedback object |
+| POST | `/api/mock-turn` | `{ conversation, prepKit, company, role, exchangeCount }` | turn object |
+| POST | `/api/mock-debrief` | `{ conversation, company, role }` | debrief object |
+| POST | `/api/hirevue-questions` | `{ company, role, mix, count, prepKit }` | `{ questions: [...] }` |
+| POST | `/api/hirevue-debrief` | `{ company, role, items }` | debrief object |
+| POST | `/api/transcribe` | multipart `file` | `{ text }` |
+| POST | `/api/tts` | `{ text, voice }` | `audio/mpeg` |
 
-## Notes / TODO
+## Deploy
 
-- **Rate limiting** is currently a best-effort in-memory limiter (per warm
-  instance only — not a true distributed limit). Phase 1e swaps in Upstash Redis
-  (`UPSTASH_REDIS_REST_URL` / `_TOKEN` already stubbed in `.env.example`).
-- Next endpoints to port behind the backend (Phase 1c): the Claude calls
-  (feedback, questions, prep kit, mock interview, HireVue, technical grading),
-  keeping request/response shapes identical to `src/utils/api.js`.
+The Hono app is portable. It runs on Node (`npm start`) and adapts to Vercel,
+Netlify, Cloudflare Workers, Fly, Render, etc. Set the same env vars on the host
+and lock `ALLOWED_ORIGIN` to your web domain.

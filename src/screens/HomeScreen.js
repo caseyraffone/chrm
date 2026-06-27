@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { OPENAI_API_KEY, ANTHROPIC_API_KEY } from '@env';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import {
   getRepCount,
@@ -20,9 +19,6 @@ import {
   FREE_DAILY_LIMIT,
 } from '../utils/storage';
 import { BEHAVIORAL_QUESTIONS } from '../utils/questions';
-
-const hasOpenAI = !!OPENAI_API_KEY;
-const hasAnthropic = !!ANTHROPIC_API_KEY;
 
 const DRILL_CATEGORIES = [
   {

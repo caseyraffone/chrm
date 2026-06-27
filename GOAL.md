@@ -142,21 +142,36 @@ Ordered roughly by severity:
 both web and logic-sharing), then accounts (needed before web is useful and
 before web payments), then the web client, then hardening, then growth.
 
-### Open decisions that need Casey before Phase 1 starts
-- **Backend host/stack** (serverless vs small Node service).
-- **Auth + data provider** (Supabase vs Firebase vs Clerk).
-- **Web payment provider** (Stripe vs RevenueCat Web Billing).
+### Decisions (made 2026-06-27 — Casey delegated these to Claude)
+- **Backend host/stack: Vercel serverless functions, plain JS (Node).** Lowest-
+  friction API proxy, git-push deploy, generous free tier, and the natural home
+  for the Phase 5 marketing site (no second platform). JS to match the codebase.
+- **Auth + data: Supabase.** Auth + Postgres + storage + RLS in one dashboard;
+  CHRM's data is clean relational data. Fewer providers than Clerk (auth-only) and
+  less lock-in/NoSQL friction than Firebase.
+- **Web payments: RevenueCat Web Billing.** Keeps ONE entitlement system across
+  iOS + web (iOS already uses RevenueCat); reuses the existing `purchases.js`
+  entitlement model. RC Web Billing runs on Stripe under the hood.
+
+Architecture summary: Vercel functions (compute/proxy) validate Supabase JWTs and
+use the Supabase service role for privileged reads; RevenueCat is the single
+source of entitlement truth across platforms.
 
 ---
 
 ## Current Phase
 
-**Status:** Phase 0 plan delivered — awaiting Casey's review + the three open
-decisions above. No commercial-build code written yet (per the directive).
+**Status:** Phase 1 started. Decisions made (Vercel + Supabase + RevenueCat Web
+Billing). Unit 1b in progress: backend skeleton + `/transcribe` Whisper proxy
+under `server/`, standalone (client NOT yet wired — that's unit 1d, and it touches
+the client + key handling, which needs explicit sign-off + a device test).
 **Last updated:** 2026-06-27 (by Claude)
-**Next session should:** Casey reviews/edits this plan and answers the three open
-decisions; then approve Phase 1, starting with unit 1a (pick backend host/stack)
-and 1b (skeleton + `/transcribe` proxy).
+**Next session should:** Review the `server/` skeleton, then deploy it to Vercel
+(set `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` as server env vars) and smoke-test
+`/api/health` + `/api/transcribe`. Then continue Phase 1: unit 1c (port the
+Claude endpoints behind the backend) and 1e (real rate limiting via Upstash).
+Hold unit 1d (point iOS `api.js` at the backend + strip keys from the client)
+until Casey confirms — it touches app.config.js, which is constraint-protected.
 
 > Note: a separate, already-shipped track in this repo expanded the IB Interview
 > Prep banks (116 technical Qs + Behavioral/Fit/Markets tracks). That is unrelated

@@ -13,6 +13,7 @@ import { colors, fonts, spacing, radius } from '../constants/theme';
 import { getFeedback, getResumeFeedback, getTechnicalFeedback } from '../utils/api';
 import { saveDrill, savePrepKitQuestionAttempt, saveBankAttempt, getResume } from '../utils/storage';
 import { track, EVENTS } from '../utils/analytics';
+import { analyzeSpeech } from '../utils/speech';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const DEEP_DIVE_SHOWN_KEY = '@chrm_deep_dive_shown';
@@ -125,6 +126,11 @@ export default function FeedbackScreen({ route, navigation }) {
 
   const scoreColor = feedback ? getScoreColor(feedback.score) : null;
 
+  // "How you said it" metrics — only when we have a real, gradeable answer.
+  const delivery = feedback && !feedback.insufficient ? analyzeSpeech(transcript, duration) : null;
+  const toneColor = (tone) =>
+    tone === 'good' ? colors.success : tone === 'bad' ? colors.error : colors.accent;
+
   return (
     <View style={styles.container}>
       {error ? (
@@ -163,6 +169,39 @@ export default function FeedbackScreen({ route, navigation }) {
           </View>
 
           <View style={styles.divider} />
+
+          {/* Delivery — how you said it (pace + fillers), computed locally */}
+          {delivery && (
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>DELIVERY</Text>
+              <View style={styles.deliveryRow}>
+                <View style={styles.deliveryStat}>
+                  <Text style={[styles.deliveryValue, { color: toneColor(delivery.paceTone) }]}>
+                    {delivery.wpm}
+                  </Text>
+                  <Text style={styles.deliveryUnit}>words/min</Text>
+                  <Text style={[styles.deliveryTag, { color: toneColor(delivery.paceTone) }]}>
+                    {delivery.paceLabel}
+                  </Text>
+                </View>
+                <View style={styles.deliveryStat}>
+                  <Text style={[styles.deliveryValue, { color: toneColor(delivery.fillerTone) }]}>
+                    {delivery.fillers}
+                  </Text>
+                  <Text style={styles.deliveryUnit}>filler words</Text>
+                  <Text style={[styles.deliveryTag, { color: toneColor(delivery.fillerTone) }]}>
+                    {delivery.fillers === 0 ? 'None — clean' : `${Math.round(delivery.fillerRate * 100)}% of words`}
+                  </Text>
+                </View>
+                <View style={styles.deliveryStat}>
+                  <Text style={styles.deliveryValue}>{delivery.durationSeconds}s</Text>
+                  <Text style={styles.deliveryUnit}>spoken</Text>
+                  <Text style={styles.deliveryTag}>{delivery.words} words</Text>
+                </View>
+              </View>
+              <Text style={styles.deliveryTip}>{delivery.tip}</Text>
+            </View>
+          )}
 
           {/* Question */}
           <View style={styles.section}>
@@ -360,6 +399,45 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.xl,
+  },
+  deliveryRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  deliveryStat: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+  },
+  deliveryValue: {
+    fontFamily: fonts.display,
+    fontSize: 24,
+    color: colors.text,
+  },
+  deliveryUnit: {
+    fontFamily: fonts.body,
+    fontSize: 10,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  deliveryTag: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 10,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    textAlign: 'center',
+  },
+  deliveryTip: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 18,
+    marginTop: spacing.md,
   },
   sectionLabel: {
     fontFamily: fonts.body,

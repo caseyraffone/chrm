@@ -149,7 +149,7 @@ export const PE_DEAL_BANK = [
   {
     id: 'pe_deal_01',
     topic: 'Investment Judgment',
-    difficulty: 2,
+    difficulty: 1,
     question: 'What makes a good investment?',
     reference_answer:
       'A strong answer goes beyond cheapness: a good business with durable competitive advantages and predictable cash flows, bought at a reasonable price, with a clear path to create value — operational improvement, growth, or strategic repositioning — and a realistic exit. It weighs the risk-adjusted return and the margin of safety, not just the upside. Price and quality together, with a thesis for how value is created.',

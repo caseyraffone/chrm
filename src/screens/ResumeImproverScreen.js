@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { improveResume } from '../utils/api';
+import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 export default function ResumeImproverScreen({ route, navigation }) {
@@ -27,6 +28,7 @@ export default function ResumeImproverScreen({ route, navigation }) {
       setLoading(true);
       const res = await improveResume(resumeText, role);
       setResult(res);
+      track(EVENTS.RESUME_IMPROVED, { has_role: Boolean(role) });
     } catch (err) {
       console.error('Resume improver error:', err);
       setError('Could not generate improvements. Check your connection and try again.');

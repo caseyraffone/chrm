@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { generateHireVueDebrief } from '../utils/api';
+import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const FILLERS = ['um', 'uh', 'hmm', 'like', 'you know', 'kind of', 'sort of', 'basically', 'literally'];
@@ -70,6 +71,7 @@ export default function HireVueDebriefScreen({ route, navigation }) {
       try {
         const result = await generateHireVueDebrief(company, role, items);
         setDebrief(result);
+        track(EVENTS.HIREVUE_COMPLETED, { score: result?.overall_score ?? null, questions: items?.length ?? null });
       } catch (err) {
         console.error('HireVue debrief failed:', err);
         setError('Could not generate your debrief. You can still review your answers below.');

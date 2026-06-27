@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { generatePrepKit } from '../utils/api';
 import { savePrepKit, getPrepKit, getAllPrepKitMeta } from '../utils/storage';
+import { track, EVENTS } from '../utils/analytics';
 
 const QUICK_PICKS = [
   'Goldman Sachs',
@@ -117,6 +118,7 @@ export default function PrepKitInputScreen({ route, navigation }) {
       if (!kit) {
         kit = await generatePrepKit(c, r);
         await savePrepKit(c, r, kit);
+        track(EVENTS.PREP_KIT_GENERATED, { has_role: Boolean(r) });
       }
 
       stopLoadingAnimation();

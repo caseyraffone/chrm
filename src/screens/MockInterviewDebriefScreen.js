@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { generateMockInterviewDebrief } from '../utils/api';
+import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const FILLERS = ['um', 'uh', 'hmm', 'like', 'you know', 'kind of', 'sort of', 'basically', 'literally'];
@@ -101,6 +102,7 @@ export default function MockInterviewDebriefScreen({ route, navigation }) {
       try {
         const result = await generateMockInterviewDebrief(conversation, company, role);
         setDebrief(result);
+        track(EVENTS.MOCK_INTERVIEW_COMPLETED, { score: result?.overall_score ?? null, has_company: Boolean(company) });
       } catch (err) {
         console.error('Debrief generation failed:', err);
         setError('Could not generate your debrief. You can still review the full transcript.');

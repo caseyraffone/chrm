@@ -164,7 +164,7 @@ export default function ResumeWalkthroughScreen({ navigation }) {
         <View style={styles.resumeLabelRow}>
           <Text style={styles.fieldLabel}>YOUR RESUME</Text>
           <TouchableOpacity onPress={handleUploadPdf} style={styles.uploadButton} activeOpacity={0.7}>
-            <Text style={styles.uploadButtonText}>⬆  Upload PDF</Text>
+            <Text style={styles.uploadButtonText}>Upload PDF</Text>
           </TouchableOpacity>
         </View>
         <View

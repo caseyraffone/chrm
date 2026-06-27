@@ -64,8 +64,8 @@ export default function ActivityCalendar({ drills }) {
     <View style={styles.wrap}>
       <View style={styles.headerRow}>
         <Text style={styles.label}>ACTIVITY</Text>
-        <Text style={styles.streak}>
-          {streak > 0 ? `🔥 ${streak} day${streak > 1 ? 's' : ''} streak` : 'Start a streak today'}
+        <Text style={[styles.streak, streak > 0 && styles.streakActive]}>
+          {streak > 0 ? `${streak} day${streak > 1 ? 's' : ''} streak` : 'Start a streak today'}
         </Text>
       </View>
 
@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm },
   label: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 2.5 },
-  streak: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.text },
+  streak: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.textMuted },
+  streakActive: { color: colors.accent },
   grid: { flexDirection: 'row', gap: GAP, justifyContent: 'center' },
   col: { gap: GAP },
   cell: { width: CELL, height: CELL, borderRadius: 3, borderWidth: 1 },

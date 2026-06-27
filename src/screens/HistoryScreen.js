@@ -35,23 +35,6 @@ function getScoreColor(score) {
   return colors.error;
 }
 
-// Small category glyph for faster scanning of the drill list.
-const CATEGORY_ICONS = {
-  Technical: '📊',
-  Behavioral: '💬',
-  'Interview Prep': '🎯',
-  'Quick Fire': '⚡',
-  'Persuade & Present': '🎤',
-  'Resume Walkthrough': '📄',
-  'Fit & Motivation': '🧭',
-  Markets: '📈',
-  LBO: '💼',
-  'Deal Sense': '💼',
-};
-function categoryIcon(category) {
-  return CATEGORY_ICONS[category] || '🎤';
-}
-
 function dayKey(d) {
   return (d || '').slice(0, 10);
 }
@@ -115,7 +98,6 @@ function DrillItem({ drill }) {
       <View style={styles.drillSummary}>
         <View style={styles.drillMeta}>
           <View style={styles.drillCategoryRow}>
-            <Text style={styles.drillIcon}>{categoryIcon(drill.category)}</Text>
             <Text style={styles.drillCategory}>{drill.category}</Text>
             {drill.company ? (
               <View style={styles.companyTag}>
@@ -205,7 +187,6 @@ export default function HistoryScreen({ navigation }) {
 
       {loading ? null : drills.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>🎤</Text>
           <Text style={styles.emptyTitle}>No drills yet</Text>
           <Text style={styles.emptySubtext}>
             Complete your first drill to see your history here.
@@ -243,7 +224,6 @@ const styles = StyleSheet.create({
   drillCount: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted, letterSpacing: 2 },
   title: { fontFamily: fonts.display, fontSize: 52, color: colors.text, paddingHorizontal: spacing.lg, marginBottom: spacing.lg, lineHeight: 56, letterSpacing: -2 },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
-  emptyIcon: { fontSize: 36, marginBottom: spacing.md },
   emptyTitle: { fontFamily: fonts.displayMedium, fontSize: 20, color: colors.text, marginBottom: spacing.sm },
   emptySubtext: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: spacing.xl, lineHeight: 22 },
   startButton: { backgroundColor: colors.text, paddingVertical: spacing.md, paddingHorizontal: spacing.xxl, borderRadius: radius.md },
@@ -254,7 +234,6 @@ const styles = StyleSheet.create({
   statTile: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, paddingVertical: spacing.md, alignItems: 'center' },
   statValue: { fontFamily: fonts.display, fontSize: 24, color: colors.text, lineHeight: 28 },
   statLabel: { fontFamily: fonts.body, fontSize: 9, color: colors.textMuted, letterSpacing: 1.5, marginTop: 4 },
-  drillIcon: { fontSize: 14 },
   drillItem: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   drillSummary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   drillMeta: { flex: 1 },

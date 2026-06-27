@@ -143,7 +143,6 @@ export default function FeedbackScreen({ route, navigation }) {
     <View style={styles.container}>
       {error ? (
         <View style={styles.centered}>
-          <Text style={styles.errorEmoji}>⚠️</Text>
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadFeedback}>

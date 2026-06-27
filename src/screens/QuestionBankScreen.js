@@ -13,6 +13,7 @@ import { colors, fonts, spacing, radius } from '../constants/theme';
 import {
   getSubscriptionStatus,
   getDailyDrillCount,
+  getBankProgress,
   FREE_DAILY_LIMIT,
 } from '../utils/storage';
 import {
@@ -97,14 +98,22 @@ export default function QuestionBankScreen({ route, navigation }) {
   const [isPro, setIsPro] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState(0);
+  const [progress, setProgress] = useState({});
 
   useFocusEffect(
     useCallback(() => {
       (async () => {
         const status = await getSubscriptionStatus();
         setIsPro(status === 'pro');
+        setProgress(await getBankProgress());
       })();
     }, [])
+  );
+
+  // How many questions in this bank have been practiced at least once.
+  const practicedCount = useMemo(
+    () => items.filter((it) => progress[it.id]).length,
+    [items, progress]
   );
 
   const sections = useMemo(() => {
@@ -145,11 +154,21 @@ export default function QuestionBankScreen({ route, navigation }) {
       questions: [item.question],
       referenceAnswer: usesStar ? null : item.reference_answer,
       keyPoints: usesStar ? null : item.key_points,
+      bankItemId: item.id,
     });
+  }
+
+  // Color band for a best score, matching the difficulty palette semantics.
+  function scoreStyle(score) {
+    if (score >= 8) return { pill: styles.scoreHigh, text: styles.scoreHighText };
+    if (score >= 5) return { pill: styles.scoreMid, text: styles.scoreMidText };
+    return { pill: styles.scoreLow, text: styles.scoreLowText };
   }
 
   function renderItem({ item }) {
     const locked = isLocked(item.difficulty, isPro);
+    const best = progress[item.id]?.best;
+    const sc = best != null ? scoreStyle(best) : null;
     return (
       <TouchableOpacity style={styles.row} onPress={() => handleSelect(item)} activeOpacity={0.7}>
         <View style={{ flex: 1 }}>
@@ -162,9 +181,14 @@ export default function QuestionBankScreen({ route, navigation }) {
                 {DIFFICULTY_LABELS[item.difficulty]}
               </Text>
             </View>
+            {best != null && (
+              <View style={[styles.scorePill, sc.pill]}>
+                <Text style={[styles.scorePillText, sc.text]}>BEST {best}/10</Text>
+              </View>
+            )}
           </View>
         </View>
-        <Text style={styles.rowIcon}>{locked ? '🔒' : '›'}</Text>
+        <Text style={styles.rowIcon}>{locked ? '🔒' : best != null ? '↻' : '›'}</Text>
       </TouchableOpacity>
     );
   }
@@ -177,6 +201,12 @@ export default function QuestionBankScreen({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.eyebrow}>{industryName.toUpperCase()} · {trackName.toUpperCase()}</Text>
       </View>
+
+      <Text style={styles.progressLine}>
+        {practicedCount > 0
+          ? `${practicedCount} of ${items.length} practiced · keep building mastery`
+          : `${items.length} questions · tap any to drill it`}
+      </Text>
 
       {/* Search */}
       <View style={styles.searchBox}>
@@ -262,6 +292,15 @@ const styles = StyleSheet.create({
   diffText1: { color: colors.success },
   diffText2: { color: colors.accent },
   diffText3: { color: colors.error },
+  progressLine: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted, paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
+  scorePill: { borderRadius: radius.sm, paddingHorizontal: 6, paddingVertical: 1 },
+  scorePillText: { fontFamily: fonts.bodyBold, fontSize: 9, letterSpacing: 0.5 },
+  scoreHigh: { backgroundColor: 'rgba(26,128,71,0.1)' },
+  scoreHighText: { color: colors.success },
+  scoreMid: { backgroundColor: 'rgba(23,71,212,0.1)' },
+  scoreMidText: { color: colors.accent },
+  scoreLow: { backgroundColor: 'rgba(214,40,40,0.1)' },
+  scoreLowText: { color: colors.error },
   rowIcon: { fontSize: 16, color: colors.textMuted, marginLeft: spacing.sm },
   empty: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, textAlign: 'center', marginTop: spacing.xxl },
 });

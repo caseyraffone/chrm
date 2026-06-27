@@ -18,7 +18,7 @@ import { transcribeAudio } from '../utils/api';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 export default function PracticeScreen({ route, navigation }) {
-  const { category, role, questions, company = null, isFirstDrill = false, hubReturn = null, referenceAnswer = null, keyPoints = null } = route.params;
+  const { category, role, questions, company = null, isFirstDrill = false, hubReturn = null, referenceAnswer = null, keyPoints = null, bankItemId = null } = route.params;
 
   const [questionIndex, setQuestionIndex] = useState(
     () => Math.floor(Math.random() * questions.length)
@@ -144,6 +144,7 @@ export default function PracticeScreen({ route, navigation }) {
         hubReturn,
         referenceAnswer,
         keyPoints,
+        bankItemId,
       });
     } catch (err) {
       console.error('Failed to stop recording:', err);

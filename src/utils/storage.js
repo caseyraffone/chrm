@@ -173,6 +173,40 @@ export async function clearCachedQuestions(role, category) {
   }
 }
 
+// ─── Question bank progress ───────────────────────────────────────────────────
+//
+// Tracks the user's best score per curated bank question (keyed by item id), so
+// the question list can show mastery and progress over time.
+
+const BANK_PROGRESS_KEY = '@chrm_bank_progress';
+
+export async function getBankProgress() {
+  try {
+    const json = await AsyncStorage.getItem(BANK_PROGRESS_KEY);
+    return json ? JSON.parse(json) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Records an attempt, keeping the best score and an attempt count per item.
+export async function saveBankAttempt(itemId, score) {
+  try {
+    if (!itemId) return;
+    const progress = await getBankProgress();
+    const prev = progress[itemId] || { best: 0, attempts: 0 };
+    progress[itemId] = {
+      best: Math.max(prev.best || 0, score || 0),
+      attempts: (prev.attempts || 0) + 1,
+      last: score || 0,
+      date: new Date().toISOString(),
+    };
+    await AsyncStorage.setItem(BANK_PROGRESS_KEY, JSON.stringify(progress));
+  } catch (error) {
+    console.error('Error saving bank attempt:', error);
+  }
+}
+
 // ─── Mock Interview storage ───────────────────────────────────────────────────
 
 const MOCK_INTERVIEWS_KEY = '@chrm_mock_interviews';

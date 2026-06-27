@@ -11,14 +11,14 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { getFeedback, getResumeFeedback, getTechnicalFeedback } from '../utils/api';
-import { saveDrill, savePrepKitQuestionAttempt, getResume } from '../utils/storage';
+import { saveDrill, savePrepKitQuestionAttempt, saveBankAttempt, getResume } from '../utils/storage';
 import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const DEEP_DIVE_SHOWN_KEY = '@chrm_deep_dive_shown';
 
 export default function FeedbackScreen({ route, navigation }) {
-  const { category, role, questions, question, transcript, duration, company = null, isFirstDrill = false, hubReturn = null, referenceAnswer = null, keyPoints = null } = route.params;
+  const { category, role, questions, question, transcript, duration, company = null, isFirstDrill = false, hubReturn = null, referenceAnswer = null, keyPoints = null, bankItemId = null } = route.params;
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,6 +47,11 @@ export default function FeedbackScreen({ route, navigation }) {
 
       if (hubReturn) {
         await savePrepKitQuestionAttempt(hubReturn.company, hubReturn.role, question, result.score);
+      }
+
+      // Record best-score progress for curated bank questions.
+      if (bankItemId) {
+        await saveBankAttempt(bankItemId, result.score);
       }
 
       if (isFirstDrill) {
@@ -100,7 +105,7 @@ export default function FeedbackScreen({ route, navigation }) {
     if (category === 'Quick Fire') {
       navigation.navigate('QuickFire');
     } else {
-      navigation.navigate('Practice', { category, role, questions, referenceAnswer, keyPoints });
+      navigation.navigate('Practice', { category, role, questions, referenceAnswer, keyPoints, bankItemId });
     }
   }
 

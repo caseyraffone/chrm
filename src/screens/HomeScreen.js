@@ -175,7 +175,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.cardRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{cat.name}</Text>
-                <Text style={styles.cardSubtitle}>{cat.subtitle}</Text>
+                <Text style={styles.cardSubtitle} numberOfLines={1}>{cat.subtitle}</Text>
               </View>
               <Text style={styles.cardArrow}>›</Text>
             </View>
@@ -195,8 +195,8 @@ export default function HomeScreen({ navigation }) {
                   <Text style={styles.proBadgeText}>PRO</Text>
                 </View>
               </View>
-              <Text style={styles.hireVueSubtitle}>
-                One-way recorded interview, timed — then full AI feedback
+              <Text style={styles.hireVueSubtitle} numberOfLines={1}>
+                One-way recorded interview + AI feedback
               </Text>
             </View>
             <Text style={styles.hireVueArrow}>›</Text>
@@ -216,7 +216,7 @@ export default function HomeScreen({ navigation }) {
                   <Text style={styles.proBadgeText}>PRO</Text>
                 </View>
               </View>
-              <Text style={styles.prepKitSubtitle}>Deep intel + custom training plan</Text>
+              <Text style={styles.prepKitSubtitle} numberOfLines={1}>Deep intel + custom training plan</Text>
             </View>
             <Text style={styles.prepKitArrow}>›</Text>
           </View>
@@ -296,6 +296,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: spacing.lg,
+    minHeight: 76,
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
@@ -326,14 +328,20 @@ const styles = StyleSheet.create({
   },
   cardArrow: {
     fontSize: 20,
-    color: '#ddd',
+    color: colors.accent,
     marginLeft: 8,
   },
   hireVueCard: {
-    marginTop: 4,
     borderRadius: radius.md,
     backgroundColor: colors.accent,
     padding: spacing.lg,
+    minHeight: 76,
+    justifyContent: 'center',
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    elevation: 2,
   },
   hireVueTitleRow: {
     flexDirection: 'row',
@@ -370,10 +378,16 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   prepKitCard: {
-    marginTop: 4,
     borderRadius: radius.md,
     backgroundColor: colors.accent,
     padding: spacing.lg,
+    minHeight: 76,
+    justifyContent: 'center',
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    elevation: 2,
   },
   prepKitCardPressed: {
     opacity: 0.85,

@@ -194,8 +194,8 @@ const css = `
     font-size: clamp(15px, 3.7vw, 18px);
   }
   .phone-size .stage {
-    padding: 0 22px clamp(16px, 4vh, 34px);
-    align-items: end;
+    padding: clamp(10px, 2vh, 18px) 22px clamp(16px, 4vh, 34px);
+    place-items: start center;
   }
   .phone-size .phone {
     width: min(55vw, 286px);
@@ -233,7 +233,7 @@ const css = `
       margin-top: 8px;
       max-width: 330px;
     }
-    .phone-size .stage { padding-bottom: 12px; }
+    .phone-size .stage { padding-top: 8px; padding-bottom: 12px; }
     .phone-size .phone {
       width: 48vw;
       max-width: 214px;

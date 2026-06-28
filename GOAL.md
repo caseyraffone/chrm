@@ -301,3 +301,51 @@ Casey is leaving HireVue as-is for now.
   transport only — if/when the client is pointed at the backend (`API_BASE_URL`),
   the backend's `/api/*feedback*` handlers need the same model choice to keep the
   speedup.
+
+---
+
+### Current Source of Truth — App Store submission push (2026-06-28, by Codex)
+
+**Done in this pass:**
+- Merged the App Store rejection-fix PR into local `main`: legal links/pages,
+  subscription disclosure, iPad-safe onboarding error handling, App Store
+  screenshots, and Vercel serverless adapter.
+- Finished backend-only client wiring: `src/utils/api.js` no longer imports or
+  references OpenAI/Anthropic client keys or provider endpoints; every AI feature
+  calls named backend endpoints at `https://chrm-two.vercel.app`.
+- Updated EAS preview/production env to ship `API_BASE_URL` + RevenueCat only,
+  not provider secrets. Fixed `app.config.js` so `extra.API_BASE_URL` appears in
+  the actual Expo public config.
+- Fixed legal links to use the real production backend domain:
+  `https://chrm-two.vercel.app/privacy` and `https://chrm-two.vercel.app/terms`.
+- Carried the faster grading model to the backend: feedback, technical feedback,
+  and resume feedback use `claude-haiku-4-5`; heavier generation/debrief paths
+  remain on Sonnet.
+
+**Verified locally:**
+- `node scripts/validateBanks.mjs` ✅ 242 curated questions, integrity checks pass.
+- `node test/speech.test.mjs` ✅ 6/6 pass.
+- `npx expo config --type public` ✅ includes `extra.API_BASE_URL`.
+- `npm run build:web` ✅ export succeeds.
+- Bundle grep ✅ no OpenAI/Anthropic key names, provider endpoints, or `sk-*`
+  secret patterns in `dist`, `src/utils/api.js`, `app.config.js`, or `eas.json`.
+- Local backend ✅ `/health`, `/privacy`, and `/terms` return 200.
+
+**Still required before pressing Submit in App Store Connect:**
+1. Push `main` and wait for Vercel production deploy.
+2. Re-check public URLs:
+   - `https://chrm-two.vercel.app/health`
+   - `https://chrm-two.vercel.app/privacy`
+   - `https://chrm-two.vercel.app/terms`
+3. In App Store Connect, set Privacy Policy URL to
+   `https://chrm-two.vercel.app/privacy`.
+4. Complete App Privacy declaration for PII-free analytics/usage data and
+   third-party processing used to provide app functionality.
+5. Upload the generated screenshots from `assets/screenshots/` for each required
+   device size.
+6. Build a fresh production iOS binary after the push so the submitted app uses
+   backend-only AI transport and the correct legal links.
+
+**Next product-quality opportunities after submission:** device-test PDF resume
+upload, add rate limiting/user-level abuse controls, then continue commercial
+hardening (Sentry, analytics review, accounts/cloud sync).

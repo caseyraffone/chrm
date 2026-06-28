@@ -6,6 +6,7 @@ const OPENAI_TRANSCRIBE_URL = 'https://api.openai.com/v1/audio/transcriptions';
 const OPENAI_TTS_URL = 'https://api.openai.com/v1/audio/speech';
 
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
+const FEEDBACK_MODEL = process.env.CLAUDE_FEEDBACK_MODEL || 'claude-haiku-4-5';
 
 /**
  * Strips markdown code fences and surrounding prose, then JSON.parses.
@@ -30,12 +31,12 @@ export function parseJson(raw) {
  * Calls Claude (Anthropic Messages API). Returns the full response JSON so
  * callers can inspect stop_reason (used by the prep-kit retry).
  */
-export async function callClaudeRaw({ system, messages, prompt, maxTokens = 1024 }) {
+export async function callClaudeRaw({ system, messages, prompt, maxTokens = 1024, model = CLAUDE_MODEL }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not configured on the server');
 
   const body = {
-    model: CLAUDE_MODEL,
+    model,
     max_tokens: maxTokens,
     messages: messages || [{ role: 'user', content: prompt }],
   };
@@ -63,6 +64,8 @@ export async function callClaudeJson(opts) {
   const data = await callClaudeRaw(opts);
   return parseJson(data.content[0].text);
 }
+
+export { CLAUDE_MODEL, FEEDBACK_MODEL };
 
 /** Forwards an uploaded audio file to OpenAI Whisper, returns the transcript. */
 export async function transcribe(file) {

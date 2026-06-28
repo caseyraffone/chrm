@@ -27,7 +27,7 @@ import {
   buildResumeImprovePrompt,
   buildResumeExtractMessages,
 } from './prompts.js';
-import { callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
+import { FEEDBACK_MODEL, callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
 import { privacyHtml, termsHtml } from './legal.js';
 
 const app = new Hono();
@@ -144,6 +144,7 @@ app.post(
     const feedback = await callClaudeJson({
       prompt: buildFeedbackPrompt(transcript, question, category, role),
       maxTokens: 800,
+      model: FEEDBACK_MODEL,
     });
     return c.json(feedback);
   })
@@ -157,6 +158,7 @@ app.post(
     const feedback = await callClaudeJson({
       prompt: buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role),
       maxTokens: 1024,
+      model: FEEDBACK_MODEL,
     });
     return c.json(feedback);
   })
@@ -170,6 +172,7 @@ app.post(
     const feedback = await callClaudeJson({
       prompt: buildResumeFeedbackPrompt(transcript, resumeText, role),
       maxTokens: 1024,
+      model: FEEDBACK_MODEL,
     });
     return c.json(feedback);
   })

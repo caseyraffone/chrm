@@ -5,7 +5,7 @@
 //
 // IMPORTANT: update LEGAL_BASE_URL to the production backend domain after the
 // Vercel deploy, and confirm both links resolve before submitting to Apple.
-export const LEGAL_BASE_URL = 'https://chrm-api.vercel.app';
+export const LEGAL_BASE_URL = 'https://chrm-two.vercel.app';
 
 export const PRIVACY_URL = `${LEGAL_BASE_URL}/privacy`;
 export const TERMS_URL = `${LEGAL_BASE_URL}/terms`;

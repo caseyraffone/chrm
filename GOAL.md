@@ -193,6 +193,37 @@ Events are PII-free (no transcripts/names/emails) — keep it that way.
 ### Overnight A-grade push (2026-06-27, by Claude)
 
 Done in this run (all pushed to main, each bundles clean):
+
+---
+
+### Backend deployed to Vercel (2026-06-28, by Claude)
+
+- `server/` is live at **https://chrm-two.vercel.app** (Production, Vercel, auto-deploys from `main`).
+- - Fixed two bugs that caused 404: added `rewrites` to `server/vercel.json` so all requests route to the serverless function; wrapped `serve()` in a `NODE_ENV !== 'production'` guard so Vercel uses `export default app`.
+  - - `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` are set as Vercel environment variables (Production + Preview). Keys are NOT yet removed from the iOS client bundle — that is unit 1d, held pending Casey sign-off.
+    - - All `/api/*` endpoints (POST) are live. The root `/` intentionally returns 404 — this is an API server, not a website.
+     
+      - ## Current Phase — Updated 2026-06-28
+     
+      - **Status:**
+      - - Backend (Phase 1b+): `server/` DEPLOYED to Vercel at `https://chrm-two.vercel.app` ✅
+        - - Analytics: `src/utils/analytics.js` added and wired ✅
+          - - iOS client still calls OpenAI/Anthropic directly (unit 1d not yet done — needs sign-off)
+           
+            - **App Store submission blockers (do these before submitting):**
+            - 1. **Privacy Policy URL** — Apple requires a hosted privacy policy. Recommended: build a simple static page at `chrm-two.vercel.app/privacy` (or a separate free Netlify/Vercel static site). Claude Code can generate this.
+              2. 2. **App Privacy declaration in App Store Connect** — once Privacy Policy URL exists, go to App Store Connect → your app → App Privacy and declare the analytics data (PII-free usage data). Takes ~10 min manually.
+                 3. 3. **Update App Store screenshots** — current screenshots are outdated. Need new ones reflecting the latest UI (Behaviorals rename, blue Prep Kit card, score display fix, collapsible transcript). Casey to take screenshots on device or simulator; upload in App Store Connect under each device size.
+                    4. 4. **LEGAL_BASE_URL** — if referenced anywhere in the app (e.g. for Terms/Privacy links), set it to `https://chrm-two.vercel.app` or the privacy page URL.
+                      
+                       5. **Hosting recommendation for Privacy Policy page:**
+                       6. Use **Vercel** — you already have the project, it's free, and it keeps everything in one place. Claude Code can add a `public/privacy.html` static file to the repo and Vercel will serve it at `chrm-two.vercel.app/privacy`. No Netlify account needed.
+                      
+                       7. **Next session should:**
+                       8. 1. Claude Code: generate `server/public/privacy.html` (simple, legally sufficient privacy policy for an AI interview-prep app with PII-free analytics).
+                          2. 2. Casey: take new App Store screenshots on device/simulator and upload to App Store Connect.
+                             3. 3. Casey: fill in App Privacy section in App Store Connect using the new privacy URL.
+                                4. 4. Hold unit 1d (wire client to backend + strip keys) until Casey confirms — touches `app.config.js`.
 - **Grading overhaul** (`src/utils/api.js`): one calibrated SCORING_RUBRIC across
   every mode; insufficient-answer guard; tolerant JSON parsing + score clamping;
   shared callClaude with retry; per-category guidance; richer mock-interview

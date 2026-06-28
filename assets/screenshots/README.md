@@ -6,9 +6,10 @@ Generated programmatically — do not hand-edit. To regenerate after a design ch
 node scripts/generate-screenshots.js
 ```
 
-The script (`scripts/generate-screenshots.js`) renders faithful HTML/CSS mockups
-of 5 screens with headless Chromium (playwright-core) and captures them at the
-exact App Store pixel sizes. Colors/fonts/spacing mirror `src/constants/theme.js`.
+The script (`scripts/generate-screenshots.js`) renders marketing-grade HTML/CSS
+screenshots with faithful app UI mockups and captures them at exact App Store
+pixel sizes. The first three are written to sell the core value quickly because
+Apple uses the first three screenshots most prominently on install sheets.
 
 ## Sizes
 
@@ -21,8 +22,8 @@ exact App Store pixel sizes. Colors/fonts/spacing mirror `src/constants/theme.js
 
 ## Screens (each folder)
 
-1. `1-welcome` — Welcome / splash
-2. `2-intent` — Onboarding intent picker
-3. `3-home` — Home dashboard
-4. `4-practice` — Drill mid-session (recording)
-5. `5-paywall` — Subscription paywall
+1. `1-practice` — AI interview coach / voice practice value prop
+2. `2-feedback` — Instant scoring and coaching
+3. `3-finance` — Finance-specific banks and company prep
+4. `4-hirevue` — Timed HireVue-style simulation
+5. `5-pro` — Subscription value and premium features

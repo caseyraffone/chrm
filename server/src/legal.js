@@ -55,6 +55,24 @@ function page(title, bodyHtml) {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 14px; padding: 18px 22px; margin: 18px 0;
     }
+    .hero { padding: 24px 0 20px; }
+    .lead { max-width: 640px; color: var(--text-secondary); font-size: 18px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    .cta {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 44px; border-radius: 10px; padding: 0 18px;
+      font-weight: 700; text-decoration: none;
+    }
+    .cta.primary { background: var(--accent); color: #fff; }
+    .cta.secondary { border: 1px solid var(--border); color: var(--text); background: var(--surface); }
+    .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 28px 0 12px; }
+    .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .feature strong { display: block; margin-bottom: 8px; }
+    .feature p { margin: 0; color: var(--text-secondary); font-size: 15px; line-height: 1.45; }
+    @media (max-width: 640px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .cta { width: 100%; }
+    }
     .muted { color: var(--text-secondary); font-size: 14px; }
     footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--border); }
     table { border-collapse: collapse; width: 100%; margin: 12px 0; }
@@ -199,6 +217,41 @@ export const privacyHtml = page(
   <h2>11. Contact Us</h2>
   <p>If you have questions about this Privacy Policy or your data, contact us at
   <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
+  `
+);
+
+export const homeHtml = page(
+  'AI Interview Coach',
+  `
+  <section class="hero">
+    <p class="updated">AI interview coach for high-stakes communication</p>
+    <h1>CHRM helps you practice before it counts.</h1>
+    <p class="lead">Voice drills, timed simulations, finance interview banks, and
+    AI feedback so candidates can build clear, confident answers under pressure.</p>
+    <div class="cta-row">
+      <a class="cta primary" href="https://apps.apple.com/app/id6759968325">View on the App Store</a>
+      <a class="cta secondary" href="/privacy">Privacy Policy</a>
+    </div>
+  </section>
+
+  <section class="feature-grid" aria-label="CHRM features">
+    <article class="feature">
+      <strong>Voice practice</strong>
+      <p>Record real answers and train the rhythm, clarity, and structure of your delivery.</p>
+    </article>
+    <article class="feature">
+      <strong>Instant feedback</strong>
+      <p>Get scores, strengths, improvement points, and sharper sample phrasing after each drill.</p>
+    </article>
+    <article class="feature">
+      <strong>Finance prep</strong>
+      <p>Practice investment banking, private equity, behavioral, and resume walkthrough questions.</p>
+    </article>
+    <article class="feature">
+      <strong>Company kits</strong>
+      <p>Generate targeted prep plans and role-specific prompts for the companies that matter.</p>
+    </article>
+  </section>
   `
 );
 

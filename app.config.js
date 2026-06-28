@@ -7,6 +7,41 @@ module.exports = {
     ...appJson.expo,
     name: 'CHRM',
     slug: 'pitchiq',
+    ios: {
+      ...appJson.expo.ios,
+      privacyManifests: {
+        NSPrivacyAccessedAPITypes: [
+          {
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults',
+            NSPrivacyAccessedAPITypeReasons: ['CA92.1'],
+          },
+          {
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryFileTimestamp',
+            NSPrivacyAccessedAPITypeReasons: ['0A2A.1', '3B52.1', 'C617.1'],
+          },
+          {
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryDiskSpace',
+            NSPrivacyAccessedAPITypeReasons: ['E174.1', '85F4.1'],
+          },
+          {
+            NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategorySystemBootTime',
+            NSPrivacyAccessedAPITypeReasons: ['35F9.1'],
+          },
+        ],
+        NSPrivacyCollectedDataTypes: [
+          {
+            NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeProductInteraction',
+            NSPrivacyCollectedDataTypeLinked: false,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: [
+              'NSPrivacyCollectedDataTypePurposeAnalytics',
+              'NSPrivacyCollectedDataTypePurposeAppFunctionality',
+            ],
+          },
+        ],
+        NSPrivacyTracking: false,
+      },
+    },
     extra: {
       ...appJson.expo.extra,
       // AI keys now live on the backend (see /server) and are never shipped to

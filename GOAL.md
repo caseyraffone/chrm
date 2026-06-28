@@ -349,3 +349,65 @@ Casey is leaving HireVue as-is for now.
 **Next product-quality opportunities after submission:** device-test PDF resume
 upload, add rate limiting/user-level abuse controls, then continue commercial
 hardening (Sentry, analytics review, accounts/cloud sync).
+
+### Current Source of Truth — Submission asset polish (2026-06-28, by Codex)
+
+**Done in this pass:**
+- Replaced the raw App Store screenshot set with marketing-grade screenshots in
+  `assets/screenshots/` for iPhone 6.9", 6.5", 5.5", and iPad 13".
+- Updated `scripts/generate-screenshots.js` so future screenshots regenerate the
+  same commercial sequence: practice value prop, instant feedback, finance prep,
+  HireVue simulation, and Pro value.
+- Added a public CHRM marketing root page at `/` on the backend while keeping
+  `/privacy`, `/terms`, and `/health` intact.
+- Added the iOS privacy manifest declaration to `app.config.js` so EAS prebuild
+  generates a native `PrivacyInfo.xcprivacy` with anonymous product interaction
+  data for analytics/app functionality, matching the existing privacy policy and
+  PostHog-over-HTTPS analytics implementation.
+- Verified the App Store icon asset is already 1024x1024 RGB PNG with no alpha.
+
+**Verified locally:**
+- Screenshot dimensions ✅
+  - `6.9-inch/`: 1320x2868
+  - `6.5-inch/`: 1242x2688
+  - `5.5-inch/`: 1242x2208
+  - `ipad-13/`: 2064x2752
+- Visual spot-check ✅ no headline/screenshot overlap after iPhone/iPad layout
+  fixes.
+- `npx expo config --type public` ✅ includes `ios.privacyManifests`.
+- Hono app fetch ✅ `/`, `/health`, `/privacy`, and `/terms` return 200 locally.
+- `npm run build:web` ✅
+- `node scripts/validateBanks.mjs` ✅
+- `node test/speech.test.mjs` ✅
+- `npx expo config --type public` ✅ includes `API_BASE_URL`.
+
+**Observed in App Store Connect via Chrome:**
+- Current iOS 1.0 submission is still Rejected for:
+  - `2.1.0 Performance: App Completeness`
+  - `3.1.2 Business: Payments - Subscriptions`
+- App Privacy still points at stale URL:
+  `https://chrm-app.netlify.app/#privacy`; change it to
+  `https://chrm-two.vercel.app/privacy`.
+- App Privacy currently declares Audio Data, Other User Content, and Product
+  Interaction as data not linked to the user. Product Interaction is currently
+  marked for App Functionality only; add Analytics too to match PostHog usage.
+- Current draft App Review response still mentions the stale Netlify privacy URL
+  (`https://chrm-app.netlify.app/#privacy`). Update it to the Vercel legal URLs
+  before resubmitting.
+- Existing App Store screenshot upload area shows six old 6.5" screenshots.
+  Replace them with the new generated screenshot files after confirmation.
+
+**Still required before pressing Submit in App Store Connect:**
+1. Push `main` and wait for Vercel production deploy.
+2. Re-check public production URLs, including the new root:
+   - `https://chrm-two.vercel.app/`
+   - `https://chrm-two.vercel.app/health`
+   - `https://chrm-two.vercel.app/privacy`
+   - `https://chrm-two.vercel.app/terms`
+3. In App Store Connect, set Privacy Policy URL to
+   `https://chrm-two.vercel.app/privacy` and Terms/EULA reference to
+   `https://chrm-two.vercel.app/terms` plus Apple's Standard EULA.
+4. Update the App Review reply to mention the correct Vercel links and the fresh
+   build number.
+5. Upload the new `assets/screenshots/` files to the matching screenshot slots.
+6. Build a fresh production iOS binary and submit that build.

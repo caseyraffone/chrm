@@ -273,18 +273,12 @@ app.post(
   })
 );
 
-// Start a long-lived Node server only when this file is run directly
-// (`npm run dev` / `npm start`). When imported by the Vercel adapter
-// (server/api/index.js) we must NOT bind a port — the function runtime owns
-// the request lifecycle.
-const isDirectRun =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isDirectRun) {
-  const port = Number(process.env.PORT) || 8787;
-  serve({ fetch: app.fetch, port }, (info) => {
-    console.log(`CHRM backend listening on http://localhost:${info.port}`);
-  });
+// Local dev only — Vercel uses export default app instead of serve()
+if (process.env.NODE_ENV !== 'production') {
+    const port = Number(process.env.PORT) || 8787;
+    serve({ fetch: app.fetch, port }, (info) => {
+          console.log(`CHRM backend listening on http://localhost:${info.port}`);
+    });
 }
 
 export default app;

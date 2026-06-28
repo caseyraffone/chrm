@@ -214,3 +214,47 @@ until there's data); device-test the PDF resume upload.
 > Note: a separate, already-shipped track in this repo expanded the IB Interview
 > Prep banks (116 technical Qs + Behavioral/Fit/Markets tracks). That is unrelated
 > to the commercial build and did not touch App Store / RevenueCat / app.config.js.
+
+---
+
+### Backlog idea — HireVue question *relevance* (raised by Casey 2026-06-28)
+
+**Problem:** how do we know the HireVue sim asks the *right* questions for a
+specific firm? Today `generateHireVueQuestions(company, role, mix, count, prepKit)`
+generates from Claude's training knowledge (grounded by the saved Prep Kit when
+present) — there's NO live research, so "right" means "on-pattern," not "verified
+against what this firm actually asks."
+
+**Reality:** big-bank HireVue sets are heavily standardized and well-documented
+(motivational / behavioral / a couple competency-technical), so the model already
+covers them well. The gap is real for niche/boutique firms and for firm-specific
+phrasing.
+
+**Options (cheapest → strongest):**
+1. **Curated real-question seed bank** for the top ~20–30 firms (human-vetted,
+   fed to the generator as ground truth). Highest trust, manual upkeep. Strong Pro
+   differentiator: "real reported questions, not AI guesses." *Clean weekend-sized
+   unit.*
+2. **Live research at generation time** on the new backend: search API
+   (Tavily/Brave/Perplexity) → feed snippets to Claude → grounded questions tagged
+   "reported by candidates." Freshest, but adds cost/latency + ToS-gray scraping.
+3. **Hybrid** — seed bank for covered firms, live research fallback for the rest.
+
+**Recommendation:** start with #1 (seed bank), layer #2 on the backend later.
+Hold on scraping until the ToS/quality tradeoff is decided. Nothing built yet —
+Casey is leaving HireVue as-is for now.
+
+### Polish shipped this session (2026-06-28, by Claude)
+- Home cards: "Behavioral" → "Behaviorals"; Company Prep Kit card re-themed blue +
+  PRO to match HireVue.
+- Resume Walkthrough keyboard UX (returnKeyType=done, interactive dismiss,
+  keyboard insets).
+- Feedback polish: fixed clipped score number (FeedbackScreen + HireVueDebrief),
+  re-themed the loading overlay (ProcessingOverlay) to the light system,
+  collapsible post-drill transcript.
+- **Speed:** grading path (`directFeedback` / `directTechnicalFeedback` /
+  `directResumeFeedback`) moved to `claude-haiku-4-5` (~2× faster in testing);
+  heavier generative work stays on Sonnet. NOTE: this applies to the *direct*
+  transport only — if/when the client is pointed at the backend (`API_BASE_URL`),
+  the backend's `/api/*feedback*` handlers need the same model choice to keep the
+  speedup.

@@ -265,9 +265,12 @@ app.post(
   })
 );
 
-const port = Number(process.env.PORT) || 8787;
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`CHRM backend listening on http://localhost:${info.port}`);
-});
+// Local dev only — Vercel uses export default app instead of serve()
+if (process.env.NODE_ENV !== 'production') {
+    const port = Number(process.env.PORT) || 8787;
+    serve({ fetch: app.fetch, port }, (info) => {
+          console.log(`CHRM backend listening on http://localhost:${info.port}`);
+    });
+}
 
 export default app;

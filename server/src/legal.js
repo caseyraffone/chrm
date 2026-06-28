@@ -87,7 +87,7 @@ function page(title, bodyHtml) {
     <footer class="muted">
       <p>${COMPANY} — AI Communication Coach. Questions? Email
       <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
-      <p><a href="/privacy">Privacy Policy</a> &middot; <a href="/terms">Terms of Use</a></p>
+      <p><a href="/privacy">Privacy Policy</a> &middot; <a href="/terms">Terms of Use</a> &middot; <a href="/support">Support</a></p>
     </footer>
   </div>
 </body>
@@ -252,6 +252,32 @@ export const homeHtml = page(
       <p>Generate targeted prep plans and role-specific prompts for the companies that matter.</p>
     </article>
   </section>
+  `
+);
+
+export const supportHtml = page(
+  'Support',
+  `
+  <h1>Support</h1>
+  <p class="updated">Last updated: ${LAST_UPDATED}</p>
+
+  <p>If you need help with ${COMPANY}, email
+  <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>. Include the device you
+  are using, what you were trying to do, and any error message you saw so we can
+  help faster.</p>
+
+  <div class="card">
+    <strong>Common support topics</strong>
+    <ul>
+      <li>Question generation, prep kits, voice drills, and mock interviews.</li>
+      <li>Subscription access or restore-purchase issues.</li>
+      <li>Privacy, data handling, or account questions.</li>
+      <li>Bug reports and feature requests.</li>
+    </ul>
+  </div>
+
+  <p>Subscriptions are billed through Apple. You can manage, cancel, or request
+  help with App Store billing in your Apple ID settings.</p>
   `
 );
 

@@ -28,7 +28,7 @@ import {
   buildResumeExtractMessages,
 } from './prompts.js';
 import { FEEDBACK_MODEL, callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
-import { homeHtml, privacyHtml, termsHtml } from './legal.js';
+import { homeHtml, privacyHtml, supportHtml, termsHtml } from './legal.js';
 
 const app = new Hono();
 
@@ -104,6 +104,7 @@ app.get('/', (c) => c.html(homeHtml));
 // paywall and the App Store listing. No auth, not rate-limited.
 app.get('/privacy', (c) => c.html(privacyHtml));
 app.get('/terms', (c) => c.html(termsHtml));
+app.get('/support', (c) => c.html(supportHtml));
 
 // ─── Question generation ──────────────────────────────────────────────────────
 app.post(

@@ -1,0 +1,20 @@
+# Render Blueprint for the CHRM backend (server/).
+# In Render: New → Blueprint → connect this repo (main branch). Render reads this
+# file and creates the service. You'll paste the secret values in the dashboard —
+# they are NEVER stored in the repo (sync: false).
+services:
+  - type: web
+    name: chrm-backend
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false # paste in Render dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false # paste in Render dashboard
+      - key: ALLOWED_ORIGIN
+        sync: false # set to your Netlify site URL once it exists, e.g. https://your-site.netlify.app

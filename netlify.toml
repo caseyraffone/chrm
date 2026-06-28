@@ -1,0 +1,20 @@
+# Netlify config for the CHRM web app (static export).
+# In Netlify: Add new site → Import from Git → pick this repo (main branch).
+# Then in Site settings → Environment variables, add:
+#   API_BASE_URL = https://<your-render-backend>.onrender.com
+#
+# The build writes that value into a .env file so the app (which reads it via
+# @env / react-native-dotenv) bakes the backend URL into the web bundle. Keys
+# themselves are NEVER set here — they live only on the backend.
+[build]
+  command = "printf 'API_BASE_URL=%s\\n' \"$API_BASE_URL\" > .env && npm run build:web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: serve index.html for any path so refreshes/deep links work.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

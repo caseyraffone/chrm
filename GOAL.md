@@ -188,6 +188,18 @@ to be tuned with real data).
 data collection in Apple's App Privacy section and needs a Privacy Policy URL.
 Events are PII-free (no transcripts/names/emails) — keep it that way.
 
+**Privacy Policy: DONE (2026-06-28, by Claude).** Static page at
+`server/public/privacy.html` (plain-English, PII-free analytics, no stored
+audio/transcripts, no accounts; lists OpenAI/Anthropic/RevenueCat/PostHog;
+contact `privacy@chrm.app` placeholder — Casey to update). `server/vercel.json`
+rewrites `/privacy → /privacy.html` (ahead of the catch-all to the Hono
+function), so Vercel serves it at `https://chrm-two.vercel.app/privacy`.
+Verified locally (valid HTML, renders correctly); live-URL check is pending
+Casey's deploy (domain not reachable yet). Note: a more comprehensive
+`/privacy` + `/terms` also exists via the Hono app (`server/src/legal.js`) from
+the App Store rejection fixes — the static file now takes precedence at
+`/privacy`.
+
 ---
 
 ### Overnight A-grade push (2026-06-27, by Claude)

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index, follow" />
+  <title>Privacy Policy · CHRM</title>
+  <style>
+    :root {
+      --bg: #F2F1EE;
+      --surface: #FFFFFF;
+      --accent: #1747D4;
+      --text: #0F0F0E;
+      --text-secondary: #686866;
+      --border: #E3E2DE;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
+      font-size: 16px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 96px; }
+    .brand {
+      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 700; margin-bottom: 8px;
+    }
+    h1 { font-size: 34px; line-height: 1.15; letter-spacing: -0.5px; margin: 0 0 4px; }
+    .updated { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
+    h2 { font-size: 20px; margin: 34px 0 8px; letter-spacing: -0.3px; }
+    p, li { color: #1c1c1b; }
+    ul { padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    a { color: var(--accent); }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 22px; margin: 20px 0;
+    }
+    .muted { color: var(--text-secondary); font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 15px; }
+    th { color: var(--text-secondary); font-weight: 600; }
+    footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">CHRM</div>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Effective date: June 28, 2026</p>
+
+    <p>CHRM is an AI-powered interview-prep app that helps you practice
+    high-stakes communication for finance and consulting recruiting. We built
+    CHRM to collect as little about you as possible. This page explains, in plain
+    English, what we do and don't collect.</p>
+
+    <div class="card">
+      <strong>The short version:</strong>
+      <ul>
+        <li>No account, no sign-up. We don't ask for your name or email.</li>
+        <li>We collect <strong>anonymous usage analytics only</strong> — never the
+        content of your answers.</li>
+        <li>Your recordings are sent to OpenAI for transcription and are
+        <strong>not stored by us</strong>.</li>
+        <li>We never sell your data or use it for advertising.</li>
+      </ul>
+    </div>
+
+    <h2>What we collect</h2>
+    <p>We use privacy-preserving product analytics (via PostHog) to understand how
+    the app is used, in aggregate, so we can improve it. These events contain no
+    personal information. The events we track are:</p>
+    <ul>
+      <li><strong>app_opened</strong> — that the app was launched.</li>
+      <li><strong>onboarding steps</strong> — which onboarding steps were reached or skipped.</li>
+      <li><strong>drill_completed</strong> — that a practice drill finished, with its
+      category and a numeric score only (for example, "Behavioral, 7/10").</li>
+      <li><strong>paywall events</strong> — that the subscription screen was shown,
+      tapped, or that a purchase completed.</li>
+    </ul>
+
+    <h2>What we do NOT collect</h2>
+    <ul>
+      <li><strong>No names or email addresses.</strong> There is no account system.</li>
+      <li><strong>No stored recordings or transcripts.</strong> We do not keep the
+      audio you record or the text of your answers.</li>
+      <li><strong>No contact lists, location tracking, or advertising identifiers.</strong></li>
+    </ul>
+
+    <h2>How your audio is handled</h2>
+    <p>When you complete a voice drill or mock interview, your recording is sent to
+    OpenAI's Whisper service to convert your speech to text so the app can coach
+    you. The transcribed text is used to generate your feedback and is then
+    discarded. <strong>We do not store your audio or transcripts on our servers.</strong>
+    Please avoid saying anything in a recording that you would not want processed by
+    a third-party AI service.</p>
+
+    <h2>Third-party services</h2>
+    <p>We rely on a small number of trusted providers to make CHRM work. We share
+    only the minimum needed for each to do its job:</p>
+    <table>
+      <tr><th>Provider</th><th>What it does</th><th>What it receives</th></tr>
+      <tr><td>OpenAI</td><td>Speech-to-text transcription (Whisper)</td><td>Your audio recording (not stored by us)</td></tr>
+      <tr><td>Anthropic</td><td>AI feedback, questions, and prep content (Claude)</td><td>Your transcribed text and inputs (e.g., target role)</td></tr>
+      <tr><td>RevenueCat / Apple</td><td>Subscription processing and management</td><td>Anonymous subscription status; no payment card details</td></tr>
+      <tr><td>PostHog</td><td>Anonymous product analytics</td><td>The usage events listed above — no names, emails, or transcripts</td></tr>
+    </table>
+    <p>Each provider handles data under its own privacy terms. We do not sell your
+    personal information.</p>
+
+    <h2>Data retention</h2>
+    <p>Your practice history is stored locally on your device, and you can remove it
+    by deleting your data in the app or uninstalling it. Audio and transcripts are
+    processed only momentarily to produce your results and are not retained by us.
+    Anonymous analytics are kept in aggregate to help us improve the product.</p>
+
+    <h2>Children</h2>
+    <p>CHRM is not directed to children under 13, and we do not knowingly collect
+    information from them.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If we change how we handle data, we'll update this page and revise the
+    effective date above.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about your privacy? Email us at
+    <a href="mailto:privacy@chrm.app">privacy@chrm.app</a>.</p>
+
+    <footer class="muted">
+      <p>CHRM — AI Communication Coach.</p>
+    </footer>
+  </div>
+</body>
+</html>

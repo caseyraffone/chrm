@@ -38,7 +38,7 @@ function page(title, bodyHtml) {
       line-height: 1.6;
       font-size: 16px;
     }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 44px 24px 96px; }
     .brand {
       font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
       color: var(--accent); font-weight: 700; margin-bottom: 8px;
@@ -55,7 +55,10 @@ function page(title, bodyHtml) {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 14px; padding: 18px 22px; margin: 18px 0;
     }
-    .hero { padding: 24px 0 20px; }
+    .hero {
+      display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+      gap: 44px; align-items: center; padding: 24px 0 34px;
+    }
     .lead { max-width: 640px; color: var(--text-secondary); font-size: 18px; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
     .cta {
@@ -65,12 +68,52 @@ function page(title, bodyHtml) {
     }
     .cta.primary { background: var(--accent); color: #fff; }
     .cta.secondary { border: 1px solid var(--border); color: var(--text); background: var(--surface); }
-    .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 28px 0 12px; }
+    .hero h1 { font-size: 52px; max-width: 660px; }
+    .hero-media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: end; }
+    .phone-shot {
+      width: 100%; border-radius: 28px; border: 1px solid var(--border);
+      box-shadow: 0 18px 44px rgba(15, 15, 14, 0.16); background: var(--surface);
+    }
+    .phone-shot.secondary { transform: translateY(28px); }
+    .trust-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .trust-pill {
+      display: inline-flex; align-items: center; min-height: 32px; padding: 0 11px;
+      border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,0.72);
+      color: var(--text-secondary); font-size: 13px; font-weight: 600;
+    }
+    .section { padding: 52px 0; border-top: 1px solid var(--border); }
+    .section-head { max-width: 680px; margin-bottom: 22px; }
+    .section-kicker { color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; }
+    .section h2 { font-size: 30px; line-height: 1.15; margin: 0 0 8px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 28px 0 12px; }
     .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
     .feature strong { display: block; margin-bottom: 8px; }
     .feature p { margin: 0; color: var(--text-secondary); font-size: 15px; line-height: 1.45; }
+    .proof-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .proof { background: #0F0F0E; color: #fff; border-radius: 14px; padding: 18px; }
+    .proof strong { display: block; color: #fff; font-size: 22px; margin-bottom: 4px; }
+    .proof p { margin: 0; color: rgba(255,255,255,0.72); font-size: 14px; line-height: 1.45; }
+    .sample {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 18px; align-items: start;
+    }
+    .score {
+      display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%;
+      background: var(--accent); color: #fff; font-size: 28px; font-weight: 800;
+    }
+    .sample h3 { margin-top: 0; font-size: 18px; }
+    .sample ul { margin-bottom: 0; }
+    .pricing { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 620px; }
+    .price-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+    .price { font-size: 30px; font-weight: 800; letter-spacing: -0.4px; }
+    .price span { color: var(--text-secondary); font-size: 15px; font-weight: 600; }
     @media (max-width: 640px) {
-      .feature-grid { grid-template-columns: 1fr; }
+      .wrap { padding-top: 30px; }
+      .hero { grid-template-columns: 1fr; gap: 26px; }
+      .hero h1 { font-size: 38px; }
+      .hero-media { max-width: 430px; margin: 0 auto; }
+      .feature-grid, .proof-grid, .pricing { grid-template-columns: 1fr; }
+      .sample { grid-template-columns: 1fr; }
       .cta { width: 100%; }
     }
     .muted { color: var(--text-secondary); font-size: 14px; }
@@ -224,33 +267,109 @@ export const homeHtml = page(
   'AI Interview Coach',
   `
   <section class="hero">
-    <p class="updated">AI interview coach for high-stakes communication</p>
-    <h1>CHRM helps you practice before it counts.</h1>
-    <p class="lead">Voice drills, timed simulations, finance interview banks, and
-    AI feedback so candidates can build clear, confident answers under pressure.</p>
-    <div class="cta-row">
-      <a class="cta primary" href="https://apps.apple.com/app/id6759968325">View on the App Store</a>
-      <a class="cta secondary" href="/privacy">Privacy Policy</a>
+    <div>
+      <p class="updated">AI interview coach for finance, consulting, and high-stakes recruiting</p>
+      <h1>Practice the answer before the room gets quiet.</h1>
+      <p class="lead">CHRM gives ambitious candidates realistic voice drills, interview banks,
+      company prep kits, and direct AI feedback so they can speak clearly under pressure.</p>
+      <div class="cta-row">
+        <a class="cta primary" href="https://apps.apple.com/app/id6759968325">View on the App Store</a>
+        <a class="cta secondary" href="#sample-feedback">See sample feedback</a>
+      </div>
+      <div class="trust-row" aria-label="Trust signals">
+        <span class="trust-pill">No account required</span>
+        <span class="trust-pill">Voice-first practice</span>
+        <span class="trust-pill">Built for recruiting reps</span>
+      </div>
+    </div>
+    <div class="hero-media" aria-label="CHRM app screenshots">
+      <img class="phone-shot" src="/screenshots/6.9-inch/1-practice.png" alt="CHRM practice screen" />
+      <img class="phone-shot secondary" src="/screenshots/6.9-inch/2-feedback.png" alt="CHRM feedback score screen" />
     </div>
   </section>
 
-  <section class="feature-grid" aria-label="CHRM features">
-    <article class="feature">
-      <strong>Voice practice</strong>
-      <p>Record real answers and train the rhythm, clarity, and structure of your delivery.</p>
-    </article>
-    <article class="feature">
-      <strong>Instant feedback</strong>
-      <p>Get scores, strengths, improvement points, and sharper sample phrasing after each drill.</p>
-    </article>
-    <article class="feature">
-      <strong>Finance prep</strong>
-      <p>Practice investment banking, private equity, behavioral, and resume walkthrough questions.</p>
-    </article>
-    <article class="feature">
-      <strong>Company kits</strong>
-      <p>Generate targeted prep plans and role-specific prompts for the companies that matter.</p>
-    </article>
+  <section class="section">
+    <div class="section-head">
+      <div class="section-kicker">What It Trains</div>
+      <h2>Reps for the moments candidates usually wing.</h2>
+      <p class="lead">Most interview prep stops at knowing the answer. CHRM focuses on saying it
+      cleanly, quickly, and convincingly when timing and nerves are real.</p>
+    </div>
+    <div class="feature-grid" aria-label="CHRM features">
+      <article class="feature">
+        <strong>Voice practice</strong>
+        <p>Record real answers and train the rhythm, clarity, and structure of your delivery.</p>
+      </article>
+      <article class="feature">
+        <strong>Instant feedback</strong>
+        <p>Get scores, strengths, improvement points, and sharper sample phrasing after each drill.</p>
+      </article>
+      <article class="feature">
+        <strong>Finance prep</strong>
+        <p>Practice investment banking, private equity, behavioral, and resume walkthrough questions.</p>
+      </article>
+      <article class="feature">
+        <strong>Company kits</strong>
+        <p>Generate targeted prep plans and role-specific prompts for the companies that matter.</p>
+      </article>
+      <article class="feature">
+        <strong>HireVue simulation</strong>
+        <p>Run one-way interview sessions with timed answers and a full debrief.</p>
+      </article>
+      <article class="feature">
+        <strong>Progress history</strong>
+        <p>Track reps, scores, and the answers you are improving over time.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="sample-feedback">
+    <div class="section-head">
+      <div class="section-kicker">Sample Coaching</div>
+      <h2>Specific enough to change the next rep.</h2>
+    </div>
+    <div class="sample">
+      <div class="score">7/10</div>
+      <div>
+        <h3>Tell me about a time you went above and beyond.</h3>
+        <ul>
+          <li><strong>What worked:</strong> Clear situation, specific actions, and a quantified result.</li>
+          <li><strong>Improve:</strong> Make the technical contribution sharper and show why you personally moved the outcome.</li>
+          <li><strong>Stronger version:</strong> CHRM rewrites the answer in a tighter spoken format you can practice immediately.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="proof-grid" aria-label="Product proof points">
+      <article class="proof"><strong>10 min</strong><p>Enough time for a realistic drill, score, and next-answer rewrite.</p></article>
+      <article class="proof"><strong>4 modes</strong><p>Behavioral, technical, resume walkthrough, and one-way interview practice.</p></article>
+      <article class="proof"><strong>Private by design</strong><p>No account required. Recordings are processed for feedback, not sold or used for ads.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-kicker">CHRM Pro</div>
+      <h2>Built for recruiting seasons, not one-off cramming.</h2>
+      <p class="lead">Start with daily practice. Upgrade when you want unlimited reps,
+      company-specific prep kits, AI mock interviews, and HireVue-style simulations.</p>
+    </div>
+    <div class="pricing" aria-label="CHRM Pro pricing">
+      <article class="price-card">
+        <div class="price">$7.99 <span>/ month</span></div>
+        <p>Flexible access when interviews are close.</p>
+      </article>
+      <article class="price-card">
+        <div class="price">$59.99 <span>/ year</span></div>
+        <p>Best for students building a full recruiting practice habit.</p>
+      </article>
+    </div>
+    <div class="cta-row">
+      <a class="cta primary" href="https://apps.apple.com/app/id6759968325">Get CHRM</a>
+      <a class="cta secondary" href="/privacy">How privacy works</a>
+    </div>
   </section>
   `
 );

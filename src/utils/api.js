@@ -72,6 +72,14 @@ function normalizeScore(score) {
   return Math.max(1, Math.min(10, n));
 }
 
+function normalizeFeedbackResult(result, { maxStrong = 2, maxImprove = 2 } = {}) {
+  if (!result || typeof result !== 'object') return result;
+  if (result.score != null) result.score = normalizeScore(result.score);
+  if (Array.isArray(result.strong)) result.strong = result.strong.slice(0, maxStrong);
+  if (Array.isArray(result.improve)) result.improve = result.improve.slice(0, maxImprove);
+  return result;
+}
+
 // ─── Transcription ────────────────────────────────────────────────────────────
 
 export async function transcribeAudio(audioUri) {
@@ -138,8 +146,7 @@ export async function getFeedback(transcript, question, category, role) {
   try {
     if (isInsufficientAnswer(transcript)) return insufficientResult(question);
     const result = await postJson('/api/feedback', { transcript, question, category, role });
-    result.score = normalizeScore(result.score);
-    return result;
+    return normalizeFeedbackResult(result);
   } catch (error) {
     console.error('Feedback error:', error);
     throw error;
@@ -152,8 +159,7 @@ export async function getTechnicalFeedback(transcript, question, referenceAnswer
   try {
     if (isInsufficientAnswer(transcript)) return insufficientResult(question);
     const result = await postJson('/api/technical-feedback', { transcript, question, referenceAnswer, keyPoints, role });
-    result.score = normalizeScore(result.score);
-    return result;
+    return normalizeFeedbackResult(result);
   } catch (error) {
     console.error('Technical feedback error:', error);
     throw error;
@@ -166,8 +172,7 @@ export async function getResumeFeedback(transcript, resumeText, role) {
   try {
     if (isInsufficientAnswer(transcript)) return insufficientResult('Walk me through your resume');
     const result = await postJson('/api/resume-feedback', { transcript, resumeText, role });
-    result.score = normalizeScore(result.score);
-    return result;
+    return normalizeFeedbackResult(result);
   } catch (error) {
     console.error('Resume feedback error:', error);
     throw error;

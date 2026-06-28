@@ -9,6 +9,7 @@
 // hosting choice stays open.
 
 import { pathToFileURL } from 'node:url';
+import { readFile } from 'node:fs/promises';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -105,6 +106,24 @@ app.get('/', (c) => c.html(homeHtml));
 app.get('/privacy', (c) => c.html(privacyHtml));
 app.get('/terms', (c) => c.html(termsHtml));
 app.get('/support', (c) => c.html(supportHtml));
+
+app.get('/screenshots/:device/:file', async (c) => {
+  const device = c.req.param('device');
+  const file = c.req.param('file');
+  const allowedDevices = new Set(['6.9-inch', '6.5-inch', 'ipad-13']);
+  if (!allowedDevices.has(device) || !/^[a-z0-9-]+\.png$/i.test(file)) {
+    return c.text('Not found', 404);
+  }
+  try {
+    const bytes = await readFile(new URL(`../../assets/screenshots/${device}/${file}`, import.meta.url));
+    return c.body(bytes, 200, {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    });
+  } catch {
+    return c.text('Not found', 404);
+  }
+});
 
 // ─── Question generation ──────────────────────────────────────────────────────
 app.post(

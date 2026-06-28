@@ -54,6 +54,8 @@ export default function HomeScreen({ navigation }) {
   const logoTapTimer = useRef(null);
 
   async function handleLogoTap() {
+    if (!__DEV__) return;
+
     logoTapCount.current += 1;
     if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
     logoTapTimer.current = setTimeout(() => { logoTapCount.current = 0; }, 1500);

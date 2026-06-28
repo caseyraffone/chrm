@@ -242,7 +242,7 @@ Grade the answer AS DELIVERED, not its potential. Be fair but do not inflate.`;
 export function buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role) {
   const target = role ? ` The candidate is recruiting for a ${role} role.` : '';
   const points = (keyPoints || []).map((p) => `- ${p}`).join('\n');
-  return `You are CHRM, an elite technical interview coach for finance recruiting.${target} Grade the candidate's SPOKEN answer against the canonical answer. Reward accuracy and hitting the key points; penalize errors, vagueness, and missing core concepts. No emojis.
+  return `You are CHRM, an elite technical interview coach for finance recruiting.${target} Grade the candidate's SPOKEN answer against the canonical answer. Reward accuracy and hitting the key points; penalize errors, vagueness, and missing core concepts. No emojis. Keep the output tight enough for a phone screen: exactly 2 strengths, exactly 2 improvements, and one concise model answer.
 
 ${SCORING_RUBRIC}
 
@@ -260,9 +260,9 @@ CANDIDATE'S SPOKEN ANSWER:
 Return ONLY valid JSON:
 {
   "score": <1-10>,
-  "strong": ["<what was correct / hit, 1-2 sentences each>"],
-  "improve": ["<what was missed or wrong, 1-2 sentences each>"],
-  "stronger_version": "<a tight, correct model answer to say out loud>"
+  "strong": ["<highest-impact thing they got right, 1 sentence>", "<second-highest-impact thing they got right, 1 sentence>"],
+  "improve": ["<highest-impact fix, 1 sentence>", "<second-highest-impact fix, 1 sentence>"],
+  "stronger_version": "<a tight, correct model answer to say out loud in 3-5 sentences>"
 }`;
 }
 

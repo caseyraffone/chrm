@@ -1,9 +1,12 @@
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "rewrites": [{ "source": "/(.*)", "destination": "/index" }],
-    "functions": {
-          "src/index.js": {
-                  "maxDuration": 60
-          }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/(.*)", "destination": "/index" }
+  ],
+  "functions": {
+    "src/index.js": {
+      "maxDuration": 60
     }
+  }
 }

@@ -15,7 +15,7 @@ const API_BASE = API_BASE_URL ? API_BASE_URL.replace(/\/$/, '') : null;
 const USE_BACKEND = !!API_BASE;
 
 async function postJson(path, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchWithTimeout(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -44,6 +44,29 @@ const SCORING_RUBRIC = `Use this calibrated 1-10 scale and apply it consistently
 Grade the answer AS ACTUALLY DELIVERED, not its potential. Be fair but do not inflate; most real practice answers land in the 4-7 range.`;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Hard ceiling on every network call. Without this a stalled request (flaky
+// review networks, slow provider) leaves the UI spinning on "Building your
+// drill..." forever — which is exactly how the iPad reviewer saw a broken,
+// never-resolving state. AbortController turns a hang into a clean, catchable
+// error the screens can surface and offer a retry on.
+const REQUEST_TIMEOUT_MS = 45000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('The request timed out. Check your connection and try again.');
+    }
+    // fetch rejects with a generic "Network request failed" when offline.
+    throw new Error('Network error. Check your connection and try again.');
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function wordCount(text) {
   return (text || '').trim().split(/\s+/).filter(Boolean).length;
@@ -96,12 +119,18 @@ function parseJsonLoose(raw) {
 // Single Claude call with one automatic retry on transient (429/5xx/network)
 // failures. `model` lets callers pick a faster model for the grading path.
 async function callClaude({ system, messages, maxTokens = 1024, model = CLAUDE_MODEL }) {
+  // Direct path requires a baked-in key. If the build shipped without one (and
+  // no backend is configured), fail loud and clear rather than firing a request
+  // with `x-api-key: undefined` that returns a cryptic 401.
+  if (!ANTHROPIC_API_KEY) {
+    throw new Error('AI service is not configured. Please update to the latest version or try again later.');
+  }
   const body = { model, max_tokens: maxTokens, messages };
   if (system) body.system = system;
   let lastError;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const response = await fetch(ANTHROPIC_URL, {
+      const response = await fetchWithTimeout(ANTHROPIC_URL, {
         method: 'POST',
         headers: {
           'x-api-key': ANTHROPIC_API_KEY,
@@ -166,19 +195,22 @@ export async function transcribeAudio(audioUri) {
     }
 
     if (USE_BACKEND) {
-      const response = await fetch(`${API_BASE}/api/transcribe`, { method: 'POST', body: formData });
+      const response = await fetchWithTimeout(`${API_BASE}/api/transcribe`, { method: 'POST', body: formData }, 60000);
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Transcription failed');
       return data.text;
     }
 
+    if (!OPENAI_API_KEY) {
+      throw new Error('Transcription service is not configured. Please update to the latest version or try again later.');
+    }
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    const response = await fetchWithTimeout('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'multipart/form-data' },
       body: formData,
-    });
+    }, 60000);
     if (!response.ok) {
       const err = await response.json();
       throw new Error(err.error?.message || 'Transcription failed');

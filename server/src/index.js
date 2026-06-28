@@ -8,6 +8,7 @@
 // Vercel, Netlify, Cloudflare Workers, Fly, etc. with a thin adapter — so the
 // hosting choice stays open.
 
+import { pathToFileURL } from 'node:url';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -27,6 +28,7 @@ import {
   buildResumeExtractMessages,
 } from './prompts.js';
 import { callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
+import { privacyHtml, termsHtml } from './legal.js';
 
 const app = new Hono();
 
@@ -92,6 +94,12 @@ const handle = (fn) => async (c) => {
 };
 
 app.get('/health', (c) => c.json({ ok: true }));
+
+// ─── Legal pages (Apple Guideline 3.1.2c) ──────────────────────────────────────
+// Public static HTML: Privacy Policy + Terms of Use (EULA). Linked from the
+// paywall and the App Store listing. No auth, not rate-limited.
+app.get('/privacy', (c) => c.html(privacyHtml));
+app.get('/terms', (c) => c.html(termsHtml));
 
 // ─── Question generation ──────────────────────────────────────────────────────
 app.post(

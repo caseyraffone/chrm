@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1747D4"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,7 +23,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#1747D4",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

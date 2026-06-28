@@ -9,7 +9,7 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
-  Dimensions,
+  useWindowDimensions,
   Alert,
   StatusBar,
 } from 'react-native';
@@ -20,7 +20,9 @@ import { getCachedQuestions, setCachedQuestions } from '../utils/storage';
 import { track, EVENTS } from '../utils/analytics';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+// Tablets (iPad) are far wider than phones — let content stretch edge to edge
+// and the layout looks broken. Cap the usable column and center it.
+const MAX_CONTENT_WIDTH = 480;
 
 const INTENTS = [
   {
@@ -55,6 +57,10 @@ export default function OnboardingScreen({ navigation }) {
   const [roleInput, setRoleInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Read width live (not once at module load) so the slide animation works on
+  // iPad, in split view, and after rotation.
+  const { width: screenWidth } = useWindowDimensions();
+
   const containerOpacity = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -69,18 +75,23 @@ export default function OnboardingScreen({ navigation }) {
 
   function goToStep(nextStep) {
     Animated.timing(slideAnim, {
-      toValue: -SCREEN_WIDTH,
+      toValue: -screenWidth,
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
       setStep(nextStep);
-      slideAnim.setValue(SCREEN_WIDTH);
+      slideAnim.setValue(screenWidth);
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 200,
         useNativeDriver: true,
       }).start();
     });
+  }
+
+  async function completeAndGoHome() {
+    await AsyncStorage.setItem('@chrm_onboarding_completed', 'true');
+    navigation.replace('Home');
   }
 
   async function handleSkip() {
@@ -123,7 +134,20 @@ export default function OnboardingScreen({ navigation }) {
       });
     } catch (err) {
       setIsGenerating(false);
-      Alert.alert('Error', 'Could not generate questions. Please try again.');
+      // Never leave the reviewer (or a real user) stuck on a spinning, broken
+      // state: surface the real reason and offer both a retry and a way out.
+      const detail =
+        err && err.message
+          ? err.message
+          : 'Something went wrong building your drill.';
+      Alert.alert(
+        "Couldn't build your drill",
+        `${detail}\n\nYou can try again, or jump straight into the app and start a drill from the home screen.`,
+        [
+          { text: 'Continue to app', style: 'cancel', onPress: completeAndGoHome },
+          { text: 'Try again', onPress: handleContinueRole },
+        ]
+      );
     }
   }
 
@@ -224,6 +248,7 @@ function RoleStep({ roleInput, setRoleInput, onContinue, continueEnabled }) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.roleInner}>
         <Text style={styles.stepTitle}>What's your{'\n'}target?</Text>
         <Text style={styles.stepSubtitle}>
           The more specific, the better your practice.
@@ -263,6 +288,7 @@ function RoleStep({ roleInput, setRoleInput, onContinue, continueEnabled }) {
         >
           <Text style={styles.primaryBtnText}>CONTINUE</Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -294,6 +320,9 @@ const styles = StyleSheet.create({
   },
   stepInner: {
     flex: 1,
+    width: '100%',
+    maxWidth: MAX_CONTENT_WIDTH,
+    alignSelf: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: 80,
   },
@@ -378,8 +407,14 @@ const styles = StyleSheet.create({
   // Role scroll
   roleScroll: {
     flexGrow: 1,
-    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
     paddingBottom: 80,
+  },
+  roleInner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: MAX_CONTENT_WIDTH,
+    paddingHorizontal: spacing.lg,
   },
 
   // Input

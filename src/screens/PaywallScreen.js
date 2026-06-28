@@ -7,10 +7,12 @@ import {
   ScrollView,
   Platform,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { presentPaywall, presentCustomerCenter } from '../utils/purchases';
 import { track, identify, EVENTS } from '../utils/analytics';
+import { PRIVACY_URL, TERMS_URL } from '../constants/links';
 
 const FEATURES = [
   {
@@ -53,6 +55,12 @@ export default function PaywallScreen({ route, navigation }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function openLink(url) {
+    Linking.openURL(url).catch((error) =>
+      console.error('[Paywall] failed to open link:', error)
+    );
   }
 
   async function handleRestore() {
@@ -151,6 +159,25 @@ export default function PaywallScreen({ route, navigation }) {
         >
           <Text style={styles.maybeLaterText}>Maybe later</Text>
         </TouchableOpacity>
+
+        {/* Legal: auto-renewable subscription disclosure + required links */}
+        <View style={styles.legalBlock}>
+          <Text style={styles.legalDisclosure}>
+            Subscriptions are billed at $7.99/month or $59.99/year through your
+            Apple ID. Your subscription renews automatically unless cancelled at
+            least 24 hours before the end of the current period. Manage or cancel
+            anytime in your App Store account settings.
+          </Text>
+          <View style={styles.legalLinksRow}>
+            <TouchableOpacity onPress={() => openLink(TERMS_URL)} activeOpacity={0.7}>
+              <Text style={styles.legalLink}>Terms of Use</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalSeparator}>·</Text>
+            <TouchableOpacity onPress={() => openLink(PRIVACY_URL)} activeOpacity={0.7}>
+              <Text style={styles.legalLink}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -302,5 +329,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     letterSpacing: 0.3,
+  },
+  legalBlock: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+  },
+  legalDisclosure: {
+    fontFamily: fonts.body,
+    fontSize: 10,
+    lineHeight: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  legalLink: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.accent,
+    letterSpacing: 0.3,
+  },
+  legalSeparator: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.textMuted,
   },
 });

@@ -1,0 +1,17 @@
+# Netlify config for the CHRM web app (static export).
+# In Netlify: Add new site → Import from Git → pick this repo + the branch.
+# Then in Site settings → Environment variables, add:
+#   API_BASE_URL = https://<your-render-backend>.onrender.com
+# The build reads it via app.config.js (extra.API_BASE_URL) and bakes it in.
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: serve index.html for any path so refreshes/deep links work.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

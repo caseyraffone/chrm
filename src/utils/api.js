@@ -1,11 +1,15 @@
 import { Platform } from 'react-native';
-import { API_BASE_URL } from '@env';
+import Constants from 'expo-constants';
 
 // All AI calls go through the CHRM backend (see /server) so the OpenAI and
-// Anthropic keys never ship in the client. Set API_BASE_URL in the app's .env
-// (e.g. http://localhost:8787 for local dev, your deployed URL in production).
+// Anthropic keys never ship in the client. The backend URL is injected via
+// app.config.js (extra.API_BASE_URL ← process.env.API_BASE_URL), which works
+// both locally (.env loaded by dotenv) and in CI/hosted builds (env var set in
+// Netlify/Vercel settings). Falls back to localhost for local dev.
 // On a physical device, use your machine's LAN IP instead of localhost.
-const API_BASE = (API_BASE_URL || 'http://localhost:8787').replace(/\/$/, '');
+const API_BASE = (
+  Constants.expoConfig?.extra?.API_BASE_URL || 'http://localhost:8787'
+).replace(/\/$/, '');
 
 async function postJson(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {

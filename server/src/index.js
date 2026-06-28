@@ -27,8 +27,55 @@ import { callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } fr
 const app = new Hono();
 
 app.use('*', logger());
-// CORS: in production set ALLOWED_ORIGIN to your web app's domain.
-app.use('*', cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
+// CORS: in production set ALLOWED_ORIGIN to your web app's domain(s),
+// comma-separated. Defaults to '*' for local dev only — lock this down in prod.
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || '*')
+  .split(',')
+  .map((o) => o.trim());
+app.use(
+  '*',
+  cors({
+    origin: (origin) =>
+      allowedOrigins.includes('*') || allowedOrigins.includes(origin)
+        ? origin || '*'
+        : allowedOrigins[0],
+  })
+);
+
+// ─── Rate limiting ─────────────────────────────────────────────────────────────
+// Simple in-memory fixed-window limiter, keyed by client IP. Protects the AI
+// endpoints from abuse running up the OpenAI/Anthropic bill. Render's free tier
+// is a single instance, so in-memory state is sufficient; move to a shared store
+// (e.g. Redis) if you scale to multiple instances.
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 30; // requests
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 60_000; // per minute
+const hits = new Map(); // ip -> { count, resetAt }
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, rec] of hits) if (rec.resetAt <= now) hits.delete(ip);
+}, RATE_LIMIT_WINDOW_MS).unref?.();
+
+app.use('/api/*', async (c, next) => {
+  const ip =
+    c.req.header('x-forwarded-for')?.split(',')[0].trim() ||
+    c.req.header('x-real-ip') ||
+    'unknown';
+  const now = Date.now();
+  const rec = hits.get(ip);
+  if (!rec || rec.resetAt <= now) {
+    hits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+  } else {
+    rec.count += 1;
+    if (rec.count > RATE_LIMIT_MAX) {
+      const retry = Math.ceil((rec.resetAt - now) / 1000);
+      return c.json({ error: 'Too many requests. Please slow down.' }, 429, {
+        'Retry-After': String(retry),
+      });
+    }
+  }
+  await next();
+});
 
 // Wrap an async handler so thrown errors become clean JSON 500s.
 const handle = (fn) => async (c) => {

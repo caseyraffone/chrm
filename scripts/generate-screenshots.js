@@ -43,11 +43,22 @@ const DEVICES = [
   { id: 'ipad-13', w: 1032, h: 1376, scale: 2, px: '2064x2752' },
 ];
 
-const fontLinks = `
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-`;
+// Fonts are embedded from the local @expo-google-fonts packages so screenshot
+// generation is fast and fully reproducible (no network / Google Fonts CDN).
+const FONT_ROOT = path.join(__dirname, '..', 'node_modules', '@expo-google-fonts');
+const FONT_FACES = [
+  { family: 'Bebas Neue', weight: 400, file: 'bebas-neue/BebasNeue_400Regular.ttf' },
+  { family: 'DM Sans', weight: 400, file: 'dm-sans/DMSans_400Regular.ttf' },
+  { family: 'DM Sans', weight: 500, file: 'dm-sans/DMSans_500Medium.ttf' },
+  { family: 'DM Sans', weight: 700, file: 'dm-sans/DMSans_700Bold.ttf' },
+  { family: 'Space Grotesk', weight: 500, file: 'space-grotesk/500Medium/SpaceGrotesk_500Medium.ttf' },
+  { family: 'Space Grotesk', weight: 600, file: 'space-grotesk/600SemiBold/SpaceGrotesk_600SemiBold.ttf' },
+  { family: 'Space Grotesk', weight: 700, file: 'space-grotesk/700Bold/SpaceGrotesk_700Bold.ttf' },
+];
+const fontLinks = `<style>${FONT_FACES.map(({ family, weight, file }) => {
+  const b64 = fs.readFileSync(path.join(FONT_ROOT, file)).toString('base64');
+  return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:block;src:url(data:font/ttf;base64,${b64}) format("truetype");}`;
+}).join('')}</style>`;
 
 const css = `
   * { box-sizing: border-box; }
@@ -430,7 +441,7 @@ async function main() {
 
     for (const screen of SCREENS) {
       const markup = html(screen.meta, screen.phone()).replace('<body>', `<body class="${device.id === 'ipad-13' ? 'ipad' : 'phone-size'}">`);
-      await page.setContent(markup, { waitUntil: 'networkidle' });
+      await page.setContent(markup, { waitUntil: 'load' });
       await page.evaluate(() => document.fonts && document.fonts.ready);
       await page.waitForTimeout(150);
       const file = path.join(dir, `${screen.id}.png`);

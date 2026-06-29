@@ -264,26 +264,26 @@ export const privacyHtml = page(
 );
 
 export const homeHtml = page(
-  'AI Interview Coach',
+  'Finance Interview Coach',
   `
   <section class="hero">
     <div>
-      <p class="updated">AI interview coach for finance, consulting, and high-stakes recruiting</p>
-      <h1>Practice the answer before the room gets quiet.</h1>
-      <p class="lead">CHRM gives ambitious candidates realistic voice drills, interview banks,
-      company prep kits, and direct AI feedback so they can speak clearly under pressure.</p>
+      <p class="updated">Voice-first finance interview reps for IB, PE, markets, and consulting recruiting</p>
+      <h1>Practice finance answers out loud before the room gets quiet.</h1>
+      <p class="lead">CHRM drills candidates on realistic finance interview questions, grades
+      technical correctness and delivery, and gives a tighter answer to practice next.</p>
       <div class="cta-row">
         <a class="cta primary" href="https://apps.apple.com/app/id6759968325">View on the App Store</a>
         <a class="cta secondary" href="#sample-feedback">See sample feedback</a>
       </div>
       <div class="trust-row" aria-label="Trust signals">
-        <span class="trust-pill">No account required</span>
-        <span class="trust-pill">Voice-first practice</span>
-        <span class="trust-pill">Built for recruiting reps</span>
+        <span class="trust-pill">Technical answer grading</span>
+        <span class="trust-pill">Voice-first reps</span>
+        <span class="trust-pill">Built for recruiting season</span>
       </div>
     </div>
     <div class="hero-media" aria-label="CHRM app screenshots">
-      <img class="phone-shot" src="/screenshots/6.9-inch/1-practice.png" alt="CHRM practice screen" />
+      <img class="phone-shot" src="/screenshots/6.9-inch/3-finance.png" alt="CHRM finance question bank screen" />
       <img class="phone-shot secondary" src="/screenshots/6.9-inch/2-feedback.png" alt="CHRM feedback score screen" />
     </div>
   </section>
@@ -291,22 +291,22 @@ export const homeHtml = page(
   <section class="section">
     <div class="section-head">
       <div class="section-kicker">What It Trains</div>
-      <h2>Reps for the moments candidates usually wing.</h2>
-      <p class="lead">Most interview prep stops at knowing the answer. CHRM focuses on saying it
-      cleanly, quickly, and convincingly when timing and nerves are real.</p>
+      <h2>Reps for the finance questions candidates usually only read.</h2>
+      <p class="lead">Most prep stops at guides and flashcards. CHRM turns technical, fit,
+      resume, and HireVue prep into spoken reps with specific corrections.</p>
     </div>
     <div class="feature-grid" aria-label="CHRM features">
       <article class="feature">
-        <strong>Voice practice</strong>
-        <p>Record real answers and train the rhythm, clarity, and structure of your delivery.</p>
+        <strong>Finance technicals</strong>
+        <p>Practice accounting, valuation, LBO, markets, fit, PE, and resume walkthrough questions.</p>
       </article>
       <article class="feature">
-        <strong>Instant feedback</strong>
-        <p>Get scores, strengths, improvement points, and sharper sample phrasing after each drill.</p>
+        <strong>Technical feedback</strong>
+        <p>Get graded against reference answers so weak or missing points are obvious.</p>
       </article>
       <article class="feature">
-        <strong>Finance prep</strong>
-        <p>Practice investment banking, private equity, behavioral, and resume walkthrough questions.</p>
+        <strong>Delivery coaching</strong>
+        <p>Catch rambling, pacing, filler words, and unclear structure before the real interview.</p>
       </article>
       <article class="feature">
         <strong>Company kits</strong>
@@ -329,13 +329,13 @@ export const homeHtml = page(
       <h2>Specific enough to change the next rep.</h2>
     </div>
     <div class="sample">
-      <div class="score">7/10</div>
+      <div class="score">6/10</div>
       <div>
-        <h3>Tell me about a time you went above and beyond.</h3>
+        <h3>Walk me through how depreciation flows through the three statements.</h3>
         <ul>
-          <li><strong>What worked:</strong> Clear situation, specific actions, and a quantified result.</li>
-          <li><strong>Improve:</strong> Make the technical contribution sharper and show why you personally moved the outcome.</li>
-          <li><strong>Stronger version:</strong> CHRM rewrites the answer in a tighter spoken format you can practice immediately.</li>
+          <li><strong>What worked:</strong> You identified depreciation as a non-cash expense.</li>
+          <li><strong>Improve:</strong> Add the tax shield and explicitly tie the balance sheet.</li>
+          <li><strong>Redo:</strong> CHRM gives the tighter statement path to practice immediately.</li>
         </ul>
       </div>
     </div>
@@ -369,6 +369,98 @@ export const homeHtml = page(
     <div class="cta-row">
       <a class="cta primary" href="https://apps.apple.com/app/id6759968325">Get CHRM</a>
       <a class="cta secondary" href="/privacy">How privacy works</a>
+    </div>
+  </section>
+  `
+);
+
+export const financeInterviewPrepHtml = page(
+  'Finance Interview Reps',
+  `
+  <section class="hero">
+    <div>
+      <p class="updated">AI finance interview reps for IB, PE, markets, and consulting recruiting</p>
+      <h1>Stop rereading guides. Practice the answer out loud.</h1>
+      <p class="lead">CHRM drills you on real finance interview questions, grades your spoken answer
+      for technical correctness and delivery, then gives you the tighter version to record next.</p>
+      <div class="cta-row">
+        <a class="cta primary" href="mailto:${SUPPORT_EMAIL}?subject=CHRM%20early%20access&body=Hey%20Casey%2C%20I%20want%20early%20access%20to%20CHRM%20finance%20interview%20reps.%0A%0AMy%20target%20role%3A%20%0AMy%20school%20/%20program%3A%20%0ARecruiting%20timeline%3A%20">Get early access</a>
+        <a class="cta secondary" href="https://apps.apple.com/app/id6759968325">View App Store page</a>
+      </div>
+      <div class="trust-row" aria-label="Finance prep signals">
+        <span class="trust-pill">Technical answer grading</span>
+        <span class="trust-pill">Spoken reps</span>
+        <span class="trust-pill">Built for recruiting season</span>
+      </div>
+    </div>
+    <div class="hero-media" aria-label="CHRM app screenshots">
+      <img class="phone-shot" src="/screenshots/6.9-inch/3-finance.png" alt="CHRM finance question bank screen" />
+      <img class="phone-shot secondary" src="/screenshots/6.9-inch/2-feedback.png" alt="CHRM feedback screen" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-kicker">The Problem</div>
+      <h2>Knowing the concept is different from saying it cleanly.</h2>
+      <p class="lead">Most students prep by reading technical guides and hoping it translates live.
+      CHRM turns that into repetitions: hear the question, answer out loud, get corrected, redo it.</p>
+    </div>
+    <div class="feature-grid" aria-label="Finance interview prep workflow">
+      <article class="feature">
+        <strong>Technical checks</strong>
+        <p>Grade against reference answers for accounting, valuation, LBOs, markets, fit, and PE questions.</p>
+      </article>
+      <article class="feature">
+        <strong>Delivery feedback</strong>
+        <p>Catch rambling, weak structure, filler words, and pacing problems before the real interview.</p>
+      </article>
+      <article class="feature">
+        <strong>Redo loop</strong>
+        <p>Get a sharper version of your answer and record it again while the fix is fresh.</p>
+      </article>
+      <article class="feature">
+        <strong>Finance banks</strong>
+        <p>Practice curated IB, PE, markets, behavioral, and resume walkthrough questions.</p>
+      </article>
+      <article class="feature">
+        <strong>Company prep</strong>
+        <p>Generate role-specific prep kits and likely interview prompts for the firms you care about.</p>
+      </article>
+      <article class="feature">
+        <strong>Progress history</strong>
+        <p>Track reps and scores so recruiting prep feels less like random cramming.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-kicker">Example</div>
+      <h2>From vague answer to interview-ready answer.</h2>
+    </div>
+    <div class="sample">
+      <div class="score">6/10</div>
+      <div>
+        <h3>Walk me through how depreciation flows through the three statements.</h3>
+        <ul>
+          <li><strong>What worked:</strong> You identified depreciation as a non-cash expense and knew it affects net income.</li>
+          <li><strong>Improve:</strong> You missed the tax shield and did not explicitly tie the balance sheet.</li>
+          <li><strong>Redo:</strong> Practice the corrected statement path immediately: income statement, cash flow, balance sheet.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="proof-grid" aria-label="Demand test offer">
+      <article class="proof"><strong>5 free reps</strong><p>Enough to see whether the feedback actually changes your next answer.</p></article>
+      <article class="proof"><strong>$29-$39</strong><p>Planned season-pass pricing if early users say the prep loop is worth it.</p></article>
+      <article class="proof"><strong>72 hours</strong><p>Current goal: find the first 20 students who want early access.</p></article>
+    </div>
+    <div class="cta-row">
+      <a class="cta primary" href="mailto:${SUPPORT_EMAIL}?subject=CHRM%20early%20access&body=Hey%20Casey%2C%20I%20want%20early%20access%20to%20CHRM%20finance%20interview%20reps.%0A%0AMy%20target%20role%3A%20%0AMy%20school%20/%20program%3A%20%0ARecruiting%20timeline%3A%20">Join early access</a>
+      <a class="cta secondary" href="mailto:${SUPPORT_EMAIL}?subject=CHRM%20feedback&body=Quick%20thought%20on%20CHRM%3A%20">Send feedback</a>
     </div>
   </section>
   `

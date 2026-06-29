@@ -29,7 +29,7 @@ import {
   buildResumeExtractMessages,
 } from './prompts.js';
 import { FEEDBACK_MODEL, callClaudeJson, callClaudeRaw, parseJson, transcribe, textToSpeech } from './llm.js';
-import { homeHtml, privacyHtml, supportHtml, termsHtml } from './legal.js';
+import { financeInterviewPrepHtml, homeHtml, privacyHtml, supportHtml, termsHtml } from './legal.js';
 
 const app = new Hono();
 
@@ -99,6 +99,7 @@ app.get('/health', (c) => c.json({ ok: true }));
 // Public marketing root. The App Store needs the legal pages, but a polished
 // root URL keeps the public web presence from looking like a bare API.
 app.get('/', (c) => c.html(homeHtml));
+app.get('/finance-interview-prep', (c) => c.html(financeInterviewPrepHtml));
 
 // ─── Legal pages (Apple Guideline 3.1.2c) ──────────────────────────────────────
 // Public static HTML: Privacy Policy + Terms of Use (EULA). Linked from the

@@ -146,9 +146,17 @@ export default function HomeScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Rep Counter */}
-      <View style={styles.repBadge}>
-        <Text style={styles.repNumber}>{repCount}</Text>
-        <Text style={styles.repLabel}>DRILLS DONE</Text>
+      <View style={styles.topBar}>
+        <Pressable
+          style={({ pressed }) => [styles.accountButton, pressed && { opacity: 0.65 }]}
+          onPress={() => navigation.navigate('Account')}
+        >
+          <Text style={styles.accountButtonText}>ACCOUNT & SYNC</Text>
+        </Pressable>
+        <View style={styles.repBadge}>
+          <Text style={styles.repNumber}>{repCount}</Text>
+          <Text style={styles.repLabel}>DRILLS DONE</Text>
+        </View>
       </View>
 
       {/* Logo & Tagline */}
@@ -243,10 +251,30 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingTop: Platform.OS === 'ios' ? 80 : 56,
   },
-  repBadge: {
-    alignItems: 'flex-end',
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
+  },
+  accountButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    backgroundColor: colors.surface,
+  },
+  accountButtonText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    color: colors.textSecondary,
+    letterSpacing: 1.8,
+  },
+  repBadge: {
+    alignItems: 'flex-end',
+    marginLeft: spacing.md,
   },
   repNumber: {
     fontFamily: fonts.display,

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchCloudDrills, syncDrillToCloud, syncLocalDrillsToCloud } from './cloudSync';
 
 const DRILLS_KEY = '@chrm_drills';
 const REP_COUNT_KEY = '@chrm_rep_count';
@@ -93,6 +94,9 @@ export async function saveDrill(drill) {
     await AsyncStorage.setItem(REP_COUNT_KEY, String(count + 1));
 
     await incrementDailyDrillCount();
+    syncDrillToCloud(drill).catch((error) => {
+      console.warn('Cloud drill sync failed:', error.message);
+    });
   } catch (error) {
     console.error('Error saving drill:', error);
     throw error;
@@ -106,6 +110,29 @@ export async function getDrills() {
   } catch (error) {
     console.error('Error getting drills:', error);
     return [];
+  }
+}
+
+export async function syncDrillsWithCloud() {
+  try {
+    await syncLocalDrillsToCloud(getDrills);
+    const cloud = await fetchCloudDrills();
+    if (!cloud.length) return await getDrills();
+
+    const local = await getDrills();
+    const byId = new Map();
+    [...cloud, ...local].forEach((drill) => {
+      if (drill?.id && !byId.has(drill.id)) byId.set(drill.id, drill);
+    });
+    const merged = Array.from(byId.values()).sort(
+      (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+    );
+    await AsyncStorage.setItem(DRILLS_KEY, JSON.stringify(merged));
+    await AsyncStorage.setItem(REP_COUNT_KEY, String(merged.length));
+    return merged;
+  } catch (error) {
+    console.warn('Cloud history sync failed:', error.message);
+    return await getDrills();
   }
 }
 

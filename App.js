@@ -41,10 +41,12 @@ import InterviewPrepTrackScreen from './src/screens/InterviewPrepTrackScreen';
 import QuestionBankScreen from './src/screens/QuestionBankScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
 import DevSettingsScreen from './src/screens/DevSettingsScreen';
+import AccountScreen from './src/screens/AccountScreen';
 import { colors } from './src/constants/theme';
-import { getOnboardingCompleted } from './src/utils/storage';
+import { getOnboardingCompleted, syncDrillsWithCloud } from './src/utils/storage';
 import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } from './src/utils/purchases';
 import { initAnalytics, track, identify, EVENTS } from './src/utils/analytics';
+import { isSupabaseConfigured, supabase } from './src/utils/supabase';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,12 +78,27 @@ export default function App() {
     // Keep AsyncStorage in sync whenever RevenueCat detects a status change
     // (renewal, cancellation, billing retry, etc.) during the app session.
     const removeListener = addSubscriptionListener();
+    let authSubscription;
+
+    if (isSupabaseConfigured && supabase) {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          syncDrillsWithCloud().catch((error) => {
+            console.warn('Cloud sync after sign-in failed:', error.message);
+          });
+        }
+      });
+      authSubscription = data?.subscription;
+    }
 
     getOnboardingCompleted().then((completed) => {
       setInitialRoute(completed ? 'Home' : 'Onboarding');
     });
 
-    return () => removeListener();
+    return () => {
+      removeListener();
+      authSubscription?.unsubscribe();
+    };
   }, []);
 
   if (!fontsLoaded || !initialRoute) {
@@ -146,6 +163,7 @@ export default function App() {
         />
         <Stack.Screen name="Paywall" component={PaywallScreen} options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
         <Stack.Screen name="DevSettings" component={DevSettingsScreen} />
+        <Stack.Screen name="Account" component={AccountScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

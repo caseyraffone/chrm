@@ -2,7 +2,9 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@env';
+import { API_BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '@env';
+
+const API_BASE = (API_BASE_URL || 'https://chrm-two.vercel.app').replace(/\/$/, '');
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
@@ -59,7 +61,17 @@ export async function signOut() {
 }
 
 export async function deleteCurrentAccount() {
-  // Client-side deletion needs a privileged server function. Keep this as a
-  // visible product requirement instead of pretending delete is done locally.
-  throw new Error('Account deletion endpoint is not configured yet.');
+  if (!supabase) throw new Error('Supabase is not configured.');
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('You need to be signed in to delete your account.');
+
+  const res = await fetch(`${API_BASE}/api/account`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || 'Could not delete your account.');
+  await supabase.auth.signOut();
+  return true;
 }

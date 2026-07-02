@@ -90,9 +90,58 @@ const handle = (fn) => async (c) => {
     return await fn(c);
   } catch (err) {
     console.error('[error]', err);
-    return c.json({ error: err.message || 'Internal error' }, 500);
+    return c.json({ error: err.message || 'Internal error' }, err.status || 500);
   }
 };
+
+function getBearerToken(c) {
+  const authorization = c.req.header('authorization') || '';
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match?.[1] || null;
+}
+
+async function getSupabaseUserFromToken(accessToken) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase auth is not configured.');
+  }
+
+  const res = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/user`, {
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const user = await res.json().catch(() => null);
+  if (!res.ok || !user?.id) {
+    const message = user?.msg || user?.message || 'Invalid or expired session.';
+    const error = new Error(message);
+    error.status = 401;
+    throw error;
+  }
+  return user;
+}
+
+async function deleteSupabaseUser(userId) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase admin deletion is not configured.');
+  }
+
+  const res = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/admin/users/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.msg || data.message || 'Could not delete account.');
+  }
+}
 
 function buildFallbackTechnicalFeedback(transcript = '', referenceAnswer = '', keyPoints = []) {
   const answer = transcript.toLowerCase();
@@ -139,6 +188,22 @@ app.get('/finance-interview-prep', (c) => c.html(financeInterviewPrepHtml));
 app.get('/privacy', (c) => c.html(privacyHtml));
 app.get('/terms', (c) => c.html(termsHtml));
 app.get('/support', (c) => c.html(supportHtml));
+
+// ─── Account management ──────────────────────────────────────────────────────
+// Apple requires in-app account deletion when the app supports account creation.
+// The client sends the user's Supabase access token; the backend validates it
+// with Supabase Auth, then uses the server-only service role key to delete the
+// authenticated user. RLS cascades remove profile/cloud data.
+app.delete(
+  '/api/account',
+  handle(async (c) => {
+    const token = getBearerToken(c);
+    if (!token) return c.json({ error: 'Missing authorization token.' }, 401);
+    const user = await getSupabaseUserFromToken(token);
+    await deleteSupabaseUser(user.id);
+    return c.json({ ok: true });
+  })
+);
 
 app.get('/favicon.png', async (c) => {
   try {

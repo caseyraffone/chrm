@@ -12,8 +12,10 @@ import { colors, fonts, spacing, radius } from '../constants/theme';
 import {
   getCurrentSession,
   isSupabaseConfigured,
+  deleteCurrentAccount,
   signInWithEmail,
   signOut,
+  supabase,
 } from '../utils/supabase';
 import { syncDrillsWithCloud, getDrills } from '../utils/storage';
 
@@ -26,6 +28,14 @@ export default function AccountScreen({ navigation }) {
 
   useEffect(() => {
     load();
+    if (!isSupabaseConfigured || !supabase) return undefined;
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      if (nextSession?.user) {
+        handleSync();
+      }
+    });
+    return () => data?.subscription?.unsubscribe();
   }, []);
 
   async function load() {
@@ -81,10 +91,32 @@ export default function AccountScreen({ navigation }) {
   }
 
   function handleDeleteAccount() {
+    if (!session?.user) {
+      Alert.alert('Sign in required', 'Sign in before deleting a CHRM account.');
+      return;
+    }
     Alert.alert(
-      'Account deletion',
-      'This requires a secure backend deletion endpoint. The button is intentionally parked here so the product requirement is visible before App Store review.',
-      [{ text: 'OK' }]
+      'Delete account?',
+      'This permanently deletes your CHRM account and cloud-synced reps. Reps stored locally on this device are not erased.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await deleteCurrentAccount();
+              setSession(null);
+              setStatus('Account deleted. Local guest reps remain on this device.');
+            } catch (error) {
+              Alert.alert('Delete failed', error.message || 'Could not delete your account.');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
     );
   }
 
@@ -172,8 +204,12 @@ export default function AccountScreen({ navigation }) {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
-        <Text style={styles.deleteText}>Delete account requirement</Text>
+      <TouchableOpacity
+        style={[styles.deleteButton, (!session?.user || loading) && styles.disabled]}
+        onPress={handleDeleteAccount}
+        disabled={!session?.user || loading}
+      >
+        <Text style={styles.deleteText}>Delete account</Text>
       </TouchableOpacity>
     </View>
   );

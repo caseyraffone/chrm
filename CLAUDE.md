@@ -2,6 +2,26 @@
 
 **Tagline:** Clear. Confident. Under Pressure.
 
+## Current Handoff — Updated 2026-07-02
+
+Recent shipped work on `main`:
+- `583589b` revamps the Vercel marketing/legal web presence, including `/finance-interview-prep`.
+- `fb86aa0` adds browser recording support via `src/utils/recorder.web.js`, so prep can run inside the browser.
+- `df7fb3b` adds Supabase account/sync scaffolding: `AccountScreen`, `src/utils/supabase.js`, `src/utils/cloudSync.js`, and `supabase/schema.sql`.
+- Latest in-progress/completed slice adds `DELETE /api/account` on the Hono backend and wires the Account screen's delete action to it.
+
+Commercialization track:
+- Supabase is the chosen account/data provider.
+- RevenueCat remains the shared entitlement system target; web payments should use RevenueCat Web Billing or Stripe through RevenueCat so iOS and web share one entitlement model.
+- Guest mode must keep working. On sign-in, local drill history merges into cloud history.
+- The backend service-role key must only exist in `server/.env` / Vercel env vars, never in `.env` for the Expo client.
+
+Next likely steps:
+1. Create the Supabase project, run `supabase/schema.sql`, and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+2. Add the client `SUPABASE_URL` and `SUPABASE_ANON_KEY` locally and in any Expo/Vercel web env used by the client build.
+3. Smoke-test magic-link sign-in, drill sync, and account deletion against the real Supabase project.
+4. Then wire RevenueCat web billing / entitlement sync to the Supabase user id.
+
 ## Git Workflow
 
 **Always work on `main`.** Commit and push directly to `main` — do not create feature branches unless explicitly asked. Before making changes, ensure you're on main and it's up to date.
@@ -20,7 +40,7 @@ A React Native / Expo app that helps students and young professionals practice h
 | Transcription | OpenAI Whisper API (`whisper-1`) |
 | AI (feedback, questions, mock interview) | Anthropic Claude (`claude-sonnet-4-6`) |
 | Monetization | RevenueCat (`react-native-purchases`) |
-| Storage | `@react-native-async-storage/async-storage` |
+| Storage | AsyncStorage local cache + Supabase cloud sync scaffolding |
 | Fonts | Bebas Neue (wordmark), Space Grotesk (UI headings), DM Sans (body) via `@expo-google-fonts` |
 | Env vars | `react-native-dotenv` → import from `@env` |
 

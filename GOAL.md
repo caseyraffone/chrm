@@ -161,28 +161,30 @@ source of entitlement truth across platforms.
 
 ## Current Phase
 
-**Status:**
-- Backend (Phase 1b): `server/` skeleton + `/transcribe` Whisper proxy built &
-  tested; standalone (client not wired). Awaiting Vercel deploy by Casey.
-- Analytics foundation: `src/utils/analytics.js` added — PII-free PostHog-over-
-  HTTPS tracker (no native SDK, no build/app.config impact, no-ops without a key).
-  Wired into the funnel: app_opened, onboarding (started/intent/role/skipped/
-  completed), drill_completed (category+score+role, never transcript), and
-  paywall (shown/purchase_tapped/subscription_purchased). Bundles clean.
+**Current status — updated 2026-07-02 by Codex:**
+- Part A marketing revamp is done and pushed: `https://chrm-two.vercel.app/finance-interview-prep` now presents CHRM as a finance interview prep product instead of a bare/buggy app page.
+- Part B browser prep is done and pushed: React Native Web uses `src/utils/recorder.web.js` / browser `MediaRecorder`, and the web build was smoke-tested through a free drill to feedback.
+- Accounts/cloud sync foundation is in place: Supabase client helpers, `AccountScreen`, Home entry point, local drill sync-on-save/sign-in, and `supabase/schema.sql` with RLS.
+- Account deletion backend route is implemented: `DELETE /api/account` validates the Supabase access token and deletes through the server-only service role key.
+- Docs have been refreshed so future agents should read `README.md`, `CLAUDE.md`, and this file before continuing.
 
-Casey's chosen build order: (1) analytics ✅ → (3) deepen interview-prep content
-→ (4) backend Phase 1c → (2) onboarding/paywall conversion LAST (research-heavy,
-to be tuned with real data).
+**Environment still needed before account features work in production:**
+- Client build: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+- Backend/Vercel: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+- Supabase dashboard: run `supabase/schema.sql`; enable/configure magic-link redirects for local dev and production web.
 
-**Last updated:** 2026-06-27 (by Claude)
 **Next session should:**
-1. Casey: deploy `server/` to Vercel (root dir `server`, set OPENAI/ANTHROPIC
-   keys), smoke-test `/api/health`. And to turn analytics on, add
-   `POSTHOG_API_KEY` (+ optional `POSTHOG_HOST`) to `.env` / the web session env.
-2. Then build next: deepen interview-prep content (IB Technical → 150+, expand
-   Behavioral/Fit/Markets, and/or stand up the first non-IB vertical, e.g. PE).
-3. Hold unit 1d (point client at backend + strip keys) until Casey confirms —
-   touches app.config.js (constraint-protected) and needs a device test.
+1. Create/configure the actual Supabase project and set Vercel env vars.
+2. Smoke-test magic-link sign-in, drill sync, and account deletion against Supabase.
+3. Then move to RevenueCat web billing / shared entitlement mapping with the Supabase user id.
+
+**Prior completed foundation:**
+- Backend is deployed to Vercel at `https://chrm-two.vercel.app`, and client AI
+  calls default to that backend through `API_BASE_URL`.
+- Analytics foundation exists in `src/utils/analytics.js` and is PII-free. Keep
+  transcripts, names, resumes, and emails out of analytics events.
+- Interview-prep content has been deepened, including IB and PE banks plus
+  per-question mastery tracking.
 
 **App Store / privacy reminder:** analytics now means the submission must declare
 data collection in Apple's App Privacy section and needs a Privacy Policy URL.

@@ -43,7 +43,7 @@ import PaywallScreen from './src/screens/PaywallScreen';
 import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import AccountScreen from './src/screens/AccountScreen';
 import { colors } from './src/constants/theme';
-import { getOnboardingCompleted, syncDrillsWithCloud } from './src/utils/storage';
+import { getOnboardingCompleted, syncAllWithCloud } from './src/utils/storage';
 import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } from './src/utils/purchases';
 import { initAnalytics, track, identify, EVENTS } from './src/utils/analytics';
 import { isSupabaseConfigured, supabase } from './src/utils/supabase';
@@ -83,7 +83,7 @@ export default function App() {
     if (isSupabaseConfigured && supabase) {
       const { data } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
-          syncDrillsWithCloud().catch((error) => {
+          syncAllWithCloud().catch((error) => {
             console.warn('Cloud sync after sign-in failed:', error.message);
           });
         }

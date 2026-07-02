@@ -17,7 +17,7 @@ import {
   signOut,
   supabase,
 } from '../utils/supabase';
-import { syncDrillsWithCloud, getDrills } from '../utils/storage';
+import { syncAllWithCloud, getDrills } from '../utils/storage';
 
 export default function AccountScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -66,7 +66,7 @@ export default function AccountScreen({ navigation }) {
     setLoading(true);
     setStatus('Syncing your reps...');
     try {
-      const drills = await syncDrillsWithCloud();
+      const drills = await syncAllWithCloud();
       setDrillCount(drills.length);
       setStatus(`Synced ${drills.length} local/cloud reps.`);
       await load();

@@ -1,5 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchCloudDrills, syncDrillToCloud, syncLocalDrillsToCloud } from './cloudSync';
+import {
+  fetchCloudDrills,
+  syncDrillToCloud,
+  syncLocalDrillsToCloud,
+  syncPrepKitToCloud,
+  syncLocalPrepKitsToCloud,
+  fetchCloudPrepKits,
+  syncHireVueSessionToCloud,
+  syncLocalHireVueSessionsToCloud,
+  fetchCloudHireVueSessions,
+} from './cloudSync';
 
 const DRILLS_KEY = '@chrm_drills';
 const REP_COUNT_KEY = '@chrm_rep_count';
@@ -134,6 +144,15 @@ export async function syncDrillsWithCloud() {
     console.warn('Cloud history sync failed:', error.message);
     return await getDrills();
   }
+}
+
+// Syncs all cloud-backed data (drills, prep kits, HireVue sessions) on login.
+// Returns the merged drills so callers can show a rep count. Prep kit and
+// HireVue merges run even if one fails, so a single error can't block the rest.
+export async function syncAllWithCloud() {
+  const drills = await syncDrillsWithCloud();
+  await Promise.allSettled([syncPrepKitsWithCloud(), syncHireVueSessionsWithCloud()]);
+  return drills;
 }
 
 export async function getRepCount() {
@@ -282,11 +301,19 @@ export async function getResume() {
 
 const HIREVUE_SESSIONS_KEY = '@chrm_hirevue_sessions';
 
+async function saveHireVueSessionLocal(session) {
+  const existing = await getHireVueSessions();
+  const deduped = existing.filter((s) => String(s.id) !== String(session.id));
+  const updated = [session, ...deduped];
+  await AsyncStorage.setItem(HIREVUE_SESSIONS_KEY, JSON.stringify(updated));
+}
+
 export async function saveHireVueSession(session) {
   try {
-    const existing = await getHireVueSessions();
-    const updated = [session, ...existing];
-    await AsyncStorage.setItem(HIREVUE_SESSIONS_KEY, JSON.stringify(updated));
+    await saveHireVueSessionLocal(session);
+    syncHireVueSessionToCloud(session).catch((error) => {
+      console.warn('Cloud HireVue sync failed:', error.message);
+    });
   } catch (error) {
     console.error('Error saving HireVue session:', error);
   }
@@ -301,6 +328,30 @@ export async function getHireVueSessions() {
   }
 }
 
+// Pushes local HireVue sessions to the cloud, then merges cloud sessions back
+// (union by id, newest first) so history carries over across devices on login.
+export async function syncHireVueSessionsWithCloud() {
+  try {
+    await syncLocalHireVueSessionsToCloud(getHireVueSessions);
+    const cloud = await fetchCloudHireVueSessions();
+    if (!cloud.length) return await getHireVueSessions();
+
+    const local = await getHireVueSessions();
+    const byId = new Map();
+    [...cloud, ...local].forEach((session) => {
+      if (session?.id && !byId.has(String(session.id))) byId.set(String(session.id), session);
+    });
+    const merged = Array.from(byId.values()).sort(
+      (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+    );
+    await AsyncStorage.setItem(HIREVUE_SESSIONS_KEY, JSON.stringify(merged));
+    return merged;
+  } catch (error) {
+    console.warn('Cloud HireVue sync failed:', error.message);
+    return await getHireVueSessions();
+  }
+}
+
 // ─── Prep Kit storage ─────────────────────────────────────────────────────────
 
 const PREP_KIT_INDEX_KEY = '@chrm_prepkit_index';
@@ -311,23 +362,60 @@ function prepKitKey(company, role) {
   return `@chrm_prepkit_${c}${r ? `_${r}` : ''}`;
 }
 
+async function savePrepKitLocal(company, role, kit) {
+  const key = prepKitKey(company, role);
+  await AsyncStorage.setItem(key, JSON.stringify(kit));
+
+  const indexJson = await AsyncStorage.getItem(PREP_KIT_INDEX_KEY);
+  const index = indexJson ? JSON.parse(indexJson) : [];
+  const entry = { company, role, key, date: new Date().toISOString() };
+  const existing = index.findIndex((i) => i.key === key);
+  if (existing >= 0) {
+    index[existing] = entry;
+  } else {
+    index.unshift(entry);
+  }
+  await AsyncStorage.setItem(PREP_KIT_INDEX_KEY, JSON.stringify(index));
+}
+
 export async function savePrepKit(company, role, kit) {
   try {
-    const key = prepKitKey(company, role);
-    await AsyncStorage.setItem(key, JSON.stringify(kit));
-
-    const indexJson = await AsyncStorage.getItem(PREP_KIT_INDEX_KEY);
-    const index = indexJson ? JSON.parse(indexJson) : [];
-    const entry = { company, role, key, date: new Date().toISOString() };
-    const existing = index.findIndex((i) => i.key === key);
-    if (existing >= 0) {
-      index[existing] = entry;
-    } else {
-      index.unshift(entry);
-    }
-    await AsyncStorage.setItem(PREP_KIT_INDEX_KEY, JSON.stringify(index));
+    await savePrepKitLocal(company, role, kit);
+    syncPrepKitToCloud(company, role, kit).catch((error) => {
+      console.warn('Cloud prep kit sync failed:', error.message);
+    });
   } catch (error) {
     console.error('Error saving prep kit:', error);
+  }
+}
+
+// Assembles every locally-stored prep kit as [{ company, role, kit }] for sync.
+export async function getAllPrepKits() {
+  try {
+    const meta = await getAllPrepKitMeta();
+    const kits = [];
+    for (const entry of meta) {
+      const kit = await getPrepKit(entry.company, entry.role);
+      if (kit) kits.push({ company: entry.company, role: entry.role || '', kit });
+    }
+    return kits;
+  } catch {
+    return [];
+  }
+}
+
+// Pushes local prep kits up, then pulls any cloud kits missing locally so
+// generated kits carry over across devices on login.
+export async function syncPrepKitsWithCloud() {
+  try {
+    await syncLocalPrepKitsToCloud(getAllPrepKits);
+    const cloud = await fetchCloudPrepKits();
+    for (const { company, role, kit } of cloud) {
+      const existing = await getPrepKit(company, role);
+      if (!existing) await savePrepKitLocal(company, role, kit);
+    }
+  } catch (error) {
+    console.warn('Cloud prep kit sync failed:', error.message);
   }
 }
 

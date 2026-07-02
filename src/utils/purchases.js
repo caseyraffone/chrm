@@ -96,3 +96,33 @@ export async function presentCustomerCenter() {
   await RevenueCatUI.presentCustomerCenter();
   await syncSubscriptionStatus();
 }
+
+// ─── Cross-platform identity ─────────────────────────────────────────────────
+// Aliasing the RevenueCat customer to the Supabase user id ties every purchase
+// to the account, so entitlements follow the user across devices and platforms
+// (and the backend webhook can attribute events to the right account).
+
+/**
+ * Links the RevenueCat identity to the signed-in Supabase user. Call on login.
+ */
+export async function linkUser(userId) {
+  if (!userId) return;
+  try {
+    await Purchases.logIn(userId);
+    await syncSubscriptionStatus();
+  } catch (error) {
+    console.warn('[RevenueCat] linkUser failed:', error.message);
+  }
+}
+
+/**
+ * Resets RevenueCat to an anonymous identity on sign-out so the next user
+ * doesn't inherit the previous account's entitlements on this device.
+ */
+export async function unlinkUser() {
+  try {
+    await Purchases.logOut();
+  } catch (error) {
+    console.warn('[RevenueCat] unlinkUser failed:', error.message);
+  }
+}

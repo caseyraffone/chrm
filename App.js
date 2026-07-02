@@ -44,7 +44,14 @@ import DevSettingsScreen from './src/screens/DevSettingsScreen';
 import AccountScreen from './src/screens/AccountScreen';
 import { colors } from './src/constants/theme';
 import { getOnboardingCompleted, syncAllWithCloud } from './src/utils/storage';
-import { initializePurchases, syncSubscriptionStatus, addSubscriptionListener } from './src/utils/purchases';
+import {
+  initializePurchases,
+  syncSubscriptionStatus,
+  addSubscriptionListener,
+  linkUser,
+  unlinkUser,
+} from './src/utils/purchases';
+import { reconcileCloudEntitlement } from './src/utils/entitlements';
 import { initAnalytics, track, identify, EVENTS } from './src/utils/analytics';
 import { isSupabaseConfigured, supabase } from './src/utils/supabase';
 
@@ -86,6 +93,12 @@ export default function App() {
           syncAllWithCloud().catch((error) => {
             console.warn('Cloud sync after sign-in failed:', error.message);
           });
+          // Tie RevenueCat to the account, then pull the account-level
+          // entitlement so a purchase from any platform unlocks Pro here.
+          linkUser(session.user.id).catch(() => {});
+          reconcileCloudEntitlement().catch(() => {});
+        } else {
+          unlinkUser().catch(() => {});
         }
       });
       authSubscription = data?.subscription;

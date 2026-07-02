@@ -60,3 +60,9 @@ export async function presentCustomerCenter() {
     window.alert('Manage your subscription in the CHRM mobile app for now.');
   }
 }
+
+// No RevenueCat SDK on web. Entitlement here comes from the account-level
+// subscription_entitlements row (see utils/entitlements.js), populated by the
+// RevenueCat webhook — so a mobile purchase still unlocks Pro in the browser.
+export async function linkUser() {}
+export async function unlinkUser() {}

@@ -96,6 +96,35 @@ Then smoke-test in the browser:
 9. Confirm a row appears in Supabase `drill_sessions`.
 10. Test Delete account with a throwaway user.
 
+## 6. Cross-platform subscriptions (RevenueCat webhook)
+
+Entitlements are unified through the `subscription_entitlements` table so a
+purchase on any platform unlocks Pro on the account. The plumbing is already in
+the code:
+
+- On sign-in the app calls `Purchases.logIn(supabaseUserId)` so the RevenueCat
+  app user id **is** the Supabase user id (`src/utils/purchases.js`).
+- The backend exposes `POST /api/revenuecat/webhook`, which validates a shared
+  secret and upserts the account's entitlement (`server/src/index.js`).
+- Clients read the account entitlement and reconcile it into local Pro status
+  (`src/utils/entitlements.js`) — this is what lets the **web** app recognize a
+  subscription bought on mobile even though it has no RevenueCat SDK.
+
+To turn it on:
+
+1. In RevenueCat, set the entitlement identifier to `CHRM Pro` (matches
+   `ENTITLEMENT_ID`).
+2. RevenueCat → Project → Integrations → **Webhooks**: URL
+   `https://chrm-two.vercel.app/api/revenuecat/webhook`, and set the
+   **Authorization header** to a strong random secret.
+3. Add that same value as `REVENUECAT_WEBHOOK_SECRET` in `server/.env` and in
+   Vercel env vars, then redeploy.
+4. Test a sandbox purchase and confirm a row lands in
+   `subscription_entitlements`, then that Pro unlocks after signing in on the web.
+
 ## Next Commercial Step
 
-After Supabase auth/data is verified, wire RevenueCat web billing so the Supabase user id maps to the same RevenueCat app user id across web and iOS.
+Actual **web checkout** still needs a purchase path (RevenueCat Web Billing or
+Stripe Checkout) so browser users can subscribe directly — the read/unlock side
+is already done, so once a web purchase writes to RevenueCat, Pro will light up
+everywhere automatically.

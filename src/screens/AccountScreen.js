@@ -18,6 +18,7 @@ import {
   supabase,
 } from '../utils/supabase';
 import { syncAllWithCloud, getDrills } from '../utils/storage';
+import { reconcileCloudEntitlement } from '../utils/entitlements';
 
 export default function AccountScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -67,6 +68,7 @@ export default function AccountScreen({ navigation }) {
     setStatus('Syncing your reps...');
     try {
       const drills = await syncAllWithCloud();
+      await reconcileCloudEntitlement();
       setDrillCount(drills.length);
       setStatus(`Synced ${drills.length} local/cloud reps.`);
       await load();

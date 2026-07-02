@@ -143,6 +143,45 @@ async function deleteSupabaseUser(userId) {
   }
 }
 
+// Upserts a row into subscription_entitlements (primary key user_id) using the
+// service role, so RevenueCat webhook events set the account-level entitlement
+// that every platform reads — the basis for cross-platform Pro unlock.
+async function upsertSubscriptionEntitlement(row) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase admin is not configured.');
+  }
+
+  const res = await fetch(
+    `${supabaseUrl.replace(/\/$/, '')}/rest/v1/subscription_entitlements?on_conflict=user_id`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(row),
+    }
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || data.msg || `Entitlement upsert failed (${res.status}).`);
+  }
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// RevenueCat's app_user_id is the Supabase user id once the client calls
+// Purchases.logIn(userId). Purchases made before sign-in carry an anonymous
+// $RCAnonymousID; check aliases too, and only accept a real UUID we can attach.
+function pickSupabaseUserId(event) {
+  const candidates = [event.app_user_id, ...(event.aliases || []), event.original_app_user_id];
+  return candidates.find((id) => typeof id === 'string' && UUID_RE.test(id)) || null;
+}
+
 function buildFallbackTechnicalFeedback(transcript = '', referenceAnswer = '', keyPoints = []) {
   const answer = transcript.toLowerCase();
   const hits = (keyPoints || []).filter((point) =>
@@ -201,6 +240,56 @@ app.delete(
     if (!token) return c.json({ error: 'Missing authorization token.' }, 401);
     const user = await getSupabaseUserFromToken(token);
     await deleteSupabaseUser(user.id);
+    return c.json({ ok: true });
+  })
+);
+
+// ─── RevenueCat webhook ───────────────────────────────────────────────────────
+// Single source of truth for entitlements across platforms. RevenueCat posts
+// purchase/renewal/expiration events here (with an Authorization header equal to
+// REVENUECAT_WEBHOOK_SECRET set in the dashboard). We map the event to an
+// active/free status and store it on the account, so a purchase made on iOS
+// (StoreKit) or on the web (Stripe / RC Web Billing) unlocks Pro everywhere the
+// user signs in.
+app.post(
+  '/api/revenuecat/webhook',
+  handle(async (c) => {
+    const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
+    if (!secret) return c.json({ error: 'Webhook not configured.' }, 500);
+    const auth = c.req.header('authorization') || '';
+    if (auth !== secret && auth !== `Bearer ${secret}`) {
+      return c.json({ error: 'Unauthorized.' }, 401);
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const event = body.event || {};
+    const userId = pickSupabaseUserId(event);
+    if (!userId) {
+      // Purchase not yet tied to a signed-in account (anonymous RC id).
+      return c.json({ ok: true, skipped: 'no-uuid-app-user-id' });
+    }
+
+    const expiresAtMs = event.expiration_at_ms || null;
+    const type = event.type || '';
+    // CANCELLATION keeps access until expiry, so rely on the expiration
+    // timestamp rather than the event type for everything except hard ends.
+    const active =
+      type !== 'EXPIRATION' &&
+      type !== 'SUBSCRIPTION_PAUSED' &&
+      (!expiresAtMs || expiresAtMs > Date.now());
+    const entitlementId =
+      (Array.isArray(event.entitlement_ids) && event.entitlement_ids[0]) ||
+      event.entitlement_id ||
+      null;
+
+    await upsertSubscriptionEntitlement({
+      user_id: userId,
+      status: active ? 'active' : 'free',
+      revenuecat_app_user_id: event.app_user_id || null,
+      entitlement_id: entitlementId,
+      expires_at: expiresAtMs ? new Date(expiresAtMs).toISOString() : null,
+      updated_at: new Date().toISOString(),
+    });
     return c.json({ ok: true });
   })
 );

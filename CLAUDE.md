@@ -17,7 +17,7 @@ Commercialization track:
 - The backend service-role key must only exist in `server/.env` / Vercel env vars, never in `.env` for the Expo client.
 
 Next likely steps:
-1. Create the Supabase project, run `supabase/schema.sql`, and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+1. Create the Supabase project using `docs/supabase-setup.md`, run `supabase/schema.sql`, and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
 2. Add the client `SUPABASE_URL` and `SUPABASE_ANON_KEY` locally and in any Expo/Vercel web env used by the client build.
 3. Smoke-test magic-link sign-in, drill sync, and account deletion against the real Supabase project.
 4. Then wire RevenueCat web billing / entitlement sync to the Supabase user id.

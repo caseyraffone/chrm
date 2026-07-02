@@ -144,7 +144,7 @@ chrm/
 - Account deletion endpoint exists at `DELETE /api/account`; it requires `SUPABASE_SERVICE_ROLE_KEY` on the backend.
 - RevenueCat is still the mobile entitlement source; web purchase/entitlement wiring is the next commercial layer.
 
-For agent/session handoff details, read `GOAL.md` and `CLAUDE.md` before starting new work.
+For Supabase setup, use `docs/supabase-setup.md`. For agent/session handoff details, read `GOAL.md` and `CLAUDE.md` before starting new work.
 
 ---
 

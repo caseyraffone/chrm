@@ -166,15 +166,16 @@ source of entitlement truth across platforms.
 - Part B browser prep is done and pushed: React Native Web uses `src/utils/recorder.web.js` / browser `MediaRecorder`, and the web build was smoke-tested through a free drill to feedback.
 - Accounts/cloud sync foundation is in place: Supabase client helpers, `AccountScreen`, Home entry point, local drill sync-on-save/sign-in, and `supabase/schema.sql` with RLS.
 - Account deletion backend route is implemented: `DELETE /api/account` validates the Supabase access token and deletes through the server-only service role key.
-- Docs have been refreshed so future agents should read `README.md`, `CLAUDE.md`, and this file before continuing.
+- Docs have been refreshed so future agents should read `README.md`, `CLAUDE.md`, and this file before continuing. Supabase setup has a dedicated checklist at `docs/supabase-setup.md`.
 
 **Environment still needed before account features work in production:**
 - Client build: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 - Backend/Vercel: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
 - Supabase dashboard: run `supabase/schema.sql`; enable/configure magic-link redirects for local dev and production web.
+- Verification command after env setup: `npm run check:supabase`.
 
 **Next session should:**
-1. Create/configure the actual Supabase project and set Vercel env vars.
+1. Create/configure the actual Supabase project using `docs/supabase-setup.md` and set Vercel env vars.
 2. Smoke-test magic-link sign-in, drill sync, and account deletion against Supabase.
 3. Then move to RevenueCat web billing / shared entitlement mapping with the Supabase user id.
 

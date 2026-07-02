@@ -82,14 +82,26 @@ function normalizeFeedbackResult(result, { maxStrong = 2, maxImprove = 2 } = {})
 
 // ─── Transcription ────────────────────────────────────────────────────────────
 
-export async function transcribeAudio(audioUri) {
+export async function transcribeAudio(audioInput) {
   try {
     const formData = new FormData();
     if (Platform.OS === 'web') {
-      const blob = await fetch(audioUri).then((r) => r.blob());
-      formData.append('file', blob, 'recording.webm');
+      const audio = typeof audioInput === 'string' ? { uri: audioInput } : audioInput || {};
+      const blob = audio.blob || (await fetch(audio.uri).then((r) => r.blob()));
+      const mimeType = audio.mimeType || blob.type || 'audio/webm';
+      const name = audio.name || (mimeType.includes('mp4') ? 'recording.mp4' : 'recording.webm');
+      const file =
+        typeof File !== 'undefined'
+          ? new File([blob], name, { type: mimeType })
+          : blob;
+      formData.append('file', file, name);
     } else {
-      formData.append('file', { uri: audioUri, type: 'audio/m4a', name: 'recording.m4a' });
+      const audio = typeof audioInput === 'string' ? { uri: audioInput } : audioInput || {};
+      formData.append('file', {
+        uri: audio.uri,
+        type: audio.mimeType || 'audio/m4a',
+        name: audio.name || 'recording.m4a',
+      });
     }
 
     const response = await fetchWithTimeout(`${API_BASE}/api/transcribe`, { method: 'POST', body: formData }, 60000);

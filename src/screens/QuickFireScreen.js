@@ -9,10 +9,15 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { Audio } from 'expo-av';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { transcribeAudio, generateQuestions } from '../utils/api';
 import { getCachedQuestions, setCachedQuestions } from '../utils/storage';
+import {
+  requestRecordingPermission,
+  startRecording as startRecorder,
+  stopRecording as stopRecorder,
+  cleanupRecording,
+} from '../utils/recorder';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const QUICKFIRE_ROLE = 'quickfire_general';
@@ -57,6 +62,7 @@ export default function QuickFireScreen({ navigation }) {
       clearCountdown();
       if (elapsedRef.current) clearInterval(elapsedRef.current);
       if (glowLoop.current) glowLoop.current.stop();
+      cleanupRecording(recordingRef.current);
     };
   }, []);
 
@@ -130,12 +136,10 @@ export default function QuickFireScreen({ navigation }) {
       isRecordingRef.current = false;
       setIsProcessing(true);
 
-      await rec.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = rec.getURI();
+      const audio = await stopRecorder(rec);
       recordingRef.current = null;
 
-      const transcript = await transcribeAudio(uri);
+      const transcript = await transcribeAudio(audio);
       navigation.navigate('Feedback', {
         category: QUICKFIRE_CATEGORY,
         role: null,
@@ -176,23 +180,22 @@ export default function QuickFireScreen({ navigation }) {
 
   async function startRecording() {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
+      const { granted } = await requestRecordingPermission();
+      if (!granted) {
         Alert.alert(
           'Microphone Access Required',
           'CHRM needs microphone access to record your answers. Please enable it in Settings.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ...(Platform.OS === 'web'
+              ? []
+              : [{ text: 'Open Settings', onPress: () => Linking.openSettings() }]),
           ]
         );
         return;
       }
 
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const { recording: rec } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const rec = await startRecorder();
 
       recordingRef.current = rec;
       setIsRecording(true);
@@ -224,12 +227,10 @@ export default function QuickFireScreen({ navigation }) {
       isRecordingRef.current = false;
       setIsProcessing(true);
 
-      await rec.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = rec.getURI();
+      const audio = await stopRecorder(rec);
       recordingRef.current = null;
 
-      const transcript = await transcribeAudio(uri);
+      const transcript = await transcribeAudio(audio);
       navigation.navigate('Feedback', {
         category: QUICKFIRE_CATEGORY,
         role: null,

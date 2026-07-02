@@ -9,10 +9,15 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { Audio } from 'expo-av';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { generateHireVueQuestions, transcribeAudio } from '../utils/api';
 import { saveHireVueSession } from '../utils/storage';
+import {
+  requestRecordingPermission,
+  startRecording as startRecorder,
+  stopRecording as stopRecorder,
+  cleanupRecording as cleanupRecorder,
+} from '../utils/recorder';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 const PREP_SECONDS = 30;
@@ -43,8 +48,8 @@ export default function HireVueSimulationScreen({ route, navigation }) {
   const prepTimerRef = useRef(null);
   const answerTimerRef = useRef(null);
   const elapsedRef = useRef(0);
-  const pendingRef = useRef(null); // { uri, duration } awaiting submit/retake
-  const answersRef = useRef([]); // [{ question, category, uri, duration }]
+  const pendingRef = useRef(null); // { audio, duration } awaiting submit/retake
+  const answersRef = useRef([]); // [{ question, category, audio, duration }]
   const permissionGrantedRef = useRef(false);
 
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -65,7 +70,6 @@ export default function HireVueSimulationScreen({ route, navigation }) {
       clearTimers();
       if (glowLoop.current) glowLoop.current.stop();
       cleanupRecording();
-      Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
     };
   }, []);
 
@@ -84,9 +88,7 @@ export default function HireVueSimulationScreen({ route, navigation }) {
     const rec = recordingRef.current;
     recordingRef.current = null;
     if (rec) {
-      try {
-        await rec.stopAndUnloadAsync();
-      } catch (_) {}
+      await cleanupRecorder(rec);
     }
   }
 
@@ -140,14 +142,16 @@ export default function HireVueSimulationScreen({ route, navigation }) {
   // ── Recording phase ───────────────────────────────────────────────────────────
   async function ensureMicPermission() {
     if (permissionGrantedRef.current) return true;
-    const { status } = await Audio.requestPermissionsAsync();
-    if (status !== 'granted') {
+    const { granted } = await requestRecordingPermission();
+    if (!granted) {
       Alert.alert(
         'Microphone Access Required',
         'CHRM needs microphone access to record your answers. Please enable it in Settings.',
         [
           { text: 'Cancel', style: 'cancel', onPress: () => navigation.goBack() },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ...(Platform.OS === 'web'
+            ? []
+            : [{ text: 'Open Settings', onPress: () => Linking.openSettings() }]),
         ]
       );
       return false;
@@ -161,10 +165,7 @@ export default function HireVueSimulationScreen({ route, navigation }) {
       const ok = await ensureMicPermission();
       if (!ok || !mountedRef.current) return;
 
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const recording = await startRecorder();
       recordingRef.current = recording;
 
       setPhaseSafe('recording');
@@ -197,11 +198,9 @@ export default function HireVueSimulationScreen({ route, navigation }) {
       stopGlow();
       clearTimers();
       const duration = elapsedRef.current;
-      await rec.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = rec.getURI();
+      const audio = await stopRecorder(rec);
       recordingRef.current = null;
-      pendingRef.current = { uri, duration };
+      pendingRef.current = { audio, duration };
       setPhaseSafe('review');
     } catch (err) {
       console.error('Failed to stop recording:', err);
@@ -224,7 +223,7 @@ export default function HireVueSimulationScreen({ route, navigation }) {
     answersRef.current.push({
       question: current.question,
       category: current.category || 'Behavioral',
-      uri: pendingRef.current?.uri || null,
+      audio: pendingRef.current?.audio || null,
       duration: pendingRef.current?.duration || 0,
     });
     pendingRef.current = null;
@@ -249,9 +248,9 @@ export default function HireVueSimulationScreen({ route, navigation }) {
       // Transcribe all recordings in parallel.
       const transcripts = await Promise.all(
         answers.map(async (a) => {
-          if (!a.uri) return '';
+          if (!a.audio) return '';
           try {
-            return await transcribeAudio(a.uri);
+            return await transcribeAudio(a.audio);
           } catch (e) {
             console.error('Transcription failed for one answer:', e);
             return '';

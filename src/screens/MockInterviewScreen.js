@@ -9,15 +9,20 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { getMockInterviewTurn, transcribeAudio } from '../utils/api';
 import { saveMockInterview } from '../utils/storage';
+import {
+  requestRecordingPermission,
+  startRecording as startRecorder,
+  stopRecording as stopRecorder,
+  cleanupRecording as cleanupRecorder,
+} from '../utils/recorder';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 // Turn-based voice interview: the interviewer speaks a question (expo-speech),
-// the candidate records a spoken answer (expo-av), it's transcribed via the
+// the candidate records a spoken answer, it's transcribed via the
 // backend, and the next turn is generated. Works on web and native with no
 // native-only modules — replaces the old realtime WebRTC implementation.
 
@@ -111,7 +116,6 @@ export default function MockInterviewScreen({ route, navigation }) {
       clearTimers();
       Speech.stop();
       cleanupRecording();
-      Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
     };
   }, []);
 
@@ -126,17 +130,15 @@ export default function MockInterviewScreen({ route, navigation }) {
     const rec = recordingRef.current;
     recordingRef.current = null;
     if (rec) {
-      try {
-        await rec.stopAndUnloadAsync();
-      } catch (_) {}
+      await cleanupRecorder(rec);
     }
   }
 
   // ── Permissions ───────────────────────────────────────────────────────────────
   async function ensureMicPermission() {
     if (permissionGrantedRef.current) return true;
-    const { status: perm } = await Audio.requestPermissionsAsync();
-    if (perm !== 'granted') {
+    const { granted } = await requestRecordingPermission();
+    if (!granted) {
       Alert.alert(
         'Microphone Access Required',
         'CHRM needs microphone access to hear your answers. Please enable it in Settings.',
@@ -226,10 +228,7 @@ export default function MockInterviewScreen({ route, navigation }) {
       const ok = await ensureMicPermission();
       if (!ok || !mountedRef.current) return;
 
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const recording = await startRecorder();
       recordingRef.current = recording;
 
       setStatusSafe('recording');
@@ -260,13 +259,11 @@ export default function MockInterviewScreen({ route, navigation }) {
     try {
       clearTimers();
       const duration = elapsedRef.current;
-      await rec.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = rec.getURI();
+      const audio = await stopRecorder(rec);
       recordingRef.current = null;
 
       setStatusSafe('transcribing');
-      const transcript = await transcribeAudio(uri);
+      const transcript = await transcribeAudio(audio);
       if (!mountedRef.current) return;
 
       conversationRef.current.push({

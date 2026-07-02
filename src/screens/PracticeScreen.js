@@ -12,9 +12,14 @@ import {
   FlatList,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { Audio } from 'expo-av';
 import { colors, fonts, spacing, radius } from '../constants/theme';
 import { transcribeAudio } from '../utils/api';
+import {
+  requestRecordingPermission,
+  startRecording as startRecorder,
+  stopRecording as stopRecorder,
+  cleanupRecording,
+} from '../utils/recorder';
 import ProcessingOverlay from '../components/ProcessingOverlay';
 
 export default function PracticeScreen({ route, navigation }) {
@@ -41,8 +46,9 @@ export default function PracticeScreen({ route, navigation }) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (glowLoop.current) glowLoop.current.stop();
+      cleanupRecording(recording);
     };
-  }, []);
+  }, [recording]);
 
   function skipQuestion() {
     if (isRecording) return;
@@ -79,24 +85,22 @@ export default function PracticeScreen({ route, navigation }) {
 
   async function startRecording() {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
+      const { granted } = await requestRecordingPermission();
+      if (!granted) {
         Alert.alert(
           'Microphone Access Required',
           'CHRM needs microphone access to record your answers. Please enable it in Settings.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ...(Platform.OS === 'web'
+              ? []
+              : [{ text: 'Open Settings', onPress: () => Linking.openSettings() }]),
           ]
         );
         return;
       }
 
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-
-      const { recording: rec } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const rec = await startRecorder();
 
       setRecording(rec);
       setIsRecording(true);
@@ -124,13 +128,10 @@ export default function PracticeScreen({ route, navigation }) {
       setIsRecording(false);
       setIsProcessing(true);
 
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-
-      const uri = recording.getURI();
+      const audio = await stopRecorder(recording);
       setRecording(null);
 
-      const transcript = await transcribeAudio(uri);
+      const transcript = await transcribeAudio(audio);
 
       navigation.navigate('Feedback', {
         category,

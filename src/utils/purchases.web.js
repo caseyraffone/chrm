@@ -4,12 +4,17 @@
 // support, so this stub stands in for them on the web target. Metro resolves
 // this file over `purchases.js` automatically when bundling for web.
 //
-// Full parity TODO: replace these stubs with RevenueCat Web Billing
-// (https://www.revenuecat.com/docs/web/web-billing) so browser users can
-// subscribe. Until then, web treats everyone as "free" and the paywall
-// buttons surface a "not yet available on web" notice.
+// Purchasing on web goes through Stripe Checkout: the backend creates a
+// subscription Checkout Session, we redirect the browser to it, and Stripe's
+// webhook writes the account entitlement (subscription_entitlements) that the
+// reconcile logic reads back — the same table the RevenueCat webhook writes, so
+// Pro unlocks across web and mobile from one source of truth.
 
+import { API_BASE_URL } from '@env';
 import { getSubscriptionStatus, setSubscriptionStatus } from './storage';
+import { getCurrentSession } from './supabase';
+
+const API_BASE = (API_BASE_URL || 'https://chrm-two.vercel.app').replace(/\/$/, '');
 
 // Must match the entitlement identifier in the RevenueCat dashboard.
 export const ENTITLEMENT_ID = 'CHRM Pro';
@@ -43,21 +48,84 @@ export function addSubscriptionListener() {
 }
 
 /**
- * Web paywall. No checkout is wired up yet — return false so callers keep the
- * user gated. Replaced by RevenueCat Web Billing / Stripe checkout in the
- * parity phase.
+ * Web paywall via Stripe Checkout. Requires a signed-in account (so the
+ * purchase attaches to the user id). Creates a Checkout Session on the backend
+ * and redirects the browser to Stripe. On return, entitlement reconciliation
+ * unlocks Pro — so this navigates away rather than resolving to `true`.
+ *
+ * @param {'monthly'|'annual'} plan
  */
-export async function presentPaywall() {
-  if (typeof window !== 'undefined' && window.alert) {
-    window.alert('Subscriptions are coming to the web app soon. For now, subscribe in the CHRM mobile app.');
+export async function presentPaywall(plan = 'annual') {
+  const session = await getCurrentSession();
+  if (!session?.access_token) {
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Please sign in first (Account & Sync) so your subscription is saved to your account.');
+    }
+    return false;
   }
-  return false;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/checkout/session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        plan,
+        origin: typeof window !== 'undefined' ? window.location.origin : undefined,
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.url) {
+      throw new Error(body.error || 'Could not start checkout.');
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = body.url;
+    }
+    return false; // redirecting; Pro unlocks on return via reconcile
+  } catch (error) {
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert(error.message || 'Checkout is unavailable right now.');
+    }
+    return false;
+  }
 }
 
-/** Web Customer Center placeholder. */
+/**
+ * Opens the Stripe billing portal so web subscribers can manage or cancel.
+ * Redirects the browser; falls back to a notice if there's no web subscription.
+ */
 export async function presentCustomerCenter() {
-  if (typeof window !== 'undefined' && window.alert) {
-    window.alert('Manage your subscription in the CHRM mobile app for now.');
+  const session = await getCurrentSession();
+  if (!session?.access_token) {
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Sign in to manage your subscription.');
+    }
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/billing/portal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        origin: typeof window !== 'undefined' ? window.location.origin : undefined,
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.url) {
+      throw new Error(body.error || 'No web subscription to manage.');
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = body.url;
+    }
+  } catch (error) {
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert(error.message || 'Billing management is unavailable right now.');
+    }
   }
 }
 

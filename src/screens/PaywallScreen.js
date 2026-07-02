@@ -39,12 +39,14 @@ export default function PaywallScreen({ route, navigation }) {
     track(EVENTS.PAYWALL_SHOWN, { source: message || 'unspecified' });
   }, [message]);
 
-  async function handlePurchase() {
+  async function handlePurchase(plan = 'annual') {
     if (loading) return;
-    track(EVENTS.PAYWALL_PURCHASE_TAPPED, { source: message || 'unspecified' });
+    track(EVENTS.PAYWALL_PURCHASE_TAPPED, { source: message || 'unspecified', plan });
     setLoading(true);
     try {
-      const purchased = await presentPaywall();
+      // On native the plan is ignored (RevenueCat shows its own paywall UI); on
+      // web it selects the Stripe price for checkout.
+      const purchased = await presentPaywall(plan);
       if (purchased) {
         track(EVENTS.SUBSCRIPTION_PURCHASED, { source: message || 'unspecified' });
         identify({ subscription_status: 'pro' });
@@ -117,7 +119,7 @@ export default function PaywallScreen({ route, navigation }) {
         <View style={styles.pricingBlock}>
           <TouchableOpacity
             style={styles.monthlyButton}
-            onPress={handlePurchase}
+            onPress={() => handlePurchase('monthly')}
             activeOpacity={0.85}
             disabled={loading}
           >
@@ -130,7 +132,7 @@ export default function PaywallScreen({ route, navigation }) {
 
           <TouchableOpacity
             style={styles.annualButton}
-            onPress={handlePurchase}
+            onPress={() => handlePurchase('annual')}
             activeOpacity={0.85}
             disabled={loading}
           >

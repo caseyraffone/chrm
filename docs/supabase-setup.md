@@ -122,9 +122,35 @@ To turn it on:
 4. Test a sandbox purchase and confirm a row lands in
    `subscription_entitlements`, then that Pro unlocks after signing in on the web.
 
-## Next Commercial Step
+## 7. Web checkout (Stripe)
 
-Actual **web checkout** still needs a purchase path (RevenueCat Web Billing or
-Stripe Checkout) so browser users can subscribe directly — the read/unlock side
-is already done, so once a web purchase writes to RevenueCat, Pro will light up
-everywhere automatically.
+Browser users subscribe through Stripe Checkout; Stripe's webhook writes the same
+`subscription_entitlements` table, so Pro stays unified with mobile. Wiring is in
+the code (`/api/checkout/session`, `/api/stripe/webhook`, `/api/billing/portal`;
+`src/utils/purchases.web.js`).
+
+To turn it on:
+
+1. In Stripe, create a **product** with two recurring prices: $7.99/month and
+   $59.99/year. Copy the two Price IDs.
+2. Stripe → Developers → **Webhooks**: add endpoint
+   `https://chrm-two.vercel.app/api/stripe/webhook`, subscribe to
+   `checkout.session.completed`, `customer.subscription.updated`,
+   `customer.subscription.deleted`. Copy the signing secret.
+3. Add server env vars (local `server/.env` **and** Vercel):
+   `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`,
+   `STRIPE_WEBHOOK_SECRET`. Redeploy.
+4. Enable the Stripe **Customer Portal** (Settings → Billing) so the manage/cancel
+   button works.
+5. Test: sign in on web → open the paywall → subscribe with a Stripe test card →
+   confirm a `subscription_entitlements` row flips to `active` and Pro unlocks.
+
+Note: the client sends its own `window.location.origin` for the Checkout
+success/return URLs, so the web app can live on any domain; `WEB_APP_URL` is only
+a fallback.
+
+## Done when
+
+Both purchase paths (iOS via RevenueCat, web via Stripe) write the same account
+entitlement, and signing in on any device/browser unlocks Pro — one subscription,
+everywhere.

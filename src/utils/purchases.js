@@ -80,7 +80,9 @@ export function addSubscriptionListener() {
  * Presents the native RevenueCat paywall. Resolves to `true` if the user
  * purchased or restored an entitlement, `false` otherwise.
  */
-export async function presentPaywall() {
+export async function presentPaywall(_plan) {
+  // _plan is only used by the web adapter; the native RevenueCat paywall shows
+  // its own package selection UI.
   const result = await RevenueCatUI.presentPaywall();
   const success =
     result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED;

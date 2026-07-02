@@ -48,6 +48,7 @@ create table if not exists public.subscription_entitlements (
   user_id uuid primary key references auth.users(id) on delete cascade,
   status text not null default 'free',
   revenuecat_app_user_id text,
+  stripe_customer_id text,
   entitlement_id text,
   expires_at timestamptz,
   updated_at timestamptz not null default now()

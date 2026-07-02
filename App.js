@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts as useBebasNeue, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
@@ -102,6 +102,26 @@ export default function App() {
         }
       });
       authSubscription = data?.subscription;
+    }
+
+    // Returning from Stripe Checkout on web: the entitlement webhook may lag the
+    // redirect by a second or two, so poll a few times, then clean the URL.
+    if (
+      Platform.OS === 'web' &&
+      typeof window !== 'undefined' &&
+      window.location?.search?.includes('checkout=success')
+    ) {
+      let tries = 0;
+      const poll = async () => {
+        const isPro = await reconcileCloudEntitlement().catch(() => false);
+        tries += 1;
+        if (!isPro && tries < 6) {
+          setTimeout(poll, 2000);
+        } else if (typeof window.history?.replaceState === 'function') {
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      };
+      poll();
     }
 
     getOnboardingCompleted().then((completed) => {

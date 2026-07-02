@@ -14,6 +14,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import Stripe from 'stripe';
 
 import {
   buildQuestionsPrompt,
@@ -182,6 +183,89 @@ function pickSupabaseUserId(event) {
   return candidates.find((id) => typeof id === 'string' && UUID_RE.test(id)) || null;
 }
 
+// ─── Stripe (web checkout) ────────────────────────────────────────────────────
+
+let stripeClient = null;
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('Stripe is not configured.');
+  if (!stripeClient) stripeClient = new Stripe(key);
+  return stripeClient;
+}
+
+// Reads the account's entitlement row (service role) — used to find the Stripe
+// customer id for the billing portal.
+async function getEntitlementRow(userId) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) return null;
+  const res = await fetch(
+    `${supabaseUrl.replace(/\/$/, '')}/rest/v1/subscription_entitlements?user_id=eq.${userId}&select=*`,
+    { headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } }
+  );
+  const rows = await res.json().catch(() => []);
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+function stripeSubscriptionActive(sub) {
+  if (!sub) return false;
+  if (!['active', 'trialing', 'past_due'].includes(sub.status)) return false;
+  if (sub.current_period_end && sub.current_period_end * 1000 < Date.now()) return false;
+  return true;
+}
+
+function customerIdOf(objectCustomer) {
+  if (!objectCustomer) return null;
+  return typeof objectCustomer === 'string' ? objectCustomer : objectCustomer.id || null;
+}
+
+// Maps a verified Stripe event to an account entitlement upsert. Both the
+// checkout completion and later subscription lifecycle events land here.
+async function handleStripeEvent(event) {
+  const stripe = getStripe();
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.client_reference_id || session.metadata?.supabase_user_id;
+    if (!userId) return;
+    let status = 'active';
+    let expiresAt = null;
+    if (session.subscription) {
+      const sub = await stripe.subscriptions.retrieve(session.subscription);
+      status = stripeSubscriptionActive(sub) ? 'active' : 'free';
+      expiresAt = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null;
+    }
+    await upsertSubscriptionEntitlement({
+      user_id: userId,
+      status,
+      stripe_customer_id: customerIdOf(session.customer),
+      entitlement_id: 'CHRM Pro',
+      expires_at: expiresAt,
+      updated_at: new Date().toISOString(),
+    });
+    return;
+  }
+
+  if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+    const sub = event.data.object;
+    const userId = sub.metadata?.supabase_user_id;
+    if (!userId) return;
+    const active = event.type !== 'customer.subscription.deleted' && stripeSubscriptionActive(sub);
+    await upsertSubscriptionEntitlement({
+      user_id: userId,
+      status: active ? 'active' : 'free',
+      stripe_customer_id: customerIdOf(sub.customer),
+      entitlement_id: 'CHRM Pro',
+      expires_at: sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null,
+      updated_at: new Date().toISOString(),
+    });
+  }
+}
+
 function buildFallbackTechnicalFeedback(transcript = '', referenceAnswer = '', keyPoints = []) {
   const answer = transcript.toLowerCase();
   const hits = (keyPoints || []).filter((point) =>
@@ -291,6 +375,79 @@ app.post(
       updated_at: new Date().toISOString(),
     });
     return c.json({ ok: true });
+  })
+);
+
+// ─── Stripe web checkout ──────────────────────────────────────────────────────
+// Browser subscriptions: create a Checkout Session tied to the signed-in user,
+// then let Stripe's webhook record the entitlement. Same subscription_entitlements
+// table the RevenueCat webhook writes, so Pro stays unified across platforms.
+app.post(
+  '/api/checkout/session',
+  handle(async (c) => {
+    const token = getBearerToken(c);
+    if (!token) return c.json({ error: 'Missing authorization token.' }, 401);
+    const user = await getSupabaseUserFromToken(token);
+    const { plan = 'annual', origin } = await c.req.json().catch(() => ({}));
+    const priceId =
+      plan === 'monthly' ? process.env.STRIPE_PRICE_MONTHLY : process.env.STRIPE_PRICE_ANNUAL;
+    if (!priceId) return c.json({ error: 'Subscription price is not configured.' }, 500);
+
+    const base = (origin || process.env.WEB_APP_URL || 'https://chrm-two.vercel.app').replace(/\/$/, '');
+    const checkout = await getStripe().checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      client_reference_id: user.id,
+      customer_email: user.email || undefined,
+      metadata: { supabase_user_id: user.id },
+      subscription_data: { metadata: { supabase_user_id: user.id } },
+      allow_promotion_codes: true,
+      success_url: `${base}/?checkout=success`,
+      cancel_url: `${base}/?checkout=cancelled`,
+    });
+    return c.json({ url: checkout.url });
+  })
+);
+
+// Stripe posts raw JSON that must be signature-verified against the raw body,
+// so this route reads the text body itself rather than going through handle().
+app.post('/api/stripe/webhook', async (c) => {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) return c.json({ error: 'Webhook not configured.' }, 500);
+  const signature = c.req.header('stripe-signature');
+  const raw = await c.req.text();
+  let event;
+  try {
+    event = getStripe().webhooks.constructEvent(raw, signature, secret);
+  } catch (err) {
+    return c.json({ error: `Signature verification failed: ${err.message}` }, 400);
+  }
+  try {
+    await handleStripeEvent(event);
+  } catch (err) {
+    console.error('[stripe webhook]', err);
+    return c.json({ error: err.message || 'Webhook handler failed' }, 500);
+  }
+  return c.json({ received: true });
+});
+
+// Stripe billing portal so web subscribers can manage/cancel their plan.
+app.post(
+  '/api/billing/portal',
+  handle(async (c) => {
+    const token = getBearerToken(c);
+    if (!token) return c.json({ error: 'Missing authorization token.' }, 401);
+    const user = await getSupabaseUserFromToken(token);
+    const row = await getEntitlementRow(user.id);
+    const customerId = row?.stripe_customer_id;
+    if (!customerId) return c.json({ error: 'No web subscription found for this account.' }, 404);
+    const { origin } = await c.req.json().catch(() => ({}));
+    const base = (origin || process.env.WEB_APP_URL || 'https://chrm-two.vercel.app').replace(/\/$/, '');
+    const portal = await getStripe().billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${base}/`,
+    });
+    return c.json({ url: portal.url });
   })
 );
 

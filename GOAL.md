@@ -161,23 +161,47 @@ source of entitlement truth across platforms.
 
 ## Current Phase
 
-**Current status — updated 2026-07-02 by Codex:**
-- Part A marketing revamp is done and pushed: `https://chrm-two.vercel.app/finance-interview-prep` now presents CHRM as a finance interview prep product instead of a bare/buggy app page.
-- Part B browser prep is done and pushed: React Native Web uses `src/utils/recorder.web.js` / browser `MediaRecorder`, and the web build was smoke-tested through a free drill to feedback.
-- Accounts/cloud sync foundation is in place: Supabase client helpers, `AccountScreen`, Home entry point, local drill sync-on-save/sign-in, and `supabase/schema.sql` with RLS.
-- Account deletion backend route is implemented: `DELETE /api/account` validates the Supabase access token and deletes through the server-only service role key.
-- Docs have been refreshed so future agents should read `README.md`, `CLAUDE.md`, and this file before continuing. Supabase setup has a dedicated checklist at `docs/supabase-setup.md`.
+**Current status — updated 2026-07-02 (Claude):** the commercialization arc is
+now CODE-COMPLETE on `main`. Everything below is built, compiles, and web-builds
+clean; what remains is dashboard configuration (Supabase, RevenueCat, Stripe),
+which only Casey can do — no code is blocked.
 
-**Environment still needed before account features work in production:**
-- Client build: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
-- Backend/Vercel: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-- Supabase dashboard: run `supabase/schema.sql`; enable/configure magic-link redirects for local dev and production web.
-- Verification command after env setup: `npm run check:supabase`.
+- **Marketing + browser prep** (Codex): `/finance-interview-prep` revamp; browser
+  recording via `src/utils/recorder.web.js`; a free drill runs end-to-end on web.
+- **Accounts** (Codex): Supabase magic-link auth (`src/utils/supabase.js`),
+  `AccountScreen`, `DELETE /api/account` account deletion, `supabase/schema.sql`
+  with RLS.
+- **Cloud sync — ALL progress** (`src/utils/cloudSync.js`, `storage.js`): drills,
+  prep kits, and HireVue sessions now sync. `saveX` pushes on save;
+  `syncAllWithCloud()` merges on login (guest→account) — wired into the App.js
+  auth listener and the AccountScreen Sync button.
+- **Cross-platform entitlements** (`src/utils/entitlements.js`, `purchases.js`,
+  `server/src/index.js`): `Purchases.logIn(userId)` makes RC's app_user_id ==
+  Supabase id; `POST /api/revenuecat/webhook` writes `subscription_entitlements`;
+  clients reconcile that row into local Pro (authoritative on web, upgrade-only
+  on native). One entitlement, all platforms.
+- **Stripe web checkout** (`purchases.web.js`, `server/src/index.js`): browser
+  users subscribe via `POST /api/checkout/session`; `POST /api/stripe/webhook`
+  records the entitlement into the SAME table; `POST /api/billing/portal` for
+  manage/cancel. PaywallScreen threads the chosen plan ('monthly'/'annual').
+
+**Environment still needed (all dashboard work — see `docs/supabase-setup.md`):**
+- Client build: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` (+
+  `REVENUECAT_API_KEY_IOS` for native).
+- Backend/Vercel: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`,
+  `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `REVENUECAT_WEBHOOK_SECRET`,
+  `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`,
+  `STRIPE_WEBHOOK_SECRET`.
+- Dashboards: run `supabase/schema.sql`; set the RevenueCat webhook + entitlement
+  id `CHRM Pro`; create Stripe product/prices + webhook; enable Stripe portal.
+- Verify: `npm run check:supabase`, then a live sign-in + purchase smoke test.
 
 **Next session should:**
-1. Create/configure the actual Supabase project using `docs/supabase-setup.md` and set Vercel env vars.
-2. Smoke-test magic-link sign-in, drill sync, and account deletion against Supabase.
-3. Then move to RevenueCat web billing / shared entitlement mapping with the Supabase user id.
+1. Do the dashboard setup above and verify sync + both purchase paths live.
+2. Polish the marketing site (Part A of the earlier plan is only partially done —
+   the root `/` page still needs the design pass discussed with Casey).
+3. Optional parity: Sign in with Apple / Google (Apple requires Sign in with
+   Apple if any third-party login is offered on iOS).
 
 **Prior completed foundation:**
 - Backend is deployed to Vercel at `https://chrm-two.vercel.app`, and client AI

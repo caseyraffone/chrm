@@ -4,23 +4,43 @@
 
 ## Current Handoff — Updated 2026-07-02
 
-Recent shipped work on `main`:
-- `583589b` revamps the Vercel marketing/legal web presence, including `/finance-interview-prep`.
-- `fb86aa0` adds browser recording support via `src/utils/recorder.web.js`, so prep can run inside the browser.
-- `df7fb3b` adds Supabase account/sync scaffolding: `AccountScreen`, `src/utils/supabase.js`, `src/utils/cloudSync.js`, and `supabase/schema.sql`.
-- Latest in-progress/completed slice adds `DELETE /api/account` on the Hono backend and wires the Account screen's delete action to it.
+**The commercialization arc (accounts → sync → cross-platform subscriptions) is
+code-complete on `main`.** All of it compiles and web-builds clean; what's left
+is dashboard configuration (Supabase, RevenueCat, Stripe) — no code is blocked.
+Full setup checklist: `docs/supabase-setup.md`. Verify with `npm run check:supabase`.
 
-Commercialization track:
-- Supabase is the chosen account/data provider.
-- RevenueCat remains the shared entitlement system target; web payments should use RevenueCat Web Billing or Stripe through RevenueCat so iOS and web share one entitlement model.
-- Guest mode must keep working. On sign-in, local drill history merges into cloud history.
-- The backend service-role key must only exist in `server/.env` / Vercel env vars, never in `.env` for the Expo client.
+What's built:
+- **Accounts** (Codex): Supabase magic-link auth (`src/utils/supabase.js`),
+  `AccountScreen`, `DELETE /api/account`, `supabase/schema.sql` + RLS.
+- **Cloud sync — all progress** (`src/utils/cloudSync.js` + `storage.js`): drills,
+  prep kits, and HireVue sessions sync. `saveX` pushes on save; `syncAllWithCloud()`
+  merges on login (guest→account) — wired into `App.js` auth listener + the
+  AccountScreen Sync button.
+- **Cross-platform entitlements** (`src/utils/entitlements.js`, `purchases.js`,
+  `server/src/index.js`): `Purchases.logIn(userId)` ties RevenueCat's app_user_id
+  to the Supabase id; `POST /api/revenuecat/webhook` writes `subscription_entitlements`;
+  clients reconcile that row into local Pro (authoritative on web, upgrade-only on
+  native).
+- **Stripe web checkout** (`purchases.web.js`, `server/src/index.js`): browser
+  subscriptions via `POST /api/checkout/session`, recorded by `POST /api/stripe/webhook`
+  into the SAME entitlement table; `POST /api/billing/portal` for manage/cancel.
+  PaywallScreen threads the plan ('monthly'/'annual'); native ignores it.
+
+Invariants to preserve:
+- Guest mode must keep working; sign-in merges local history into the cloud.
+- Service-role / Stripe / webhook secrets live ONLY in `server/.env` / Vercel —
+  never in the Expo client `.env`.
+- `subscription_entitlements` is the single source of truth for Pro across
+  platforms; both the RevenueCat and Stripe webhooks upsert into it.
 
 Next likely steps:
-1. Create the Supabase project using `docs/supabase-setup.md`, run `supabase/schema.sql`, and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
-2. Add the client `SUPABASE_URL` and `SUPABASE_ANON_KEY` locally and in any Expo/Vercel web env used by the client build.
-3. Smoke-test magic-link sign-in, drill sync, and account deletion against the real Supabase project.
-4. Then wire RevenueCat web billing / entitlement sync to the Supabase user id.
+1. Run the Supabase + RevenueCat + Stripe dashboard setup in `docs/supabase-setup.md`
+   (create project, run schema, set env vars, register webhooks), then verify sync
+   and both purchase paths live.
+2. Marketing site polish — the root `/` page still needs the design pass discussed
+   with Casey (only `/finance-interview-prep` was revamped).
+3. Optional: Sign in with Apple / Google (Apple requires Sign in with Apple if any
+   third-party login is offered on iOS).
 
 ## Git Workflow
 
@@ -36,11 +56,11 @@ A React Native / Expo app that helps students and young professionals practice h
 |---|---|
 | Framework | React Native + Expo (SDK 55) |
 | Navigation | React Navigation — native stack |
-| Audio Recording | `expo-av` |
-| Transcription | OpenAI Whisper API (`whisper-1`) |
-| AI (feedback, questions, mock interview) | Anthropic Claude (`claude-sonnet-4-6`) |
-| Monetization | RevenueCat (`react-native-purchases`) |
-| Storage | AsyncStorage local cache + Supabase cloud sync scaffolding |
+| Audio Recording | `expo-av` (native) / browser `MediaRecorder` (web) via `recorder.js` split |
+| Transcription | OpenAI Whisper API (`whisper-1`) — through the backend proxy |
+| AI (feedback, questions, mock interview) | Anthropic Claude (`claude-sonnet-4-6`) — through the backend proxy |
+| Monetization | RevenueCat (`react-native-purchases`) on iOS + Stripe Checkout on web; unified via `subscription_entitlements` |
+| Accounts / cloud sync | Supabase (magic-link auth + Postgres + RLS) with AsyncStorage as offline cache |
 | Fonts | Bebas Neue (wordmark), Space Grotesk (UI headings), DM Sans (body) via `@expo-google-fonts` |
 | Env vars | `react-native-dotenv` → import from `@env` |
 
@@ -101,12 +121,18 @@ chrm/
 │   │   ├── PaywallScreen.js            # Subscription gate (slide from bottom, gesture-locked)
 │   │   └── DevSettingsScreen.js        # Internal dev/debug tools
 │   ├── utils/
-│   │   ├── api.js       # All API calls (see section below)
-│   │   ├── storage.js   # AsyncStorage helpers: drills, rep count, onboarding flag, prep kits
-│   │   ├── questions.js # Static question bank per category + CATEGORIES constants
-│   │   └── purchases.js # RevenueCat init, subscription sync, entitlement listener
+│   │   ├── api.js         # All API calls (see section below)
+│   │   ├── storage.js     # AsyncStorage helpers + cloud sync wiring (drills, prep kits, HireVue)
+│   │   ├── cloudSync.js   # Supabase upsert/fetch for drills, prep kits, HireVue sessions
+│   │   ├── supabase.js    # Supabase client + magic-link auth helpers (env-gated)
+│   │   ├── entitlements.js# Reads subscription_entitlements → reconciles local Pro status
+│   │   ├── recorder.js / recorder.web.js  # expo-av (native) / MediaRecorder (web) split
+│   │   ├── questions.js   # Static question bank per category + CATEGORIES constants
+│   │   ├── purchases.js / purchases.web.js # RevenueCat (native) / Stripe checkout (web)
+│   │   └── analytics.js   # PII-free PostHog events
+│   ├── screens/ (+ AccountScreen.js — sign in, sync, delete account)
 │   └── constants/
-│       └── theme.js     # Colors, fonts, spacing, radius tokens
+│       └── theme.js       # Colors, fonts, spacing, radius tokens
 ```
 
 ---
@@ -188,14 +214,27 @@ Border radius: `sm=8, md=14, lg=20, full=9999`
 
 ## Monetization
 
-RevenueCat handles all subscription logic. `src/utils/purchases.js` exports:
-- `initializePurchases()` — called once in `App.js` `useEffect`
-- `syncSubscriptionStatus()` — writes entitlement status to AsyncStorage on launch
-- `addSubscriptionListener()` — keeps AsyncStorage in sync during the session; returns a cleanup function
+Pro is an **account-level entitlement**, unified across platforms via the
+`subscription_entitlements` Supabase table (single source of truth):
 
-Gating: screens check AsyncStorage for subscription status and navigate to `Paywall` if not subscribed. **Pro features:** Company Prep Kit, Mock Interview, and HireVue Simulation. **Free** (subject to the 3/day limit): Interview Prep, Behavioral, Persuade & Present, Quick Fire.
+- **iOS:** RevenueCat (`src/utils/purchases.js`). `initializePurchases()`,
+  `syncSubscriptionStatus()`, `addSubscriptionListener()` as before, plus
+  `linkUser(userId)`/`unlinkUser()` which call `Purchases.logIn/logOut` so RC's
+  `app_user_id` == the Supabase user id. `POST /api/revenuecat/webhook` writes the
+  entitlement row.
+- **Web:** Stripe Checkout (`src/utils/purchases.web.js`). `presentPaywall(plan)`
+  redirects to `POST /api/checkout/session`; `POST /api/stripe/webhook` writes the
+  same entitlement row; `presentCustomerCenter()` opens the Stripe billing portal.
+- **Reconcile:** `src/utils/entitlements.js` reads the account row and folds it
+  into local Pro status — authoritative on web, upgrade-only on native (so a
+  cross-platform purchase unlocks Pro without a stale row clobbering a fresh
+  StoreKit purchase). Called on login (`App.js`) and manual sync (`AccountScreen`).
 
-Pricing: $7.99 / month or $59.99 / year (36% savings).
+Gating: screens read local subscription status (AsyncStorage) and navigate to
+`Paywall` if not Pro. **Pro:** Company Prep Kit, Mock Interview, HireVue Simulation.
+**Free** (3/day limit): Interview Prep, Behavioral, Persuade & Present, Quick Fire.
+
+Pricing: $7.99 / month or $59.99 / year (36% savings). Entitlement id: `CHRM Pro`.
 
 ---
 
@@ -296,33 +335,53 @@ Rule: events only, never transcripts/names/emails.
 
 ## Backend (`server/`)
 
-Vercel serverless functions that will proxy the OpenAI/Anthropic calls so keys
-leave the client (commercial-build initiative; see `GOAL.md`). Currently
-standalone — `/api/transcribe` (Whisper proxy) + `/api/health`. The client is
-not yet pointed at it.
+Host-agnostic Hono app, **live on Vercel at `https://chrm-two.vercel.app`**
+(auto-deploys from `main`). Keeps all OpenAI/Anthropic keys server-side; the
+client points at it via `API_BASE_URL`. Also serves the marketing/legal pages
+(`/`, `/finance-interview-prep`, `/privacy`, `/terms`, `/support`) from
+`server/src/legal.js`.
+
+Key endpoints:
+- AI proxies: `/api/questions`, `/api/prep-kit`, `/api/feedback`, `/api/transcribe`,
+  mock-interview / HireVue / resume endpoints (each builds its prompt in
+  `server/src/prompts.js`).
+- Accounts: `DELETE /api/account` (validates Supabase token, deletes via service role).
+- Subscriptions: `POST /api/revenuecat/webhook`, `POST /api/checkout/session`,
+  `POST /api/stripe/webhook`, `POST /api/billing/portal` — all upsert
+  `subscription_entitlements`.
+
+Server-only secrets live in `server/.env` / Vercel (see `server/.env.example`):
+Supabase service role, `REVENUECAT_WEBHOOK_SECRET`, and Stripe keys. Never ship
+these to the client. Setup + verification: `docs/supabase-setup.md`.
 
 ---
 
 ## Env Vars
 
-Set in `.env` (gitignored). Required:
+AI keys now live on the **backend** (`server/.env` / Vercel), not the client —
+see `server/.env.example` and `docs/supabase-setup.md`. The client `.env`
+(gitignored, read via `@env`) holds only public/base values:
 
 ```
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
+API_BASE_URL=https://chrm-two.vercel.app
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_ANON_KEY=ey...
 ```
 
-Optional:
+Optional client:
 ```
 POSTHOG_API_KEY=phc_...        # turns analytics on; omit to keep it a no-op
 POSTHOG_HOST=https://us.i.posthog.com
-REVENUECAT_API_KEY_IOS=...     # RevenueCat public SDK key
+REVENUECAT_API_KEY_IOS=...     # RevenueCat public SDK key (native only)
 ```
 
-Accessed in code via:
-```js
-import { OPENAI_API_KEY, ANTHROPIC_API_KEY } from '@env';
-```
+Server-only (never in the client `.env`): `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, `REVENUECAT_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY`,
+`STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_WEBHOOK_SECRET`.
+
+> Note: the session-start hook still writes `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`
+> into the client `.env` for legacy/offline dev, but production AI runs through
+> the backend.
 
 ---
 

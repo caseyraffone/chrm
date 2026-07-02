@@ -94,6 +94,38 @@ const handle = (fn) => async (c) => {
   }
 };
 
+function buildFallbackTechnicalFeedback(transcript = '', referenceAnswer = '', keyPoints = []) {
+  const answer = transcript.toLowerCase();
+  const hits = (keyPoints || []).filter((point) =>
+    String(point)
+      .toLowerCase()
+      .split(/\W+/)
+      .some((word) => word.length > 5 && answer.includes(word))
+  );
+  const missing = (keyPoints || []).filter((point) => !hits.includes(point));
+  const score = Math.max(3, Math.min(8, 3 + hits.length + (transcript.length > 180 ? 1 : 0)));
+  return {
+    score,
+    strong: [
+      hits.length
+        ? `You covered ${hits.slice(0, 2).join(' and ')}.`
+        : 'You gave a substantive answer that CHRM can coach from.',
+      transcript.length > 180
+        ? 'The answer had enough detail to evaluate structure and content.'
+        : 'You kept the answer concise.',
+    ],
+    improve: [
+      missing.length
+        ? `Add the missing point explicitly: ${missing[0]}.`
+        : 'Tighten the structure so each statement follows in order.',
+      missing[1]
+        ? `Also include: ${missing[1]}.`
+        : 'End with a clean summary sentence an interviewer can follow.',
+    ],
+    stronger_version: referenceAnswer || 'Use a clear beginning, middle, and end, then tie each point back to the question.',
+  };
+}
+
 app.get('/health', (c) => c.json({ ok: true }));
 
 // Public marketing root. The App Store needs the legal pages, but a polished
@@ -108,6 +140,18 @@ app.get('/privacy', (c) => c.html(privacyHtml));
 app.get('/terms', (c) => c.html(termsHtml));
 app.get('/support', (c) => c.html(supportHtml));
 
+app.get('/favicon.png', async (c) => {
+  try {
+    const bytes = await readFile(new URL('../public/favicon.png', import.meta.url));
+    return c.body(bytes, 200, {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    });
+  } catch {
+    return c.text('Not found', 404);
+  }
+});
+
 app.get('/screenshots/:device/:file', async (c) => {
   const device = c.req.param('device');
   const file = c.req.param('file');
@@ -116,7 +160,7 @@ app.get('/screenshots/:device/:file', async (c) => {
     return c.text('Not found', 404);
   }
   try {
-    const bytes = await readFile(new URL(`../../assets/screenshots/${device}/${file}`, import.meta.url));
+    const bytes = await readFile(new URL(`../public/screenshots/${device}/${file}`, import.meta.url));
     return c.body(bytes, 200, {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=31536000, immutable',
@@ -180,12 +224,17 @@ app.post(
   '/api/technical-feedback',
   handle(async (c) => {
     const { transcript, question, referenceAnswer, keyPoints, role } = await c.req.json();
-    const feedback = await callClaudeJson({
-      prompt: buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role),
-      maxTokens: 1024,
-      model: FEEDBACK_MODEL,
-    });
-    return c.json(feedback);
+    try {
+      const feedback = await callClaudeJson({
+        prompt: buildTechnicalFeedbackPrompt(transcript, question, referenceAnswer, keyPoints, role),
+        maxTokens: 1024,
+        model: FEEDBACK_MODEL,
+      });
+      return c.json(feedback);
+    } catch (err) {
+      console.warn('[technical-feedback:fallback]', err.message);
+      return c.json(buildFallbackTechnicalFeedback(transcript, referenceAnswer, keyPoints));
+    }
   })
 );
 

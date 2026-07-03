@@ -2,12 +2,13 @@
 
 **Tagline:** Clear. Confident. Under Pressure.
 
-## Current Handoff — Updated 2026-07-02
+## Current Handoff — Updated 2026-07-03
 
 **The commercialization arc (accounts → sync → cross-platform subscriptions) is
-code-complete on `main`.** All of it compiles and web-builds clean; what's left
-is dashboard configuration (Supabase, RevenueCat, Stripe) — no code is blocked.
-Full setup checklist: `docs/supabase-setup.md`. Verify with `npm run check:supabase`.
+code-complete on `main`.** All of it compiles and web-builds clean. Supabase
+and Vercel are configured; what remains is RevenueCat + Stripe dashboard work
+and live purchase-path testing. Full setup checklist: `docs/supabase-setup.md`.
+Supabase verification currently passes with `npm run check:supabase`.
 
 What's built:
 - **Accounts** (Codex): Supabase magic-link auth (`src/utils/supabase.js`),
@@ -34,9 +35,9 @@ Invariants to preserve:
   platforms; both the RevenueCat and Stripe webhooks upsert into it.
 
 Next likely steps:
-1. Run the Supabase + RevenueCat + Stripe dashboard setup in `docs/supabase-setup.md`
-   (create project, run schema, set env vars, register webhooks), then verify sync
-   and both purchase paths live.
+1. Finish RevenueCat + Stripe dashboard setup in `docs/supabase-setup.md`
+   (webhook secrets, Stripe prices/webhook, customer portal), then verify both
+   purchase paths live.
 2. Marketing site polish — the root `/` page still needs the design pass discussed
    with Casey (only `/finance-interview-prep` was revamped).
 3. Optional: Sign in with Apple / Google (Apple requires Sign in with Apple if any

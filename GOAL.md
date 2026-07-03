@@ -161,10 +161,10 @@ source of entitlement truth across platforms.
 
 ## Current Phase
 
-**Current status — updated 2026-07-02 (Claude):** the commercialization arc is
+**Current status — updated 2026-07-03 (Codex):** the commercialization arc is
 now CODE-COMPLETE on `main`. Everything below is built, compiles, and web-builds
-clean; what remains is dashboard configuration (Supabase, RevenueCat, Stripe),
-which only Casey can do — no code is blocked.
+clean. Supabase + Vercel dashboard setup is complete; what remains is
+RevenueCat + Stripe dashboard configuration and live purchase-path testing.
 
 - **Marketing + browser prep** (Codex): `/finance-interview-prep` revamp; browser
   recording via `src/utils/recorder.web.js`; a free drill runs end-to-end on web.
@@ -185,19 +185,21 @@ which only Casey can do — no code is blocked.
   records the entitlement into the SAME table; `POST /api/billing/portal` for
   manage/cancel. PaywallScreen threads the chosen plan ('monthly'/'annual').
 
-**Environment still needed (all dashboard work — see `docs/supabase-setup.md`):**
-- Client build: `API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` (+
-  `REVENUECAT_API_KEY_IOS` for native).
-- Backend/Vercel: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SUPABASE_URL`,
-  `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `REVENUECAT_WEBHOOK_SECRET`,
-  `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`,
-  `STRIPE_WEBHOOK_SECRET`.
-- Dashboards: run `supabase/schema.sql`; set the RevenueCat webhook + entitlement
-  id `CHRM Pro`; create Stripe product/prices + webhook; enable Stripe portal.
-- Verify: `npm run check:supabase`, then a live sign-in + purchase smoke test.
+**Environment/dashboard status (see `docs/supabase-setup.md`):**
+- DONE: Supabase project created (`vkjukaxncibqnptuzjko`), schema applied,
+  Auth Site URL + redirects set, local `.env` / `server/.env` created, Vercel
+  Supabase env vars added for Production + Preview, and latest production
+  deployment redeployed.
+- DONE: `npm run check:supabase` passes.
+- STILL NEEDED: RevenueCat webhook secret + entitlement id `CHRM Pro`; Stripe
+  product/prices, webhook signing secret, customer portal; add those env vars
+  locally and in Vercel, then redeploy.
+- VERIFY NEXT: live sign-in + sync smoke test, then iOS RevenueCat purchase and
+  web Stripe purchase smoke tests.
 
 **Next session should:**
-1. Do the dashboard setup above and verify sync + both purchase paths live.
+1. Finish RevenueCat + Stripe dashboard setup and verify sync + both purchase
+   paths live.
 2. Polish the marketing site (Part A of the earlier plan is only partially done —
    the root `/` page still needs the design pass discussed with Casey).
 3. Optional parity: Sign in with Apple / Google (Apple requires Sign in with

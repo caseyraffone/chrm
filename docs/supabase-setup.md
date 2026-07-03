@@ -8,6 +8,23 @@ Use this when turning on accounts, cloud drill sync, and account deletion.
 - Project: `chrm` / `prj_C2knWNZRzUWphY5nQyqs4VfBZItF`
 - Production app/API: `https://chrm-two.vercel.app`
 
+## Current Supabase Status
+
+Updated 2026-07-03:
+
+- Supabase project is created at `https://vkjukaxncibqnptuzjko.supabase.co`
+  (`vkjukaxncibqnptuzjko`).
+- `supabase/schema.sql` has been run successfully in the Supabase SQL Editor.
+- Auth Site URL is set to `https://chrm-two.vercel.app`.
+- Redirect URLs are set:
+  - `https://chrm-two.vercel.app`
+  - `http://localhost:4321`
+  - `http://localhost:8081`
+- Vercel project env vars are set for Production and Preview:
+  `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+- Latest production deployment was redeployed after adding env vars.
+- `npm run check:supabase` passes.
+
 ## 1. Create Supabase Project
 
 1. Create a new Supabase project named `chrm`.

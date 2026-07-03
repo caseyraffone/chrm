@@ -10,15 +10,19 @@ and Vercel are configured; what remains is RevenueCat + Stripe dashboard work
 and live purchase-path testing. Supabase verification passes with
 `npm run check:supabase`.
 
-**Billing setup is in progress (2026-07-03).** The dashboard steps, the 5
-server-only Vercel env vars, and the smoke tests live in `docs/billing-setup.md`.
-A verifier mirrors the Supabase one: `npm run check:billing` probes the live
-endpoints and asserts each is *configured*. It currently **fails** (both webhook
-routes return `500 "Webhook not configured."`) because no billing env vars are on
-Vercel yet — it flips green once the dashboards are set up, the 5 vars are added
-to Vercel (Production + Preview), and the deploy is redeployed. Note: the local
-Vercel CLI token is invalid — run `npx vercel login && npx vercel link` (or use
-the dashboard UI) before pushing env vars.
+**Billing: RevenueCat (iOS) is wired and live (2026-07-03).** Decision: ship
+**RevenueCat-only** for now, **defer Stripe / web checkout** (no Stripe account
+yet). Done: `CHRM Pro` entitlement confirmed; RevenueCat webhook → `/api/
+revenuecat/webhook` with a generated Authorization secret; `REVENUECAT_WEBHOOK_
+SECRET` added to Vercel (Prod + Preview) and redeployed; public iOS SDK key added
+to client `.env` as `REVENUECAT_API_KEY_IOS`. `npm run check:billing -- --skip-stripe`
+passes (webhook returns 401 to a wrong secret, not 500). Full details +
+Stripe-when-ready steps: `docs/billing-setup.md`.
+
+**Next for billing:** live sandbox purchase to confirm the webhook writes a
+`subscription_entitlements` row (needs a signed-in user so RC's `app_user_id` is a
+real Supabase UUID). Stripe stays deferred; `--skip-stripe` keeps the verifier
+green until then.
 
 What's built:
 - **Accounts** (Codex): Supabase magic-link auth (`src/utils/supabase.js`),

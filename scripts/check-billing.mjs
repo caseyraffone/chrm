@@ -18,6 +18,13 @@
 
 const apiBase = (process.env.API_BASE_URL || 'https://chrm-two.vercel.app').replace(/\/$/, '');
 
+// Each purchase path can be turned off — CHRM currently ships RevenueCat-only
+// (web/Stripe checkout is deferred), so `--skip-stripe` drops the Stripe routes
+// from the run instead of failing on the intentionally-unconfigured webhook.
+const args = new Set(process.argv.slice(2));
+const skipStripe = args.has('--skip-stripe') || process.env.SKIP_STRIPE === '1';
+const skipRevenueCat = args.has('--skip-revenuecat') || process.env.SKIP_REVENUECAT === '1';
+
 async function post(path, { headers = {}, body = '{}' } = {}) {
   const response = await fetch(`${apiBase}${path}`, {
     method: 'POST',
@@ -53,24 +60,29 @@ function assertAuthGated(name, { status, json }) {
 
 try {
   console.log(`Checking billing endpoints on ${apiBase}`);
+  if (skipStripe) console.log('(skipping Stripe / web checkout — RevenueCat-only)');
+  if (skipRevenueCat) console.log('(skipping RevenueCat)');
 
-  // Stripe webhook: bogus signature. Configured -> 400 (sig verify), not 500.
-  assertWebhookConfigured(
-    'POST /api/stripe/webhook',
-    await post('/api/stripe/webhook', { headers: { 'stripe-signature': 't=0,v1=deadbeef' } }),
-    400
-  );
+  if (!skipRevenueCat) {
+    // RevenueCat webhook: wrong Authorization. Configured -> 401, not 500.
+    assertWebhookConfigured(
+      'POST /api/revenuecat/webhook',
+      await post('/api/revenuecat/webhook', { headers: { authorization: 'Bearer wrong-secret' } }),
+      401
+    );
+  }
 
-  // RevenueCat webhook: wrong Authorization. Configured -> 401, not 500.
-  assertWebhookConfigured(
-    'POST /api/revenuecat/webhook',
-    await post('/api/revenuecat/webhook', { headers: { authorization: 'Bearer wrong-secret' } }),
-    401
-  );
-
-  // Auth-gated billing routes must reject missing tokens.
-  assertAuthGated('POST /api/checkout/session', await post('/api/checkout/session'));
-  assertAuthGated('POST /api/billing/portal', await post('/api/billing/portal'));
+  if (!skipStripe) {
+    // Stripe webhook: bogus signature. Configured -> 400 (sig verify), not 500.
+    assertWebhookConfigured(
+      'POST /api/stripe/webhook',
+      await post('/api/stripe/webhook', { headers: { 'stripe-signature': 't=0,v1=deadbeef' } }),
+      400
+    );
+    // Auth-gated Stripe routes must reject missing tokens.
+    assertAuthGated('POST /api/checkout/session', await post('/api/checkout/session'));
+    assertAuthGated('POST /api/billing/portal', await post('/api/billing/portal'));
+  }
 
   console.log('Billing endpoint checks passed. Run a live sandbox purchase to confirm entitlement upserts.');
 } catch (error) {

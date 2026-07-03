@@ -12,9 +12,23 @@ Prereq: Supabase + Vercel are already configured — see `docs/supabase-setup.md
 
 Updated 2026-07-03:
 
-- **Not configured yet.** `npm run check:billing` fails: both webhook routes
-  return `500 "Webhook not configured."`, meaning no billing env vars are on the
-  Vercel deploy.
+- **RevenueCat (iOS) is wired and live.** Decision: ship **RevenueCat-only** for
+  now and **defer Stripe / web checkout** (no Stripe account yet). Done:
+  - Entitlement `CHRM Pro` confirmed (4 products attached).
+  - Webhook "CHRM Backend" → `https://chrm-two.vercel.app/api/revenuecat/webhook`,
+    Authorization header set to a generated secret, "Both Production and Sandbox",
+    all events.
+  - `REVENUECAT_WEBHOOK_SECRET` added to Vercel (Production + Preview) and the
+    production deploy was redeployed.
+  - Public iOS SDK key `appl_…` added to the client `.env` as
+    `REVENUECAT_API_KEY_IOS`.
+  - `npm run check:billing -- --skip-stripe` **passes** (webhook returns 401 to a
+    wrong secret instead of 500 "not configured").
+- **Still to do for RevenueCat:** a live sandbox purchase to confirm the webhook
+  writes a `subscription_entitlements` row (needs a signed-in user so the RC
+  `app_user_id` is a real Supabase UUID — the webhook skips non-UUID ids).
+- **Stripe:** deferred. The whole section below is ready for whenever web
+  subscriptions matter; until then `--skip-stripe` keeps the verifier green.
 - Entitlement id across all code is **`CHRM Pro`** (`ENTITLEMENT_ID`).
 - Pricing: **$7.99/month**, **$59.99/year**.
 

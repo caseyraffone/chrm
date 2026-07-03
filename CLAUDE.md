@@ -7,8 +7,18 @@
 **The commercialization arc (accounts → sync → cross-platform subscriptions) is
 code-complete on `main`.** All of it compiles and web-builds clean. Supabase
 and Vercel are configured; what remains is RevenueCat + Stripe dashboard work
-and live purchase-path testing. Full setup checklist: `docs/supabase-setup.md`.
-Supabase verification currently passes with `npm run check:supabase`.
+and live purchase-path testing. Supabase verification passes with
+`npm run check:supabase`.
+
+**Billing setup is in progress (2026-07-03).** The dashboard steps, the 5
+server-only Vercel env vars, and the smoke tests live in `docs/billing-setup.md`.
+A verifier mirrors the Supabase one: `npm run check:billing` probes the live
+endpoints and asserts each is *configured*. It currently **fails** (both webhook
+routes return `500 "Webhook not configured."`) because no billing env vars are on
+Vercel yet — it flips green once the dashboards are set up, the 5 vars are added
+to Vercel (Production + Preview), and the deploy is redeployed. Note: the local
+Vercel CLI token is invalid — run `npx vercel login && npx vercel link` (or use
+the dashboard UI) before pushing env vars.
 
 What's built:
 - **Accounts** (Codex): Supabase magic-link auth (`src/utils/supabase.js`),

@@ -115,6 +115,11 @@ Then smoke-test in the browser:
 
 ## 6. Cross-platform subscriptions (RevenueCat webhook)
 
+> **The full billing pass — RevenueCat + Stripe dashboard config, the 5 Vercel
+> env vars, and `npm run check:billing` — now lives in `docs/billing-setup.md`.**
+> The two sections below are the conceptual overview; follow the billing doc for
+> the exact, ordered steps.
+
 Entitlements are unified through the `subscription_entitlements` table so a
 purchase on any platform unlocks Pro on the account. The plumbing is already in
 the code:

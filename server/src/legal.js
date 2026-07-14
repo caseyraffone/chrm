@@ -583,6 +583,9 @@ export const financeInterviewPrepHtml = page(
           <span class="trust-pill">Markets and fit</span>
           <span class="trust-pill">Spoken delivery</span>
         </div>
+        <div class="cta-row">
+          <a class="cta primary" id="finance-start-cta" href="#prep-app">Try a free finance interview question</a>
+        </div>
       </div>
       <div>
         <div class="prep-stats" aria-label="Practice stats">
@@ -708,6 +711,84 @@ export const financeInterviewPrepHtml = page(
 
   <script>
     (function () {
+      var attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+      var attributionStorageKey = 'chrm_campaign_attribution';
+      var analyticsIdKey = 'chrm_marketing_analytics_id';
+
+      function limited(value, max) {
+        return String(value || '').slice(0, max || 120);
+      }
+
+      function readAttribution() {
+        var params = new URLSearchParams(window.location.search);
+        var next = {};
+        attributionKeys.forEach(function (key) {
+          if (params.get(key)) next[key] = limited(params.get(key));
+        });
+        if (Object.keys(next).length) {
+          localStorage.setItem(attributionStorageKey, JSON.stringify(next));
+          return next;
+        }
+        try {
+          return JSON.parse(localStorage.getItem(attributionStorageKey) || '{}');
+        } catch (err) {
+          return {};
+        }
+      }
+
+      function analyticsId() {
+        var existing = localStorage.getItem(analyticsIdKey);
+        if (existing) return existing;
+        var created = 'web_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem(analyticsIdKey, created);
+        return created;
+      }
+
+      var attribution = readAttribution();
+
+      function trackGrowth(event, properties) {
+        var campaignProperties = {
+          page: 'finance-interview-prep',
+          landingVariant: 'finance-reps-v1',
+          utmSource: attribution.utm_source || '',
+          utmMedium: attribution.utm_medium || '',
+          utmCampaign: attribution.utm_campaign || '',
+          utmContent: attribution.utm_content || '',
+          utmTerm: attribution.utm_term || ''
+        };
+        if (document.referrer) {
+          try {
+            campaignProperties.referrerHost = limited(new URL(document.referrer).hostname);
+          } catch (err) {
+            campaignProperties.referrerHost = '';
+          }
+        }
+        fetch('/api/marketing-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            event: event,
+            distinctId: analyticsId(),
+            properties: Object.assign(campaignProperties, properties || {})
+          })
+        }).catch(function () {});
+      }
+
+      trackGrowth('marketing_page_view');
+      var repStartTracked = false;
+      function markRepStarted(inputMethod) {
+        if (repStartTracked) return;
+        repStartTracked = true;
+        var q = currentQuestion();
+        trackGrowth('finance_rep_started', {
+          questionId: q.id,
+          track: q.track,
+          role: els.roleInput.value,
+          inputMethod: inputMethod
+        });
+      }
+
       var questions = [
         {
           id: 'depreciation',
@@ -913,17 +994,17 @@ export const financeInterviewPrepHtml = page(
             })
           });
           if (!res.ok) throw new Error('feedback failed');
-          showFeedback(await res.json());
+          showFeedback(await res.json(), 'ai');
           setStatus('Feedback ready. Redo this rep while the fix is fresh.');
         } catch (err) {
-          showFeedback(localFeedback(answer, q));
+          showFeedback(localFeedback(answer, q), 'local');
           setStatus('Showing local feedback because the AI grader was unavailable.');
         } finally {
           els.gradeButton.disabled = false;
         }
       }
 
-      function showFeedback(feedback) {
+      function showFeedback(feedback, feedbackMode) {
         var score = Math.round(Number(feedback.score || 0));
         state.reps += 1;
         state.best = Math.max(state.best, score);
@@ -938,6 +1019,15 @@ export const financeInterviewPrepHtml = page(
         listItems(els.improveList, feedback.improve);
         els.modelAnswer.textContent = feedback.stronger_version || feedback.strongerVersion || currentQuestion().reference;
         els.feedbackPanel.classList.add('show');
+        var q = currentQuestion();
+        trackGrowth('finance_rep_completed', {
+          questionId: q.id,
+          track: q.track,
+          role: els.roleInput.value,
+          score: score,
+          feedbackMode: feedbackMode || 'unknown',
+          repNumber: state.reps
+        });
       }
 
       function nextQuestion() {
@@ -951,6 +1041,11 @@ export const financeInterviewPrepHtml = page(
       function redoRep() {
         els.transcript.value = '';
         els.transcript.focus();
+        repStartTracked = false;
+        trackGrowth('finance_redo_started', {
+          questionId: currentQuestion().id,
+          track: currentQuestion().track
+        });
         setStatus('Redo mode: answer the same question again with the tighter version in mind.');
       }
 
@@ -993,6 +1088,7 @@ export const financeInterviewPrepHtml = page(
         };
         state.recognition = recognition;
         state.recording = true;
+        markRepStarted('voice');
         els.answerZone.classList.add('recording');
         els.recordButton.innerHTML = '<span class="recording-dot"></span> Stop recording';
         recognition.start();
@@ -1015,7 +1111,22 @@ export const financeInterviewPrepHtml = page(
       els.referenceToggle.addEventListener('click', function () {
         var showing = els.referenceAnswer.classList.toggle('show');
         els.referenceToggle.textContent = showing ? 'Hide what interviewers listen for' : 'Show what interviewers listen for';
+        if (showing) {
+          trackGrowth('finance_reference_opened', {
+            questionId: currentQuestion().id,
+            track: currentQuestion().track
+          });
+        }
       });
+      els.transcript.addEventListener('input', function () {
+        if (els.transcript.value.trim()) markRepStarted('typed');
+      });
+      var startCta = document.getElementById('finance-start-cta');
+      if (startCta) {
+        startCta.addEventListener('click', function () {
+          trackGrowth('marketing_cta_clicked', { cta: 'hero_free_rep' });
+        });
+      }
       els.gradeButton.addEventListener('click', gradeAnswer);
       els.nextButton.addEventListener('click', nextQuestion);
       els.redoButton.addEventListener('click', redoRep);

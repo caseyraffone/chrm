@@ -305,6 +305,80 @@ app.get('/health', (c) => c.json({ ok: true }));
 app.get('/', (c) => c.html(homeHtml));
 app.get('/finance-interview-prep', (c) => c.html(financeInterviewPrepHtml));
 
+const MARKETING_EVENTS = new Set([
+  'marketing_page_view',
+  'marketing_cta_clicked',
+  'finance_rep_started',
+  'finance_rep_completed',
+  'finance_redo_started',
+  'finance_reference_opened',
+]);
+const MARKETING_PROPERTY_KEYS = new Set([
+  'page',
+  'landingVariant',
+  'utmSource',
+  'utmMedium',
+  'utmCampaign',
+  'utmContent',
+  'utmTerm',
+  'referrerHost',
+  'cta',
+  'questionId',
+  'track',
+  'role',
+  'inputMethod',
+  'score',
+  'feedbackMode',
+  'repNumber',
+]);
+
+// PII-free, allowlisted marketing capture. Never send answers, transcripts,
+// names, or emails through this endpoint.
+app.post(
+  '/api/marketing-event',
+  handle(async (c) => {
+    const body = await c.req.json();
+    const event = typeof body?.event === 'string' ? body.event : '';
+    if (!MARKETING_EVENTS.has(event)) {
+      return c.json({ error: 'Unsupported marketing event.' }, 400);
+    }
+
+    const distinctId =
+      typeof body?.distinctId === 'string' && body.distinctId.length <= 80
+        ? body.distinctId
+        : 'web_anonymous';
+    const safeProperties = {};
+    for (const [key, value] of Object.entries(body?.properties || {})) {
+      if (!MARKETING_PROPERTY_KEYS.has(key)) continue;
+      if (typeof value === 'string') safeProperties[key] = value.slice(0, 120);
+      else if (typeof value === 'number' && Number.isFinite(value)) safeProperties[key] = value;
+      else if (typeof value === 'boolean') safeProperties[key] = value;
+    }
+
+    const apiKey = process.env.POSTHOG_API_KEY;
+    if (!apiKey) return c.json({ ok: true, tracked: false });
+
+    const host = (process.env.POSTHOG_HOST || 'https://us.i.posthog.com').replace(/\/$/, '');
+    const response = await fetch(`${host}/capture/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: apiKey,
+        event,
+        distinct_id: distinctId,
+        properties: { ...safeProperties, $lib: 'chrm-web' },
+        timestamp: new Date().toISOString(),
+      }),
+    });
+    if (!response.ok) {
+      console.warn('[marketing-event] PostHog capture failed', response.status);
+      return c.json({ ok: false, tracked: false }, 502);
+    }
+    return c.json({ ok: true, tracked: true });
+  })
+);
+
+
 // ─── Legal pages (Apple Guideline 3.1.2c) ──────────────────────────────────────
 // Public static HTML: Privacy Policy + Terms of Use (EULA). Linked from the
 // paywall and the App Store listing. No auth, not rate-limited.
